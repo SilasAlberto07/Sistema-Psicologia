@@ -86,47 +86,6 @@
     border-color: #8a9e78;
 }
 
-.btn-excluir-sessao {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    height: 30px;
-    padding: 0 10px;
-    background-color: #fdf0f0;
-    color: #aa3a3a;
-    border: 1px solid #f0c0c0;
-    border-radius: 20px;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    transition: background-color 0.15s;
-}
-
-.btn-excluir-sessao:hover {
-    background-color: #f8e0e0;
-}
-
-.btn-evolucao {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    height: 30px;
-    padding: 0 10px;
-    background-color: #f0f3fd;
-    color: #3a3eaa;
-    border: 1px solid #c0c8f0;
-    border-radius: 20px;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    transition: background-color 0.15s;
-}
-
-.btn-evolucao:hover {
-    background-color: #e0e1f8;
-}
 
 .input-data,
 .input-horario {

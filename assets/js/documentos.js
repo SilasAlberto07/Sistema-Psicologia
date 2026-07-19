@@ -32,7 +32,10 @@ btnGerar.addEventListener("click", () => {
     const idPaciente = selectPaciente.value;
 
     if (!idPaciente) {
-        alert("Selecione um paciente!");
+        mostrarMensagem(
+            "Selecione um paciente!",
+            "warning"
+        );
         return;
     }
 

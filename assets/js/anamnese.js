@@ -16,14 +16,16 @@ async function iniciarAnamnese() {
 
     pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
 
-    console.log("ID buscado na URL:", idPaciente);
-    console.log("Lista de pacientes carregada:", pacientes);
-
     paciente = pacientes.find(p => String(p.id) === String(idPaciente));
 
     if (!paciente) {
-        alert("Paciente não encontrado!");
-        window.location.href = "pacientes.html";
+        mostrarMensagem(
+            "Paciente não encontrado!",
+            "error",
+            () => {
+                window.location.href = "pacientes.html";
+            }
+        );
         return;
     }
 
@@ -95,9 +97,13 @@ form.addEventListener("submit", async (e) => {
 
     await window.storage.setItem("pacientes", JSON.stringify(pacientes));
 
-    alert("Ficha de anamnese salva com sucesso!");
-
-    window.location.href = `anamnese.html?id=${idPaciente}`;
+    mostrarMensagem(
+        "Ficha de anamnese salva com sucesso!",
+        "success",
+        () => {
+            window.location.href = `anamnese.html?id=${idPaciente}`;
+        }
+    );
 });
 
 // abrir anamnese

@@ -234,18 +234,25 @@ function obterMes(dataISO) {
 salvarModal.addEventListener("click", async () => {
 
     if (valor.value === "") {
-        alert("Informe o valor.");
+        mostrarMensagem(
+            "Informe o valor.",
+            "warning"
+        );
         return;
     }
 
     if (data.value === "") {
-        alert("Informe a data.");
+        mostrarMensagem(
+            "Informe a data.",
+            "warning"
+        );
         return;
     }
 
     const registro = {
         tipo: tipoLancamento.value,
         paciente: paciente.value.trim(),
+        categoria: categoria.value,
         descricao: descricao.value.trim(),
         valor: Number(valor.value),
         pagamento: formaPagamento.value,
@@ -470,6 +477,7 @@ function editarRegistro(index) {
     status.value = item.status;
     data.value = item.dataISO;
 
+
 }
 
 
@@ -479,13 +487,22 @@ function editarRegistro(index) {
 
 async function excluirRegistro(index) {
 
-    if (!confirm("Deseja realmente excluir este lançamento?")) {
+    const resposta = await mostrarConfirmacao(
+        "Deseja realmente excluir este lançamento?"
+    );
+
+    if (!resposta.isConfirmed) {
         return;
     }
 
     financeiro.splice(index, 1);
 
     await salvarFinanceiro();
+
+    mostrarMensagem(
+        "Lançamento excluído com sucesso!",
+        "success"
+    );
 }
 
 

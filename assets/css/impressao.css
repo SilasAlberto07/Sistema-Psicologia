@@ -1,0 +1,360 @@
+/* ═══════════════════════════════════════════════
+   IMPRESSAO.CSS
+   Folha de estilo compartilhada por todos os
+   documentos imprimíveis do sistema:
+   - imprimir-anamnese.html
+   - imprimir-prontuario.html
+   - imprimir-documento.html
+
+   Princípio de hierarquia: rótulos/perguntas ficam
+   pequenos e discretos; o CONTEÚDO preenchido é
+   sempre o elemento mais visível da página.
+═══════════════════════════════════════════════ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11.5pt;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #e9e9e6;
+    padding: 48px 20px;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* "folha de papel" centralizada na tela */
+.prontuario {
+    position: relative;
+    z-index: 0;
+    max-width: 780px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 56px 64px;
+    box-shadow: 0 2px 24px rgba(0, 0, 0, 0.14);
+}
+
+/* ==========================
+   MARCA D'ÁGUA
+   (logo discreta atrás do conteúdo,
+   fica atrás do texto mas acima do fundo branco)
+========================== */
+.marca-dagua {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    z-index: -1;
+    opacity: 0.03;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ==========================
+   CABEÇALHO DO DOCUMENTO
+   (padrão único usado em anamnese,
+   prontuário e documento/declaração)
+========================== */
+.cabecalho-print {
+    text-align: center;
+    margin-top: 12px;
+    margin-bottom: 30px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.cabecalho-print .clinica-nome {
+    font-size: 9.5pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #818181;
+}
+
+.cabecalho-print h1 {
+    font-size: 16.5pt;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+    margin-top: 50px;
+}
+
+.cabecalho-print .subtitulo-clinica {
+    font-size: 9.5pt;
+    color: #717171;
+    letter-spacing: 0.02em;
+}
+
+/* ==========================
+   IDENTIFICAÇÃO DO PACIENTE
+   (grade de 2 colunas, rótulo pequeno / valor em destaque)
+========================== */
+.identificacao-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 32px;
+    margin-bottom: 6px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid #e2e2e2;
+    margin-bottom: 22px;
+}
+
+.identificacao-grid .item.full {
+    grid-column: 1 / -1;
+}
+
+.identificacao-grid .rotulo {
+    display: block;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: 400;
+    color: #7a7a7a;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 3px;
+}
+
+.identificacao-grid .valor {
+    display: block;
+    font-size: 11.5pt;
+    font-weight: 600;
+    color: #111;
+}
+
+/* ==========================
+   TÍTULOS DE SEÇÃO
+========================== */
+.titulo-secao {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #000000;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+    break-after: avoid;
+    page-break-after: avoid;
+}
+
+.titulo-secao:first-of-type {
+    margin-top: 22px;
+}
+
+/* ==========================
+   CAMPO (pergunta pequena / resposta em destaque)
+========================== */
+.campo-impresso {
+    margin-bottom: 15px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.campo-impresso strong {
+    display: block;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    font-weight: 600;
+    color: #858585;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 3px;
+}
+
+.campo-impresso span {
+    display: block;
+    font-size: 11.5pt;
+    font-weight: 500;
+    color: #111;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+/* ==========================
+   TABELA (Ficha de Prontuário)
+========================== */
+.tabela-impressa {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 18px;
+    font-size: 10pt;
+}
+
+/* faz o cabeçalho da tabela repetir em toda
+   página impressa, caso a tabela quebre */
+.tabela-impressa thead {
+    display: table-header-group;
+}
+
+.tabela-impressa tfoot {
+    display: table-footer-group;
+}
+
+.tabela-impressa thead th {
+    background: #f2f1ee;
+    border: 1px solid #bbb;
+    padding: 9px 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #444;
+    text-align: left;
+}
+
+.tabela-impressa tbody td {
+    border: 1px solid #ddd;
+    padding: 11px 12px;
+    vertical-align: top;
+    font-size: 11pt;
+    font-weight: 500;
+    color: #161616;
+    line-height: 1.55;
+}
+
+.tabela-impressa tbody td.centro {
+    text-align: center;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.tabela-impressa tbody tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+/* ==========================
+   DOCUMENTOS EM TEXTO CORRIDO
+   (Declaração / Atestado)
+========================== */
+.documento-texto {
+    font-size: 12pt;
+    font-weight: 500;
+    line-height: 1.95;
+    text-align: justify;
+    color: #111;
+    margin-bottom: 16px;
+}
+
+.documento-texto strong {
+    font-weight: 700;
+}
+
+.documento-saudacao {
+    font-size: 11.5pt;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+.documento-data {
+    margin-top: 40px;
+    font-size: 11pt;
+    color: #222;
+}
+
+/* ==========================
+   ASSINATURA
+========================== */
+.assinatura {
+    margin-top: 64px;
+    text-align: center;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.linha-assinatura {
+    width: 280px;
+    border-top: 1px solid #000;
+    margin: 0 auto 10px;
+}
+
+.assinatura h3 {
+    font-size: 11.5pt;
+    font-weight: 700;
+    color: #111;
+}
+
+.assinatura p {
+    font-size: 9.5pt;
+    color: #555;
+    margin-top: 2px;
+}
+
+/* ==========================
+   RODAPÉ DE CONTATO
+========================== */
+.rodape-contato {
+    text-align: center;
+    margin-top: 46px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    color: #888;
+    letter-spacing: 0.01em;
+}
+
+/* carimbo discreto de geração do documento,
+   fica logo abaixo do rodapé de contato */
+.timestamp-impressao {
+    text-align: center;
+    margin-top: 6px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    color: #aaa;
+    letter-spacing: 0.02em;
+}
+
+/* ==========================
+   IMPRESSÃO
+========================== */
+@media print {
+    body {
+        background: #ffffff;
+        padding: 0;
+    }
+
+    .prontuario {
+        box-shadow: none;
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    @page {
+        size: A4;
+        margin: 20mm 18mm;
+    }
+
+    .titulo-secao,
+    .campo-impresso,
+    .assinatura,
+    .tabela-impressa tbody tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* faz a marca d'água repetir em CADA página impressa
+       (na tela ela continua na posição definida acima) */
+    .marca-dagua {
+        position: fixed;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* esconde elementos desnecessários na impressão */
+    .no-imprimir {
+        display: none !important;
+    }
+}

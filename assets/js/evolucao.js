@@ -24,8 +24,13 @@ async function iniciarEvolucao() {
     paciente = pacientes.find(p => String(p.id) === String(idPaciente));
 
     if (!paciente) {
-        alert("Paciente não encontrado!");
-        window.location.href = "pacientes.html";
+        mostrarMensagem(
+            "Paciente não encontrado!",
+            "error",
+            () => {
+                window.location.href = "pacientes.html";
+            }
+        );
         return;
     }
 
@@ -93,7 +98,10 @@ btnSalvar.addEventListener("click", async () => {
     const plano = planoAcao.value.trim();
 
     if (!conteudo) {
-        alert("Digite algo antes de salvar!");
+        mostrarMensagem(
+            "Digite algo antes de salvar!",
+            "warning"
+        );
         return;
     }
 
@@ -113,22 +121,43 @@ btnSalvar.addEventListener("click", async () => {
 
     renderHistorico();
 
-    alert("Evolução salva com sucesso!");
-
-    window.location.href = `evolucao.html?id=${idPaciente}`;
+    mostrarMensagem(
+        "Evolução salva com sucesso!",
+        "success",
+        () => {
+            window.location.href = `evolucao.html?id=${idPaciente}`;
+        }
+    );
 });
 
 // ================= EXCLUIR =================
 historico.addEventListener("click", async (e) => {
+
     if (e.target.classList.contains("btn-excluir-evolucao")) {
+
+        const resposta = await mostrarConfirmacao(
+            "Deseja excluir esta evolução?"
+        );
+
+        if (!resposta.isConfirmed) {
+            return;
+        }
 
         const index = e.target.dataset.index;
 
         paciente.evolucoes.splice(index, 1);
 
-        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+        await window.storage.setItem(
+            "pacientes",
+            JSON.stringify(pacientes)
+        );
 
         renderHistorico();
+
+        mostrarMensagem(
+            "Evolução excluída com sucesso!",
+            "success"
+        );
     }
 });
 
@@ -141,7 +170,10 @@ btnAbrirProntuario.addEventListener("click", () => {
 btnImprimir.addEventListener("click", () => {
 
     if (!paciente.evolucoes || paciente.evolucoes.length === 0) {
-        alert("⚠️ Não há evoluções registradas para imprimir!");
+        mostrarMensagem(
+            "Não há evoluções registradas para imprimir!",
+            "warning"
+        );
         return;
     }
 

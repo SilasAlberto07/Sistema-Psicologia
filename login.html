@@ -194,6 +194,9 @@
         <div id="mensagem-erro" class="error-msg">Senha incorreta. Tente novamente.</div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="./assets/js/alert.js"></script>
+    
     <script>
         // decide qual tela mostrar assim que a página carrega
         window.addEventListener("DOMContentLoaded", async () => {
@@ -294,8 +297,14 @@
             }
 
             await window.storage.removeItem("senhaHash");
-            alert("Senha removida. Você será direcionada para criar uma nova.");
-            window.location.reload();
+
+            mostrarMensagem(
+                "Senha removida. Você será direcionada para criar uma nova.",
+                "success",
+                () => {
+                    window.location.reload();
+                }
+            );
         }
 
     </script>

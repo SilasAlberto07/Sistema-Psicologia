@@ -46,25 +46,58 @@ async function carregarLixeira() {
 document.addEventListener("click", async (e) => {
 
     if (e.target.closest(".btnRestaurar")) {
+
         const indice = e.target.closest(".btnRestaurar").dataset.indice;
 
         delete pacientes[indice].excluido;
         delete pacientes[indice].excluidoEm;
 
-        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+        await window.storage.setItem(
+            "pacientes",
+            JSON.stringify(pacientes)
+        );
+
         carregarLixeira();
+
+        mostrarMensagem(
+            "Paciente restaurado com sucesso!",
+            "success"
+        );
     }
+
 
     if (e.target.closest(".btnExcluirDefinitivo")) {
 
-        if (!confirm("Isso apaga o paciente DEFINITIVAMENTE, sem chance de recuperar. Tem certeza?")) return;
+
+        const resposta = await mostrarConfirmacao(
+            "Isso apaga o paciente DEFINITIVAMENTE, sem chance de recuperar. Tem certeza?"
+        );
+
+
+        if (!resposta.isConfirmed) {
+            return;
+        }
+
 
         const indice = e.target.closest(".btnExcluirDefinitivo").dataset.indice;
 
+
         pacientes.splice(indice, 1);
 
-        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+
+        await window.storage.setItem(
+            "pacientes",
+            JSON.stringify(pacientes)
+        );
+
+
         carregarLixeira();
+
+
+        mostrarMensagem(
+            "Paciente excluído definitivamente!",
+            "success"
+        );
     }
 });
 

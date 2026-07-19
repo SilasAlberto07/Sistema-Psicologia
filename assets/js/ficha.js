@@ -28,12 +28,17 @@ async function carregarFicha() {
 
         <h3>📌 Dados Pessoais</h3>
         <p><strong>ID:</strong> ${paciente.id}</p>
+        <p><strong>CPF:</strong> ${paciente.cpf ?? "-"}</p>
+        <p></p><strong>RG:</strong> ${paciente.rg ?? "-"}</p>
         <p><strong>Data Nascimento:</strong> ${formatarDataBR(paciente.dataNascimento)}</p>
         <p><strong>Idade:</strong> ${paciente.idade ?? "-"}</p>
+        <p><strong>Onde Nasceu:</strong> ${paciente.ondeNasceu ?? "-"}</p>
         <p><strong>Sexo:</strong> ${paciente.sexo ?? "-"}</p>
         <p><strong>Estado Civil:</strong> ${paciente.estadoCivil ?? "-"}</p>
         <p><strong>Profissão:</strong> ${paciente.profissao ?? "-"}</p>
         <p><strong>Responsável:</strong> ${paciente.responsavel ?? "-"}</p>
+        <p><strong>Nome do Pai:</strong> ${paciente.pai ?? "-"}</p>
+        <p><strong>Nome da Mãe:</strong> ${paciente.mae ?? "-"}</p>
 
         <hr>
 

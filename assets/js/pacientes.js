@@ -45,17 +45,27 @@ async function carregarPacientes() {
 }
 
 document.addEventListener("click", async function (event) {
+
     if (event.target.classList.contains("btnDelete")) {
 
-        if (!confirm("Mover este paciente para a lixeira?")) return;
+        const resposta = await mostrarConfirmacao(
+            "Mover este paciente para a lixeira?"
+        );
+
+        if (!resposta.isConfirmed) return;
 
         const indice = event.target.dataset.indice;
 
         pacientes[indice].excluido = true;
         pacientes[indice].excluidoEm = new Date().toISOString();
 
-        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+        await window.storage.setItem(
+            "pacientes",
+            JSON.stringify(pacientes)
+        );
+
         carregarPacientes();
+
     }
 });
 
