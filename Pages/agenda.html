@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/agenda.css">
+    <link rel="stylesheet" href="../assets/css/button.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <title>Agenda</title>
+</head>
+
+<body>
+
+    <div class="container-menu">
+
+        <div id="menu"></div>
+
+        <main class="page-container-calendario">
+
+            <h1 class="page-title"><i class="ti ti-calendar" style="color:#8a9e78"></i> Agenda</h1>
+
+            <div class="agenda-layout">
+
+                <section class="calendario">
+                    <div class="calendario-header">
+                        <button id="btnAnterior" class="btn-mes"><i class="ti ti-chevron-left"></i></button>
+                        <h2 id="mesAno"></h2>
+                        <button id="btnProximo" class="btn-mes"><i class="ti ti-chevron-right"></i></button>
+                    </div>
+                    <div class="dias-semana">
+                        <div>Dom</div>
+                        <div>Seg</div>
+                        <div>Ter</div>
+                        <div>Qua</div>
+                        <div>Qui</div>
+                        <div>Sex</div>
+                        <div>Sáb</div>
+                    </div>
+                    <div id="calendario"></div>
+                </section>
+
+                <section class="horarios">
+                    <h3 class="horarios-title"><i class="ti ti-clock" style="color:#8a9e78;font-size:15px"></i> Agenda
+                        do Dia</h3>
+                    <div class="resumo-dia">
+                        <p><strong>Data:</strong> <span id="dataSelecionada">Selecione um dia</span></p>
+                        <p style="margin-top:6px"><strong>Pacientes:</strong> <span id="quantidadePacientes">0</span>
+                        </p>
+                    </div>
+                    <div class="agendaDia" id="agendaDia"></div>
+                </section>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <script src="../assets/js/menu.js"></script>
+    <script src="../assets/js/agenda.js"></script>
+</body>
+
+</html>

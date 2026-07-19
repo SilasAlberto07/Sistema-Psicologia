@@ -1,0 +1,145 @@
+/* ═══════════════════════════════════════════════
+   ANAMNESE.CSS — estilos exclusivos de Pages/anamnese.html
+   (Ficha de anamnese estruturada — Adulto / Adolescente)
+═══════════════════════════════════════════════ */
+.anamnese-container {
+    width: 100%;
+    max-width: 100%;
+}
+
+.anamnese-container h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #3d3a28;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    
+}
+
+.anamnese-container h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6a6a58;
+    margin-bottom: 4px;
+}
+
+.aviso-tipo {
+    font-size: 12px;
+    color: #8a9e78;
+    background-color: #f0f7ea;
+    border: 1px solid #c8d5b5;
+    border-radius: 8px;
+    padding: 6px 12px;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.form-section {
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 16px;
+}
+
+.form-section legend {
+    font-family: 'Playfair Display', serif;
+    background-color: #f7f5f0;
+    border: 1px solid #ede8e0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #3d4a30;
+    padding: 4px 12px;
+}
+
+.linha {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.w-30 {
+    width: 30%;
+    flex-shrink: 0;
+}
+
+.w-50 {
+    width: 50%;
+    flex-shrink: 0;
+}
+
+.w-100 {
+    flex: 1;
+    min-width: 0;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #7a7a68;
+}
+
+.form-group input{
+    width: 97.5%;
+    padding: 10px 12px;
+    background-color: #faf8f4;
+    border: 1px solid #ddd8ce;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #3d3a28;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.form-group textarea{
+    width: 100%;
+    min-height: 38px;
+    padding: 10px 12px;
+    background-color: #faf8f4;
+    border: 1px solid #ddd8ce;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #3d3a28;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #8a9e78;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(138, 158, 120, 0.15);
+}
+
+.secao-adolescente-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #eeeaf6;
+    border: 1px solid #d8d0ea;
+    color: #5a4a7a;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 24px 0 16px;
+}

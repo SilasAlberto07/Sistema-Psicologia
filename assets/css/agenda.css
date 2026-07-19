@@ -1,0 +1,267 @@
+/* ═══════════════════════════════════════════════
+   16. CALENDÁRIO — agenda.html
+═══════════════════════════════════════════════ */
+.page-container-calendario {
+    overflow-x: hidden;
+}
+
+.agenda-layout {
+    margin-top: 10px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex: 1;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.calendario {
+    flex: 1;
+    max-height: 100vh;
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 12px;
+    padding: 22px;
+    overflow: hidden;
+}
+
+.horarios {
+    width: 400px;
+    min-width: 280px;
+    flex-shrink: 0;
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendario-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.calendario-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #3d3a28;
+}
+
+.btn-mes {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f2ec;
+    border: 1px solid #ddd8ce;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #7a7a68;
+    font-size: 14px;
+    transition: background-color 0.15s;
+}
+
+.btn-mes:hover {
+    background-color: #ede8dc;
+}
+
+.dias-semana {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #a0a090;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+#calendario {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    width: 100%;
+}
+
+.dia {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background-color: #faf8f4;
+    font-size: 16px;
+    color: #5a5a48;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.dia:hover {
+    background-color: #e6e1d5;
+    color: #3d3a28;
+}
+
+.dia-selecionado {
+    background-color: #3d5a28 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.dia-vazio {
+    aspect-ratio: 1 / 1;
+    pointer-events: none;
+}
+
+.dia-com-sessao {
+    background-color: #d8e8c8;
+    border: 1px solid #b0d0a0;
+    color: #3d5a28;
+    font-weight: 600;
+}
+
+.horarios-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #3d3a28;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.resumo-dia {
+    background-color: #f7f5f0;
+    border: 1px solid #ede8e0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: #6a6a58;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+
+.resumo-dia strong {
+    font-weight: 500;
+    color: #3d3a28;
+}
+
+.agendaDia {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 480px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.agendaDia::-webkit-scrollbar {
+    width: 5px;
+}
+
+.agendaDia::-webkit-scrollbar-track {
+    background-color: #f5f2ec;
+    border-radius: 10px;
+}
+
+.agendaDia::-webkit-scrollbar-thumb {
+    background-color: #d8d3c8;
+    border-radius: 10px;
+}
+
+.horario-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    transition: opacity 0.15s;
+}
+
+.livre-bg {
+    background-color: #f0faf0;
+    border-color: #c8e0c8;
+    color: #3a6a3a;
+}
+
+.ocupado-bg {
+    background-color: #fdf5f5;
+    border-color: #e8c0c0;
+    color: #7a3a3a;
+}
+
+/* popup que aparece embaixo do título */
+.seletor-mes-popup {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* input do ano */
+.seletor-ano-input {
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+/* grid 4 colunas: Jan Fev Mar Abr / Mai Jun Jul Ago / ... */
+.seletor-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+
+/* botão de cada mês */
+.seletor-btn-mes {
+    padding: 8px 4px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #f0f0f0;
+    font-size: 13px;
+    transition: background 0.15s;
+}
+
+.seletor-btn-mes:hover {
+    background: #e0e0e0;
+}
+
+/* destaque do mês atual */
+.seletor-btn-mes.ativo {
+    background: #8a9e78;
+    /* mesma cor verde do teu projeto */
+    color: #fff;
+    font-weight: 600;
+}
+
+/* deixa o h2 do mês com cursor de clique pra indicar que é clicável */
+#mesAno {
+    cursor: pointer;
+    user-select: none;
+    /* evita selecionar o texto ao clicar */
+}
+
+#mesAno:hover {
+    text-decoration: none;
+    color: #8a9e78;
+}

@@ -1,0 +1,169 @@
+/* ═══════════════════════════════════════════════
+   EVOLUCAO.CSS — estilos exclusivos de Pages/evolucao.html
+═══════════════════════════════════════════════ */
+.evolucao-container {
+    width: 100%;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 14px;
+    padding: 32px 36px;
+    display: flex;
+    flex-direction: column;
+}
+
+.evolucao-header {
+    margin-bottom: 20px;
+}
+
+.evolucao-container h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #3d3a28;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.evolucao-container h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6a6a58;
+}
+
+.campo-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #7a7a68;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+#textoEvolucao,
+#planoAcao,
+#relatoSessao {
+    width: 100%;
+    padding: 14px 16px;
+    background-color: #faf8f4;
+    border: 1px solid #ddd8ce;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #3d3a28;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+#textoEvolucao, 
+#relatoSessao {
+    min-height: 140px;
+}
+
+#planoAcao {
+    min-height: 80px;
+    background-color: #f4f8f0;
+    border-color: #d5e0c5;
+}
+
+#textoEvolucao:focus,
+#planoAcao:focus,
+#relatoSessao:focus {
+    border-color: #8a9e78;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(138, 158, 120, 0.15);
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #ede8e0;
+    margin: 22px 0;
+}
+
+.historico-container {
+    margin-top: 4px;
+}
+
+.historico-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #3d3a28;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#historico {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.card-evolucao {
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-evolucao summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 13px 18px;
+    background-color: #faf8f4;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #3d3a28;
+    user-select: none;
+    list-style: none;
+    transition: background-color 0.15s;
+}
+
+.card-evolucao summary::-webkit-details-marker {
+    display: none;
+}
+
+.card-evolucao summary:hover {
+    background-color: #f5f0e8;
+}
+
+.card-evolucao summary::after {
+    content: "▼";
+    font-size: 10px;
+    color: #a0a090;
+    transition: transform 0.25s;
+    flex-shrink: 0;
+}
+
+.card-evolucao[open] summary::after {
+    transform: rotate(180deg);
+}
+
+.card-evolucao summary small {
+    font-size: 12px;
+    font-weight: 400;
+    color: #a0a090;
+    margin-left: 6px;
+}
+
+.conteudo-evolucao {
+    padding: 16px 20px;
+    border-top: 1px solid #ede8e0;
+    font-size: 14px;
+    color: #5a5a48;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+

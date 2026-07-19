@@ -1,0 +1,256 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500&display=swap');
+
+/* ═══════════════════════════════════════════════
+   1. RESET
+═══════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    background-color: #f7f4ee;
+    color: #3d3a28;
+    -webkit-font-smoothing: antialiased;
+
+  
+    background-image: url("../img/fundo-pagina.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+}
+
+/* ═══════════════════════════════════════════════
+   6. TÍTULO DE PÁGINA
+═══════════════════════════════════════════════ */
+.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: #3d3a28;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.page-card {
+    width: 100%;
+}
+
+.page-card h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+.page-subtitle {
+    font-size: 13px;
+    color: #9a9a88;
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid #7a8e69;
+    display: inline-block;
+}
+
+/* ═══════════════════════════════════════════════
+   2. LAYOUT RAIZ
+═══════════════════════════════════════════════ */
+.container-menu {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* ═══════════════════════════════════════════════
+   3. SIDEBAR
+═══════════════════════════════════════════════ */
+.menu {
+    width: 250px;
+    min-width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+    border-right: 1px solid #e2ddd4;
+    overflow: hidden;
+}
+
+/* folha decorativa */
+.menu::before {
+    content: '';
+    position: absolute;
+    bottom: 60px;
+    left: -50px;
+    width: 175px;
+    height: 250px;   
+    background-repeat: no-repeat;
+    background-size: contain;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* 3a. BRAND */
+.menu-brand {
+    display: flex;
+    align-items: center;
+    padding: 20px 16px 18px;
+    gap: 10px;
+    border-bottom: 1px solid #e2ddd4;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.menu-brand-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: 5px;
+    margin-right: 8px;
+}
+
+.menu-brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.menu-brand-text h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: #7a8e69;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.menu-brand-text span {
+    font-size: 12px;
+    color: #9a9a88;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 3b. NAV */
+.menu ul {
+    list-style: none;
+    padding: 10px 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+    position: relative;
+    z-index: 1;
+}
+
+.menu li {
+    border-radius: 8px;
+    transition: background-color 0.15s;
+}
+
+.menu li:hover {
+    background-color: #e6e1d5;
+}
+
+.menu li.ativo {
+    background-color: #d8e6c8;
+}
+
+.menu a {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 400;
+    color: #6a6a58;
+    text-decoration: none;
+    border-radius: 8px;
+    white-space: nowrap;
+    transition: color 0.15s;
+}
+
+.menu a i {
+    font-size: 17px;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+}
+
+.menu li:hover a {
+    color: #3d4a30;
+}
+
+.menu li.ativo a {
+    color: #3d5a28;
+    font-weight: 500;
+}
+
+/* 3c. RODAPÉ DA SIDEBAR */
+.rodape {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    width: 100%;
+    padding: 14px 16px;
+    text-align: center;
+    position: relative;
+   
+}
+
+.copyright {
+    font-family: 'Playfair Display', sans-serif;
+    font-size: 18px;
+    font-style: italic;
+    color: #606e41;
+    font-weight: 500;
+    line-height: 1.2;
+    opacity: 0.55;
+}
+
+
+/* ═══════════════════════════════════════════════
+   4. ÁREA DE CONTEÚDO
+═══════════════════════════════════════════════ */
+.conteudo,
+.page-container,
+.page-container-sessoes,
+.page-container-calendario,
+.page-container-financeiro,
+.form-container {
+
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    min-height: 100vh;
+    padding: 20px 36px;
+    display: flex;
+    flex-direction: column;
+
+}
+

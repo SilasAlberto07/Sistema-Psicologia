@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Financeiro</title>
+
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/button.css">
+    <link rel="stylesheet" href="../assets/css/financeiro.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+</head>
+
+<body>
+
+    <div class="container-menu">
+
+        <div id="menu"></div>
+
+        <main class="page-container-financeiro">
+
+            <!-- ==========================
+             CABEÇALHO
+        =========================== -->
+
+            <div class="financeiro-header">
+
+                <di class="financeiro-title">
+                    <h1 class="page-title"><i class="ti ti-cash" style="color:#8a9e78"></i> Financeiro</h1>
+                    <p class="page-subtitle">Controle financeiro completo da clínica.</p>
+                </di>
+
+                <div class="financeiro-acoes">
+
+                    <button class="btn-receita">
+                        <i class="ti ti-plus"></i>
+                        Registrar Recebimento
+                    </button>
+
+                    <button class="btn-despesa">
+                        <i class="ti ti-minus"></i>
+                        Registrar Pagamento
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- ==========================
+             CARDS
+        =========================== -->
+
+            <section class="financeiro-cards">
+
+                <div class="financeiro-card card-receita">
+
+                    <div class="financeiro-info">
+
+                        <h3>Receitas</h3>
+
+                        <strong id="receitaMes">R$ 0,00</strong>
+
+                        <span>Total recebido</span>
+
+                    </div>
+
+                    <div class="financeiro-icon">
+
+                        <i class="ti ti-cash"></i>
+
+                    </div>
+
+                </div>
+
+                <div class="financeiro-card card-despesa">
+
+                    <div class="financeiro-info">
+
+                        <h3>Despesas</h3>
+
+                        <strong id="despesasMes">R$ 0,00</strong>
+
+                        <span>Total gasto</span>
+
+                    </div>
+
+                    <div class="financeiro-icon">
+
+                        <i class="ti ti-credit-card"></i>
+
+                    </div>
+
+                </div>
+
+                <div class="financeiro-card card-lucro">
+
+                    <div class="financeiro-info">
+
+                        <h3>Lucro</h3>
+
+                        <strong id="lucroMes">R$ 0,00</strong>
+
+                        <span>Receitas - Despesas</span>
+
+                    </div>
+
+                    <div class="financeiro-icon">
+
+                        <i class="ti ti-chart-line"></i>
+
+                    </div>
+
+                </div>
+
+                <div class="financeiro-card card-pendente">
+
+                    <div class="financeiro-info">
+
+                        <h3>Pendentes</h3>
+
+                        <strong id="pendentes">0</strong>
+
+                        <span>Pagamentos pendentes</span>
+
+                    </div>
+
+                    <div class="financeiro-icon">
+
+                        <i class="ti ti-clock-hour-4"></i>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- ==========================
+             FILTROS
+        =========================== -->
+
+            <section class="financeiro-filtros">
+
+                <input type="text" id="pesquisa" placeholder="Pesquisar paciente, descrição">
+
+                <select id="filtroMes">
+
+                    <option value="">Todos os meses</option>
+
+                    <option>Janeiro</option>
+                    <option>Fevereiro</option>
+                    <option>Março</option>
+                    <option>Abril</option>
+                    <option>Maio</option>
+                    <option>Junho</option>
+                    <option>Julho</option>
+                    <option>Agosto</option>
+                    <option>Setembro</option>
+                    <option>Outubro</option>
+                    <option>Novembro</option>
+                    <option>Dezembro</option>
+
+                </select>
+
+            </section>
+
+            <!-- ==========================
+            TABELA
+        =========================== -->
+
+            <section class="financeiro-tabela">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Data</th>
+
+                            <th>Tipo</th>
+
+                            <th>Paciente / Despesa</th>
+
+                            <th>Descrição</th>
+
+                            <th>Valor</th>
+
+                            <th>Forma de Pagamento</th>
+
+                            <th>Status</th>
+
+                            <th>Ações</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="listaFinanceiro">
+
+                    </tbody>
+
+                </table>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- ==================================================
+     MODAL
+=================================================== -->
+
+    <div class="modal" id="modalFinanceiro">
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h2 id="tituloModal">
+
+                    Novo Lançamento
+
+                </h2>
+
+                <button id="fecharModal">
+
+                    <i class="ti ti-x"></i>
+
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <!-- Tipo -->
+
+                <div class="grupo">
+
+                    <label>Tipo</label>
+
+                    <select id="tipoModal">
+
+                        <option value="Receita">Receita</option>
+
+                        <option value="Despesa">Despesa</option>
+
+                    </select>
+
+                </div>
+
+                <!-- Categoria -->
+
+                <div class="grupo">
+
+                    <label>Categoria</label>
+
+                    <select id="categoriaModal">
+
+                    </select>
+
+                </div>
+
+                <!-- Paciente -->
+
+                <div class="grupo full">
+
+                    <label>
+
+                        Paciente / Nome da Despesa
+
+                    </label>
+
+                    <input type="text" id="pacienteModal" placeholder="Ex.: João Silva ou Aluguel da Clínica">
+
+                </div>
+
+                <!-- Descrição -->
+
+                <div class="grupo full">
+
+                    <label>
+
+                        Descrição
+
+                    </label>
+
+                    <textarea id="descricaoModal" placeholder="Descrição do lançamento..."></textarea>
+
+                </div>
+
+                <!-- Valor -->
+
+                <div class="grupo">
+
+                    <label>
+
+                        Valor
+
+                    </label>
+
+                    <input type="number" id="valorModal" min="0" step="0.01">
+
+                </div>
+
+                <!-- Forma pagamento -->
+
+                <div class="grupo">
+
+                    <label>
+
+                        Forma de Pagamento
+
+                    </label>
+
+                    <select id="pagamentoModal">
+
+                        <option>Pix</option>
+
+                        <option>Dinheiro</option>
+
+                        <option>Cartão de Crédito</option>
+
+                        <option>Cartão de Débito</option>
+
+                        <option>Boleto</option>
+
+                        <option>Transferência</option>
+
+                    </select>
+
+                </div>
+
+                <!-- Status -->
+
+                <div class="grupo">
+
+                    <label>
+
+                        Status
+
+                    </label>
+
+                    <select id="statusModal">
+
+                        <option>Recebido</option>
+
+                        <option>Pendente</option>
+
+                        <option>Pago</option>
+
+                        <option>Cancelado</option>
+
+                    </select>
+
+                </div>
+
+                <!-- Data -->
+
+                <div class="grupo">
+
+                    <label>
+
+                        Data
+
+                    </label>
+
+                    <input type="date" id="dataModal">
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button class="btn-cancelar" id="cancelarModal">
+
+                    Cancelar
+
+                </button>
+
+                <button class="btn-salvar" id="salvarModal">
+
+                    Salvar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!-- ==========================================
+         SCRIPTS
+    =========================================== -->
+
+    <script src="../assets/js/menu.js"></script>
+
+    <script src="../assets/js/financeiro.js"></script>
+
+</body>
+
+</html>

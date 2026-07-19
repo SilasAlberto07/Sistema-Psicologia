@@ -1,0 +1,149 @@
+
+/* ═══════════════════════════════════════════════
+   7. BUSCA
+═══════════════════════════════════════════════ */
+.search-box {
+    display: block;
+    width: 100%;
+    height: 40px;
+    padding: 0 14px;
+    margin-bottom: 16px;
+    background-color: #ffffff;
+    border: 1px solid #ddd8ce;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #3d3a28;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+}
+
+.search-box::placeholder {
+    color: #b0a898;
+}
+
+.search-box:focus {
+    border-color: #8a9e78;
+    box-shadow: 0 0 0 3px rgba(138, 158, 120, 0.15);
+}
+
+/* ═══════════════════════════════════════════════
+   8. TABELA — pacientes.html
+═══════════════════════════════════════════════ */
+.tabela {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #ede8e0;
+}
+
+.tabela thead tr {
+    background-color: #f0ece3;
+}
+
+.tabela th {
+    padding: 13px 16px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #5a5a48;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.tabela td {
+    padding: 13px 16px;
+    text-align: center;
+    font-size: 13px;
+    color: #4a4a38;
+    border-bottom: 1px solid #f5f2ec;
+    vertical-align: middle;
+}
+
+.tabela tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tabela tbody tr:hover td {
+    background-color: #faf8f4;
+}
+
+.input-sessoes {
+    width: 54px;
+    height: 32px;
+    padding: 0 8px;
+    text-align: center;
+    border: 1px solid #ddd8ce;
+    border-radius: 6px;
+    background-color: #faf8f4;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #3d3a28;
+    outline: none;
+}
+
+/* ═══════════════════════════════════════════════
+   9. BOTÕES DE AÇÃO DA TABELA
+═══════════════════════════════════════════════ */
+.btnAnamnese,
+.btnOpen,
+.btnEdit,
+.btnDelete {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 11px;
+    height: 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid;
+    transition: background-color 0.15s;
+    white-space: nowrap;
+}
+
+.btnAnamnese {
+    background-color: #eeeaf6;
+    color: #6a5aaa;
+    border-color: #c8c0e0;
+}
+
+.btnAnamnese:hover {
+    background-color: #e0daf0;
+}
+
+.btnOpen {
+    background-color: #e8f4fd;
+    color: #3a7aaa;
+    border-color: #b8d8f0;
+}
+
+.btnOpen:hover {
+    background-color: #d8ecf8;
+}
+
+.btnEdit {
+    background-color: #eaf6ea;
+    color: #3a7a48;
+    border-color: #b8d8b8;
+}
+
+.btnEdit:hover {
+    background-color: #d8eeda;
+}
+
+.btnDelete {
+    background-color: #fdf0f0;
+    color: #aa3a3a;
+    border-color: #f0c0c0;
+}
+
+.btnDelete:hover {
+    background-color: #f8e0e0;
+}

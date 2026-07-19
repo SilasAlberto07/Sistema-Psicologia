@@ -1,0 +1,48 @@
+{
+  "name": "sistema-psicologia",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.claudiabethania.sistemapsicologia",
+    "productName": "Sistema Psicologia",
+    "win": {
+      "target": "nsis",
+      "icon": "build/PsiLogo.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "**/*",
+      "!node_modules/electron-builder",
+      "!node_modules/electron"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SilasAlberto07/Sistema-Psicologia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SilasAlberto07/Sistema-Psicologia/issues"
+  },
+  "homepage": "https://github.com/SilasAlberto07/Sistema-Psicologia#readme",
+  "devDependencies": {
+    "@electron/rebuild": "^4.2.0",
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "serve-handler": "^6.1.7"
+  }
+}

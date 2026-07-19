@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso Seguro - Psicologia</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-image: url("./assets/img/fundo-pagina.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+
+            /* Tom de fundo creme idêntico ao do seu sistema */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+
+
+        }
+
+        .login-card {
+            background: #ffffff;
+            padding: 45px 35px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            /* Sombra bem leve e sofisticada */
+            border: 1px solid #eae5dc;
+            text-align: center;
+            width: 380px;
+        }
+
+        .logo-area {
+            font-size: 13px;
+            color: #79896b;
+            /* Marrom acinzentado do seu menu lateral */
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            font-size: 26px;
+            color: #79896b;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        p {
+            font-size: 14px;
+            color: #8c8275;
+            margin-bottom: 35px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            color: #3e362e;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            background: #faf9f6;
+            border: 1px solid #eae5dc;
+            border-radius: 10px;
+            color: #3e362e;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #79668d;
+            /* Bordas ganham o tom lilás/roxo ao focar */
+            background: #ffffff;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #a7b798;
+            /* Roxo/Lilás elegante do card de Próxima Sessão */
+            color: #3e362e;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #78876a;
+            /* Roxo levemente mais escuro no hover */
+        }
+
+        .error-msg {
+            color: #ba3c3c;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 15px;
+            display: none;
+            padding: 10px;
+            background: #fdf2f2;
+            border-radius: 8px;
+            border: 1px solid #f7dede;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-card" id="cardCriarSenha" style="display:none">
+        <div class="logo-area">SISTEMA DE PSICOLOGIA</div>
+        <h2>Primeiro acesso</h2>
+        <p>Crie sua senha de acesso ao sistema</p>
+
+        <div class="input-group">
+            <label for="novaSenha">Nova senha</label>
+            <input type="password" id="novaSenha" placeholder="••••••••" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+            <label for="confirmarSenha">Confirmar senha</label>
+            <input type="password" id="confirmarSenha" placeholder="••••••••" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+            <label for="respostaSeguranca">Qual a data de nascimento da sua mae? (resposta de segurança)</label>
+            <input type="text" id="respostaSeguranca" placeholder="Só você sabe essa resposta" autocomplete="off">
+        </div>
+
+        <button onclick="criarSenha()">Criar Senha e Entrar</button>
+        <div id="mensagem-erro-criar" class="error-msg"></div>
+    </div>
+
+    <div class="login-card" id="cardResetSenha" style="display:none">
+        <div class="logo-area">SISTEMA DE PSICOLOGIA</div>
+        <h2>Esqueci minha senha</h2>
+        <p>Responda a pergunta de segurança para redefinir</p>
+
+        <div class="input-group">
+            <label for="respostaReset">Qual a data de nascimento da sua mae?</label>
+            <input type="text" id="respostaReset" placeholder="Sua resposta" autocomplete="off">
+        </div>
+
+        <button onclick="confirmarReset()">Confirmar e Redefinir</button>
+        <div id="mensagem-erro-reset" class="error-msg"></div>
+    </div>
+
+    <div class="login-card" id="cardLogin" style="display:none">
+        <div class="logo-area">SISTEMA DE PSICOLOGIA</div>
+        <h2>Bem-vinda, Dra. Cláudia</h2>
+        <p>Insira sua senha para acessar</p>
+
+        <div class="input-group">
+            <label for="senha">Senha de Acesso</label>
+            <input type="password" id="senha" placeholder="••••••••" autocomplete="off">
+        </div>
+
+        <button onclick="verificarSenha()">Entrar no Sistema</button>
+
+        <p style="margin-top:16px; margin-bottom:0;">
+            <a href="#" onclick="resetarSenha(); return false;" style="color:#79668d; font-size:13px;">
+                Esqueci minha senha
+            </a>
+        </p>
+
+        <div id="mensagem-erro" class="error-msg">Senha incorreta. Tente novamente.</div>
+    </div>
+
+    <script>
+        // decide qual tela mostrar assim que a página carrega
+        window.addEventListener("DOMContentLoaded", async () => {
+            const senhaSalva = await window.storage.getItem("senhaHash");
+
+            if (senhaSalva) {
+                document.getElementById("cardLogin").style.display = "block";
+            } else {
+                document.getElementById("cardCriarSenha").style.display = "block";
+            }
+        });
+
+        // cria a senha no primeiro acesso
+        async function criarSenha() {
+            const nova = document.getElementById("novaSenha").value;
+            const confirmar = document.getElementById("confirmarSenha").value;
+            const erroDiv = document.getElementById("mensagem-erro-criar");
+
+            if (nova.length < 4) {
+                erroDiv.textContent = "A senha precisa ter pelo menos 4 caracteres.";
+                erroDiv.style.display = "block";
+                return;
+            }
+
+            if (nova !== confirmar) {
+                erroDiv.textContent = "As senhas não coincidem.";
+                erroDiv.style.display = "block";
+                return;
+            }
+
+            const resposta = document.getElementById("respostaSeguranca").value.trim().toLowerCase();
+
+            if (!resposta) {
+                erroDiv.textContent = "Preencha a resposta de segurança.";
+                erroDiv.style.display = "block";
+                return;
+            }
+
+            const hash = await gerarHash(nova);
+            const hashResposta = await gerarHash(resposta);
+
+            await window.storage.setItem("senhaHash", hash);
+            await window.storage.setItem("respostaSegurancaHash", hashResposta);
+
+            window.location.href = "index.html";
+        }
+
+        // login normal (substitui a função antiga)
+        async function verificarSenha() {
+            const senhaDigitada = document.getElementById('senha').value;
+            const senhaSalva = await window.storage.getItem("senhaHash");
+            const erroDiv = document.getElementById("mensagem-erro");
+
+            const hashDigitado = await gerarHash(senhaDigitada);
+
+            if (hashDigitado === senhaSalva) {
+                window.location.href = "index.html";
+            } else {
+                erroDiv.style.display = "block";
+            }
+        }
+
+        document.getElementById('senha').addEventListener('keypress', function (event) {
+            if (event.key === 'Enter') {
+                verificarSenha();
+            }
+        });
+
+        async function gerarHash(texto) {
+            const encoder = new TextEncoder();
+            const dados = encoder.encode(texto);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", dados);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+
+        function mostrarTrocarSenha() {
+            document.getElementById("cardLogin").style.display = "none";
+            document.getElementById("cardTrocarSenha").style.display = "block";
+        }
+
+        function resetarSenha() {
+            document.getElementById("cardLogin").style.display = "none";
+            document.getElementById("cardResetSenha").style.display = "block";
+        }
+
+        async function confirmarReset() {
+            const respostaDigitada = document.getElementById("respostaReset").value;
+            const erroDiv = document.getElementById("mensagem-erro-reset");
+
+            const hashDigitado = await gerarHash(respostaDigitada.trim().toLowerCase());
+            const hashSalvo = await window.storage.getItem("respostaSegurancaHash");
+
+            if (hashDigitado !== hashSalvo) {
+                erroDiv.textContent = "Resposta incorreta. Não foi possível redefinir a senha.";
+                erroDiv.style.display = "block";
+                return;
+            }
+
+            await window.storage.removeItem("senhaHash");
+            alert("Senha removida. Você será direcionada para criar uma nova.");
+            window.location.reload();
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+/* ═══════════════════════════════════════════════
+   12. FICHA — ficha.html
+═══════════════════════════════════════════════ */
+.ficha-container {
+    width: 900px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 14px;
+    padding: 32px 36px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ficha-container h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: #3d3a28;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ficha-container h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #3d3a28;
+    margin-bottom: 12px;
+}
+
+.ficha-container h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #3d4a30;
+    border-left: 3px solid #8a9e78;
+    padding-left: 10px;
+    margin: 22px 0 10px;
+}
+
+.ficha-container p {
+    font-size: 14px;
+    color: #5a5a48;
+    line-height: 1.7;
+    margin-bottom: 5px;
+}
+
+.ficha-container strong {
+    color: #3d3a28;
+    font-weight: 500;
+}
+
+.ficha-container hr {
+    border: none;
+    border-top: 1px solid #ede8e0;
+    margin: 18px 0;
+}

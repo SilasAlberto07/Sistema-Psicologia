@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Evolução</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/button.css">
+    <link rel="stylesheet" href="../assets/css/evolucao.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+
+<body>
+
+    <div class="container-menu">
+
+        <div id="menu"></div>
+
+        <main class="page-container">
+            <div class="evolucao-container">
+
+                <div class="evolucao-header">
+                    <h1><i class="ti ti-clipboard-list" style="color:#8a9e78"></i> Prontuário do Paciente</h1>
+                    <h3 id="nomePaciente"></h3>
+                </div>
+
+                <label class="campo-label">Relato da Sessão</label>
+                <textarea id="relatoSessao" rows="3" placeholder="Escreva o relato da sessão..."></textarea>
+
+                <label class="campo-label">Evolução da sessão</label>
+                <textarea id="textoEvolucao" rows="5" placeholder="Escreva a evolução da sessão..."></textarea>
+
+                <label class="campo-label">Plano de ação</label>
+                <textarea id="planoAcao" rows="3" placeholder="Próximos passos / plano de ação..."></textarea>
+
+                <div class="botoes">
+                    <button class="btn-salvar"><i class="ti ti-device-floppy"></i> Salvar</button>
+                    <button class="btn-abrir"><i class="ti ti-folder-open"></i> Abrir Prontuário</button>
+                    <button class="btn-imprimir-tudo"><i class="ti ti-printer"></i> Imprimir Prontuário</button>
+                    <button class="btn-voltar"><i class="ti ti-arrow-left"></i> Voltar</button>
+                </div>
+
+                <hr>
+
+                <div class="historico-container">
+                    <h2 class="historico-title"><i class="ti ti-history" style="color:#8a9e78"></i> Registros das Sessões</h2>
+                    <div id="historico"></div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <script src="../assets/js/menu.js"></script>
+    <script src="../assets/js/evolucao.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,601 @@
+/*═══════════════════════════════════════
+    PAGE
+═══════════════════════════════════════*/
+
+.page-container-financeiro{
+
+    gap:25px;
+
+}
+
+/*═══════════════════════════════════════
+    HEADER
+═══════════════════════════════════════*/
+.financeiro-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.financeiro-title{
+    gap: 0px;
+
+}
+
+.financeiro-header p{
+    font-size: 13px;
+    color: #9a9a88;
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid #7a8e69;
+    display: inline-block;
+}
+
+/*═══════════════════════════════════════
+    ACÕES
+═══════════════════════════════════════*/
+.financeiro-acoes {
+    display: flex;
+    gap: 12px;
+
+}
+
+/*═══════════════════════════════════════
+    CARDS
+═══════════════════════════════════════*/
+
+.financeiro-cards {    
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+
+}
+
+.financeiro-card {
+    background: #fff;
+    border-radius: 18px;
+    border: 1px solid #ebe7df;
+
+    padding: 22px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    transition: .25s;
+
+}
+
+.financeiro-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .06);
+
+}
+
+.financeiro-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+}
+
+.financeiro-info h3 {
+    font-size: 13px;
+    font-weight: 500;
+    color: #8b8b82;
+
+}
+
+.financeiro-info strong {
+    font-size: 30px;
+    font-weight: 700;
+    color: #4d5c43;
+
+}
+
+.financeiro-info span {
+    font-size: 12px;
+    color: #a3a39a;
+
+}
+
+/*═══════════════════════════════════════
+    ÍCONES
+═══════════════════════════════════════*/
+
+.financeiro-icon {
+    width: 60px;
+    height: 60px;
+
+    border-radius: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 28px;
+
+}
+
+.card-receita .financeiro-icon {
+    background: #edf6ea;
+    color: #6f9d56;
+
+}
+
+.card-despesa .financeiro-icon {
+    background: #fdeceb;
+    color: #cb6a6a;
+
+}
+
+.card-lucro .financeiro-icon {
+    background: #edf1fd;
+    color: #6479cf;
+
+}
+
+.card-pendente .financeiro-icon {
+    background: #fff7df;
+    color: #d39c28;
+
+}
+
+/*═══════════════════════════════════════
+    FILTROS
+═══════════════════════════════════════*/
+
+.financeiro-filtros {
+
+    display: grid;
+    grid-template-columns: 2fr 220px;
+    gap: 15px;
+
+    background: #fff;
+
+    border: 1px solid #ebe7df;
+
+    border-radius: 18px;
+
+    padding: 18px;
+
+}
+
+.financeiro-filtros input,
+.financeiro-filtros select {
+
+    width: 100%;
+    height: 46px;
+
+    padding: 0 16px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 12px;
+
+    outline: none;
+
+    background: #fff;
+
+    color: #555;
+
+    font-size: 14px;
+
+    transition: .2s;
+
+}
+
+.financeiro-filtros input:focus,
+.financeiro-filtros select:focus {
+
+    border-color: #8d9d7b;
+
+    box-shadow: 0 0 0 4px rgba(141, 157, 123, .15);
+
+}
+
+/*═══════════════════════════════════════
+    TABELA
+═══════════════════════════════════════*/
+
+.financeiro-tabela {
+    background: #fff;
+    border-radius: 18px;
+    border: 1px solid #ebe7df;
+    overflow: hidden;
+
+}
+
+.financeiro-tabela table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.financeiro-tabela thead {
+
+    background: #f8f6f2;
+
+}
+
+.financeiro-tabela th {
+    padding: 18px;
+    text-align: center;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #888;
+    font-weight: 600;
+    border-bottom: 1px solid #ece8df;
+
+}
+
+.financeiro-tabela td {    
+    padding: 16px 18px;
+    border-bottom: 1px solid #f1efeb;
+    font-size: 14px;
+    color: #555;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.financeiro-tabela tbody tr {
+    transition: .18s;
+
+}
+
+.financeiro-tabela tbody tr:hover {
+    background: #faf9f7;
+
+}
+
+.financeiro-tabela tbody tr:last-child td {
+    border-bottom: none;
+
+}
+
+/*═══════════════════════════════════════
+    STATUS
+═══════════════════════════════════════*/
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 95px;
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 600;
+
+}
+
+.status.recebido,
+.status.pago {
+
+    background: #edf7ec;
+
+    color: #5f9157;
+
+}
+
+.status.pendente {
+
+    background: #fff6dd;
+
+    color: #b98b1b;
+
+}
+
+.status.cancelado {
+
+    background: #fdeaea;
+
+    color: #bf5d5d;
+
+}
+
+/*═══════════════════════════════════════
+    MODAL
+═══════════════════════════════════════*/
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: .25s;
+    z-index: 9999;
+
+}
+
+.modal.ativo {
+
+    opacity: 1;
+    visibility: visible;
+
+}
+
+/*═══════════════════════════════════════
+    CAIXA DO MODAL
+═══════════════════════════════════════*/
+
+.modal-box {
+
+    width: 760px;
+    max-width: 95%;
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, .18);
+    animation: modalEntrada .25s ease;
+}
+
+@keyframes modalEntrada {
+
+    from {
+
+        transform: translateY(-25px);
+        opacity: 0;
+
+    }
+
+    to {
+
+        transform: translateY(0);
+        opacity: 1;
+
+    }
+
+}
+
+/*═══════════════════════════════════════
+    HEADER
+═══════════════════════════════════════*/
+
+.modal-header {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 26px;
+    border-bottom: 1px solid #ece7df;
+
+}
+
+.modal-header h2 {
+
+    font-size: 26px;
+    font-family: 'Playfair Display', serif;
+    color: #58684d;
+
+}
+
+.modal-header button {
+
+    width: 40px;
+    height: 40px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #f5f4f1;
+
+    cursor: pointer;
+
+    font-size: 20px;
+
+    transition: .2s;
+
+}
+
+.modal-header button:hover {
+
+    background: #ece7df;
+
+}
+
+/*═══════════════════════════════════════
+    BODY
+═══════════════════════════════════════*/
+
+.modal-body {
+
+    padding: 24px;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 18px;
+
+}
+
+.grupo {
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+}
+
+.grupo.full {
+
+    grid-column: 1 / -1;
+
+}
+
+.grupo label {
+
+    font-size: 13px;
+    font-weight: 600;
+    color: #777;
+
+}
+
+.grupo input,
+.grupo select,
+.grupo textarea {
+
+    width: 100%;
+
+    border: 1px solid #ddd;
+
+    border-radius: 12px;
+
+    outline: none;
+
+    background: #fff;
+
+    transition: .2s;
+
+    font-size: 14px;
+
+}
+
+.grupo input,
+.grupo select {
+
+    height: 46px;
+
+    padding: 0 15px;
+
+}
+
+.grupo textarea {
+
+    min-height: 120px;
+
+    resize: vertical;
+
+    padding: 14px;
+
+}
+
+.grupo input:focus,
+.grupo select:focus,
+.grupo textarea:focus {
+
+    border-color: #8d9d7b;
+
+    box-shadow: 0 0 0 4px rgba(141, 157, 123, .12);
+
+}
+
+/*═══════════════════════════════════════
+    FOOTER
+═══════════════════════════════════════*/
+
+.modal-footer {
+
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    padding: 20px 24px;
+
+    border-top: 1px solid #ece7df;
+
+}
+
+.modal-footer button {
+
+    height: 44px;
+
+    padding: 0 22px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    transition: .2s;
+
+}
+
+.btn-cancelar {
+
+    background: #efefef;
+    color: #555;
+
+}
+
+.btn-cancelar:hover {
+
+    background: #dfdfdf;
+
+}
+
+.btn-salvar {
+
+    background: #8d9d7b;
+    color: #fff;
+
+}
+
+.btn-salvar:hover {
+
+    background: #758865;
+
+}
+
+/*═══════════════════════════════════════
+    RESPONSIVO
+═══════════════════════════════════════*/
+
+@media(max-width:1200px) {
+
+    .financeiro-cards {
+
+        grid-template-columns: repeat(2, 1fr);
+
+    }
+
+}
+
+@media(max-width:900px) {
+
+    .financeiro-header {
+
+        flex-direction: column;
+        align-items: flex-start;
+
+    }
+
+    .financeiro-filtros {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .modal-body {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}
+
+@media(max-width:700px) {
+
+
+    .financeiro-cards {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .financeiro-tabela {
+
+        overflow-x: auto;
+
+    }
+
+}

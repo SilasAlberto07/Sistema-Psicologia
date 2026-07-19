@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Trocar Senha</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/button.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+
+<body>
+
+    <div class="container-menu">
+
+        <div id="menu"></div>
+
+        <main class="page-container">
+            <div style="max-width:480px">
+
+                <h1><i class="ti ti-key" style="color:#8a9e78"></i> Trocar Senha</h1>
+                <p style="color:#9a9a88; margin-bottom:20px;">Confirme sua senha atual e defina a nova.</p>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label>Senha atual</label>
+                    <input type="password" id="senhaAtual">
+                </div>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label>Nova senha</label>
+                    <input type="password" id="senhaNovaTroca">
+                </div>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label>Confirmar nova senha</label>
+                    <input type="password" id="confirmarNovaTroca">
+                </div>
+
+                <div id="mensagem-erro-troca" style="color:#ba3c3c; margin-bottom:14px; display:none;"></div>
+
+                <div class="botoes">
+                    <button class="btn-salvar" id="btnSalvarSenha"><i class="ti ti-device-floppy"></i> Salvar Nova Senha</button>
+                    <button class="btn-voltar" id="btnVoltar"><i class="ti ti-arrow-left"></i> Voltar</button>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <script src="../assets/js/menu.js"></script>
+    <script src="../assets/js/trocar-senha.js"></script>
+</body>
+
+</html>

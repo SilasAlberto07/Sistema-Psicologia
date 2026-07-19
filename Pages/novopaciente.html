@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Novo Paciente</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/button.css">
+    <link rel="stylesheet" href="../assets/css/novopaciente.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+
+<body>
+
+    <div class="container-menu">
+
+        <div id="menu"></div>
+
+        <main class="form-container">
+            <form>
+                <h1 class="page-title"><i class="ti ti-user-plus" style="color:#8a9e78"></i> Novo Paciente</h1>
+
+                <fieldset class="form-section">
+                    <legend>Dados Pessoais</legend>
+                    <div class="linha">
+                        <div class="form-group w-12">
+                            <label>ID</label>
+                            <input type="text" id="id" name="id" readonly disabled>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Nome Completo</label>
+                            <input type="text" id="nomeCompleto" name="nomeCompleto" required>
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-180px">
+                            <label>Data de Nasc.</label>
+                            <input type="date" id="dataNascimento" name="dataNascimento">
+                        </div>
+                        <div class="form-group w-100px">
+                            <label>Idade</label>
+                            <input type="number" id="idade" name="idade">
+                        </div>
+                        <div class="form-group w-180px">
+                            <label>Sexo</label>
+                            <select id="sexo" name="sexo">
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Estado Civil</label>
+                            <select id="estadoCivil" name="estadoCivil">
+                                <option value="Solteiro(a)">Solteiro(a)</option>
+                                <option value="Casado(a)">Casado(a)</option>
+                                <option value="Divorciado(a)">Divorciado(a)</option>
+                                <option value="Viuvo(a)">Viúvo(a)</option>
+                                <option value="União Estável">União Estável</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-50">
+                            <label>Profissão / Ocupação</label>
+                            <input type="text" id="profissao" name="profissao">
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Responsável Legal (se menor)</label>
+                            <input type="text" id="responsavel" name="responsavel">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>Informações de Contato</legend>
+                    <div class="linha">
+                        <div class="form-group w-30">
+                            <label>Telefone</label>
+                            <input type="text" id="telefone" placeholder="(00) 00000-0000" name="telefone">
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Contato de Emergência</label>
+                            <input type="text" id="cntEmergencia" placeholder="Nome e Contato" name="cntEmergencia">
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-100">
+                            <label>E-mail</label>
+                            <input type="email" id="email" placeholder="nome@email.com" name="email">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>Endereço Residencial</legend>
+                    <div class="linha">
+                        <div class="form-group w-30">
+                            <label>CEP</label>
+                            <input type="text" id="cep" placeholder="00000-000" name="cep">
+                        </div>
+                        <div class="form-group w-50">
+                            <label>Rua / Logradouro</label>
+                            <input type="text" id="endereco" name="endereco">
+                        </div>
+                        <div class="form-group w-15">
+                            <label>Número</label>
+                            <input type="text" id="numero" name="numero">
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-40">
+                            <label>Complemento</label>
+                            <input type="text" id="complemento" placeholder="Apto, Bloco, etc." name="complemento">
+                        </div>
+                        <div class="form-group w-30">
+                            <label>Bairro</label>
+                            <input type="text" id="bairro" name="bairro">
+                        </div>
+                        <div class="form-group w-25">
+                            <label>Cidade / UF</label>
+                            <input type="text" id="cidadeUf" name="cidadeUf">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>Relato Inicial do Paciente / Primeira Consulta</legend>
+                    <div class="form-group w-100">
+                        <label>Queixas / Sintomas</label>
+                        <textarea id="queixaPrincipal" rows="4" name="queixaPrincipal"
+                            placeholder="O que o levou a buscar atendimento..."></textarea>
+                    </div>
+                </fieldset>
+
+                <div class="botoes">
+                    <button type="submit" id="salvar"><i class="ti ti-device-floppy"></i> Salvar Paciente</button>
+                    <button type="button" id="limpar"><i class="ti ti-eraser"></i> Limpar Formulário</button>
+                </div>
+            </form>
+        </main>
+
+    </div>
+
+    <script src="../assets/js/menu.js"></script>
+    <script src="../assets/js/novopaciente.js"></script>
+</body>
+
+</html>

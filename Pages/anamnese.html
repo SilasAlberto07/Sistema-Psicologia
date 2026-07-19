@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Anamnese</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/anamnese.css">
+    <link rel="stylesheet" href="../assets/css/button.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+
+<body>
+
+    <div class="container-menu">
+
+        <div id="menu"></div>
+
+        <main class="page-container">
+            <div class="anamnese-container">
+
+                <h1><i class="ti ti-notes-medical" style="color:#8a9e78"></i> Ficha de Anamnese</h1>
+                <h3 id="nomePaciente"></h3>
+                <p class="aviso-tipo" id="avisoTipo"></p>
+
+                <form id="formAnamnese">
+
+                    <fieldset class="form-section">
+                        <legend>Data da Entrevista</legend>
+                        <div class="linha">
+                            <div class="form-group w-30">
+                                <label>Data</label>
+                                <input type="date" name="dataAnamnese">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Hora</label>
+                                <input type="time" name="horaAnamnese">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="form-section">
+                        <legend>Queixa Principal</legend>
+                        <div class="form-group w-100">
+                            <label>Queixa principal</label>
+                            <textarea name="queixaPrincipal" rows="1"></textarea>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-50">
+                                <label>Tem diagnóstico?</label>
+                                <input type="text" name="temDiagnostico">
+                            </div>
+                            <div class="form-group w-50">
+                                <label>Faz uso de medicação?</label>
+                                <input type="text" name="usoMedicacao">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="form-section">
+                        <legend>História da Queixa Atual</legend>
+                        <div class="form-group w-100">
+                            <label>Quando os sintomas iniciaram?</label>
+                            <textarea name="queixaInicio" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Como os sintomas se manifestam?</label>
+                            <textarea name="queixaManifestacao" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Em quais situações se intensificam ou diminuem?</label>
+                            <textarea name="queixaSituacoes" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Que pensamentos e emoções acompanham os sintomas?</label>
+                            <textarea name="queixaPensamentos" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Já buscou ajuda profissional para essa queixa? Qual o resultado?</label>
+                            <textarea name="queixaAjudaAnterior" rows="1"></textarea>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="form-section">
+                        <legend>Histórico Pessoal</legend>
+                        <div class="form-group w-100">
+                            <label>Infância e adolescência</label>
+                            <textarea name="historicoInfancia" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Como se descreveria?</label>
+                            <textarea name="autodescricao" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Hobbies e atividades de lazer</label>
+                            <textarea name="hobbies" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Doença grave ou cirurgia?</label>
+                            <textarea name="doencaGrave" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Medicações contínuas</label>
+                            <textarea name="medicacaoContinua" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Tabagismo, alcoolismo ou uso de outras drogas?</label>
+                            <textarea name="habitos" rows="1"></textarea>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="form-section">
+                        <legend>Histórico Familiar</legend>
+                        <div class="form-group w-100">
+                            <label>Relação com familiares (pais, irmãos, cônjuge, filhos)</label>
+                            <textarea name="relacaoFamiliares" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Histórico de doenças psicológicas na família</label>
+                            <textarea name="doencasFamilia" rows="1"></textarea>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="form-section">
+                        <legend>Condições Socioeconômicas</legend>
+                        <div class="form-group w-100">
+                            <label>Trabalho / Estudos</label>
+                            <textarea name="trabalhoEstudos" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Situação financeira atual</label>
+                            <textarea name="situacaoFinanceira" rows="1"></textarea>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="form-section">
+                        <legend>Histórico de Saúde Mental</legend>
+                        <div class="form-group w-100">
+                            <label>Diagnóstico psicológico anterior</label>
+                            <textarea name="diagnosticoAnterior" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Acompanhamento psicológico/psiquiátrico anterior (tempo, como foi)</label>
+                            <textarea name="acompanhamentoAnterior" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Medicações psicotrópicas (já tomou ou toma)</label>
+                            <textarea name="medicacaoPsicotropica" rows="1"></textarea>
+                        </div>
+                    </fieldset>
+
+                    <!-- ================= SEÇÃO ADOLESCENTE (condicional) ================= -->
+                    <div id="secaoAdolescente" style="display:none">
+
+                        <div class="secao-adolescente-titulo">
+                            <i class="ti ti-users"></i> Seção adicional — paciente menor de idade
+                        </div>
+
+                        <fieldset class="form-section">
+                            <legend>Dados Familiares</legend>
+                            <div class="linha">
+                                <div class="form-group w-50">
+                                    <label>Nome do Pai</label>
+                                    <input type="text" name="nomePai">
+                                </div>
+                                <div class="form-group w-50">
+                                    <label>Nome da Mãe</label>
+                                    <input type="text" name="nomeMae">
+                                </div>
+                            </div>
+                            <div class="form-group w-100">
+                                <label>Irmãos (idades)</label>
+                                <input type="text" name="irmaos">
+                            </div>
+                            <div class="form-group w-100">
+                                <label>Como a família lida com a queixa?</label>
+                                <textarea name="familiaLidaQueixa" rows="1"></textarea>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="form-section">
+                            <legend>Desenvolvimento</legend>
+                            <div class="form-group w-100">
+                                <label>História pré/perinatal e condições do parto</label>
+                                <textarea name="desenvolvimentoParto" rows="1"></textarea>
+                            </div>
+                            <div class="form-group w-100">
+                                <label>Desenvolvimento motor (sentou, engatinhou, andou, fala)</label>
+                                <textarea name="desenvolvimentoMotor" rows="1"></textarea>
+                            </div>
+                            <div class="form-group w-100">
+                                <label>Desenvolvimento socioemocional (comportamento, amizades, agressividade)</label>
+                                <textarea name="desenvolvimentoSocioemocional" rows="1"></textarea>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="form-section">
+                            <legend>História Escolar</legend>
+                            <div class="form-group w-100">
+                                <label>Adaptação e desempenho escolar</label>
+                                <textarea name="escolaDesempenho" rows="1"></textarea>
+                            </div>
+                            <div class="form-group w-100">
+                                <label>Dificuldades de aprendizagem</label>
+                                <textarea name="escolaDificuldades" rows="1"></textarea>
+                            </div>
+                        </fieldset>
+
+                    </div>
+
+                    <fieldset class="form-section">
+                        <legend>Observações</legend>
+                        <div class="form-group w-100">
+                            <label>Algo mais a acrescentar?</label>
+                            <textarea name="observacoesAdicionais" rows="1"></textarea>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Dados de observação do entrevistador</label>
+                            <textarea name="observacoesEntrevistador" rows="1"></textarea>
+                        </div>
+                    </fieldset>
+
+                    <div class="botoes">
+
+                        <button type="submit" class="btn-salvar"><i 
+                                class="ti ti-device-floppy"></i> Salvar Anamnese</button>
+
+                        <button type="button" class="btn-abrir-anamnese" id="btnAbrirAnamnese"><i
+                                class="ti ti-printer"></i> Abrir Anamnese</button>
+
+                        <button type="button" class="btn-imprimir-tudo" id="btnImprimir"><i 
+                                class="ti ti-printer"></i> Imprimir Anamnese</button>
+
+                        <button type="button" class="btn-voltar" id="btnVoltar"><i 
+                                class="ti ti-arrow-left"></i> Voltar</button>
+                    </div>
+
+                </form>
+
+            </div>
+        </main>
+
+    </div>
+
+    <script src="../assets/js/menu.js"></script>
+    <script src="../assets/js/anamnese.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,238 @@
+/* ═══════════════════════════════════════════════
+   11. BOTÕES GERAIS
+═══════════════════════════════════════════════ */
+.botoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+    align-items: center;
+}
+
+/* base de todos os botões */
+.botoes button,
+#salvar,
+#limpar,
+.btn-salvar,
+.btn-voltar,
+.btn-imprimir-tudo,
+.btn-imprimir-sessao,
+#btnEditar,
+#btnVoltar, 
+.btn-abrir {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.18s, transform 0.1s;
+}
+
+/* verde */
+#salvar,
+.btn-salvar,
+#btnEditar {
+    background-color: #8a9e78;
+    color: #ffffff;
+    border-color: #8a9e78;
+}
+
+#salvar:hover,
+.btn-salvar:hover,
+#btnEditar:hover {
+    background-color: #7a8e68;
+    border-color: #7a8e68;
+}
+
+/* areia */
+#limpar,
+.btn-voltar,
+#btnVoltar {
+    background-color: #f5f0e8;
+    color: #6a6a58;
+    border-color: #ddd8ce;
+}
+
+#limpar:hover,
+.btn-voltar:hover,
+#btnVoltar:hover {
+    background-color: #ede8dc;
+}
+
+/* azul claro */
+.btn-imprimir-tudo {
+    background-color: #e8f4fd;
+    color: #3a7aaa;
+    border-color: #b8d8f0;
+}
+
+.btn-imprimir-tudo:hover {
+    background-color: #d8ecf8;
+}
+
+.btn-sair {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    color: #aaa;
+    font-size: 20px;
+    transition: color 0.2s;
+}
+
+.btn-sair:hover {
+    color: #e05a5a;
+}
+
+/*═══════════════════════════════════════
+    BOTÕES FINANCEIRO
+═══════════════════════════════════════*/
+
+.btn-excluir-financeiro{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+    padding: 0 10px;
+    background-color: #fdf0f0;
+    color: #aa3a3a;
+    border: 1px solid #f0c0c0;
+    border-radius: 15px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.15s;
+}
+
+.btn-excluir-financeiro:hover{
+    background-color: #f8e0e0;
+}
+
+.btn-editar-financeiro{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+    padding: 0 10px;
+    background-color: #f0f8ff;
+    color: #3a7aaa;
+    border: 1px solid #b8d8f0;
+    border-radius: 15px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.15s;
+}
+
+.btn-editar-financeiro:hover{
+    background-color: #e8f4fd;
+}
+
+.btn-receita,
+.btn-despesa {
+
+    height: 44px;
+    padding: 0 18px;
+
+    border: none;
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    transition: .2s;
+
+}
+
+.btn-receita {
+
+    background: #8d9d7b;
+    color: #fff;
+
+}
+
+.btn-receita:hover {
+
+    background: #79896b;
+
+}
+
+.btn-despesa {
+
+    background: #d96f6f;
+    color: #fff;
+
+}
+
+.btn-despesa:hover {
+
+    background: #bf5d5d;
+
+}
+
+/* ==========================
+   BOTÃO FLUTUANTE (só aparece na tela,
+   nunca sai na impressão)
+========================== */
+.btn-fechar-visualizacao {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: #3d3a28;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    z-index: 999;
+}
+
+.btn-fechar-visualizacao:hover {
+    background: #2a2818;
+}
+
+/* botões evolução*/
+
+.btn-excluir-evolucao {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 18px 14px;
+    padding: 0 12px;
+    height: 32px;
+    background-color: #fdf0f0;
+    color: #aa3a3a;
+    border: 1px solid #f0c0c0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.15s;
+}
+
+.btn-excluir-evolucao:hover {
+    background-color: #f8e0e0;
+}

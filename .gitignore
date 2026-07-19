@@ -1,0 +1,23 @@
+# Dependências
+node_modules/
+
+# Build do Electron
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+temp/
+tmp/
+
+# Banco de dados temporário (se desejar)
+*.db-journal
+
+# VS Code
+.vscode/

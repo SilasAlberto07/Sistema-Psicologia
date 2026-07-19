@@ -1,0 +1,76 @@
+/* ═══════════════════════════════════════════════
+   DOCUMENTOS.CSS — estilos exclusivos de Pages/documentos.html
+═══════════════════════════════════════════════ */
+.documentos-container {
+    width: 100%;
+    max-width: 100%;
+}
+
+.form-section {
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 12px;
+    padding: 24px 26px 26px;
+    margin-top: 16px;
+}
+
+.linha {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+    align-items: flex-end;
+}
+
+.linha:last-child {
+    margin-bottom: 0;
+}
+
+.w-20 { width: 20%; flex-shrink: 0; }
+.w-30 { width: 30%; flex-shrink: 0; }
+.w-40 { width: 40%; flex-shrink: 0; }
+.w-50 { width: 50%; flex-shrink: 0; }
+.w-100 { flex: 1; min-width: 0; }
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #7a7a68;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    height: 38px;
+    padding: 0 10px;
+    background-color: #faf8f4;
+    border: 1px solid #ddd8ce;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #3d3a28;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #8a9e78;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(138, 158, 120, 0.15);
+}
+
+.grupo-campos {
+    border-top: 1px dashed #ede8e0;
+    padding-top: 16px;
+    margin-top: 4px;
+    margin-bottom: 14px;
+}

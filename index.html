@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/css/global.css">
+    <link rel="stylesheet" href="./assets/css/button.css">
+    <link rel="stylesheet" href="./assets/css/home.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <title>Sistema Psicologia</title>
+</head>
+
+<body>
+
+    <div class="container-menu">
+
+        <div id="menu"></div>
+
+        <!-- CONTEÚDO -->
+        <main class="conteudo">
+
+            <!-- CABEÇALHO -->
+            <div class="home-header">
+                <div>
+                    <h1><span id="saudacao">Bem-vinda</span>, Dra. Cláudia Bethânia</h1>
+                    <p class="page-subtitle">Resumo das atividades e agendamentos.</p>
+                </div>
+                <div class="home-topbar-right">
+                    <span class="home-date" id="dataAtual"></span>
+                </div>
+            </div>
+
+            <!-- CARDS DE MÉTRICAS -->
+            <div class="cards">
+
+                <div class="home-card" data-link="Pages/pacientes.html">
+
+                    <div class="home-card-top">
+
+                        <i class="ti ti-arrow-up-right home-card-arrow"></i>
+
+                        <div class="home-card-icon" style="background:#f0ece4">
+                            <i class="ti ti-users" style="color:#8a9e78;font-size:20px"></i>
+                        </div>
+
+                        <div class="home-card-info">
+                            <h3>Pacientes</h3>
+                            <p id="totalPacientes">0</p>
+                            <span class="home-card-sub">Cadastrados</span>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div class="home-card">
+
+                    <div class="home-card-top">
+
+                        <div class="home-card-icon" style="background:#fdf0e4">
+                            <i class="ti ti-calendar-event" style="color:#c0885a;font-size:20px"></i>
+                        </div>
+
+                        <div class="home-card-info">
+                            <h3>Sessões Hoje</h3>
+                            <p id="sessoesHoje">0</p>
+                            <span class="home-card-sub">agendadas</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="home-card card-proxima">
+
+                    <div class="home-card-top">
+
+                        <div class="home-card-icon" style="background:#ddd8f0">
+                            <i class="ti ti-clock" style="color:#7a6aaa;font-size:20px"></i>
+                        </div>
+
+                        <div class="home-card-info">
+                            <h3>Próxima Sessão</h3>
+                            <p id="proximaSessao">Nenhuma</p>
+                            <span class="home-card-sub" id="proximaSessaoSub"></span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- AGENDA + RESUMO -->
+            <div class="home-bottom">
+
+                <!-- Agenda -->
+                <div class="home-agenda">
+
+                    <div class="home-agenda-header">
+                        <h2><i class="ti ti-calendar" style="color:#8a9e78;font-size:16px"></i> Agenda de Hoje</h2>
+                        <a class="home-agenda-link" href="Pages/agenda.html">
+                            Ver agenda completa
+                            <i class="ti ti-chevron-right" style="font-size:12px"></i>
+                        </a>
+                    </div>
+
+                    <div id="agendaHoje"></div>
+
+                    <div class="agenda-aviso" id="agendaAviso" style="display:none">
+                        <i class="ti ti-bell" style="font-size:13px;color:#8a9e78"></i>
+                        Você tem <b id="qtdSessoes">0</b> sessões agendadas para hoje.
+                    </div>
+
+                </div>
+
+                <!-- Resumo -->
+                <div class="home-resumo">
+
+                    <div class="home-resumo-header">
+                        <h2>
+                            <i class="ti ti-chart-bar" style="color:#8a9e78;font-size:16px"></i>
+                            Resumo da Semana
+                        </h2>
+                    </div>
+
+                    <div class="resumo-item">
+                        <span class="resumo-label realizada">
+                            <i class="ti ti-check"></i>
+                            Realizadas
+                        </span>
+
+                        <strong id="resumoRealizadas">0</strong>
+                    </div>
+
+                    <div class="resumo-item">
+                        <span class="resumo-label agendada">
+                            <i class="ti ti-calendar-event"></i>
+                            Agendadas
+                        </span>
+
+                        <strong id="resumoAgendadas">0</strong>
+                    </div>
+
+                    <div class="resumo-item">
+                        <span class="resumo-label andamento">
+                            <i class="ti ti-player-play"></i>
+                            Em andamento
+                        </span>
+
+                        <strong id="resumoAndamento">0</strong>
+                    </div>
+
+                    <div class="resumo-item">
+                        <span class="resumo-label cancelada">
+                            <i class="ti ti-x"></i>
+                            Canceladas
+                        </span>
+
+                        <strong id="resumoCanceladas">0</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <script src="./assets/js/menu.js"></script>
+    
+    <script src="script.js"></script>
+
+    <script>
+        // Data atual no header
+        const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('dataAtual').textContent = new Date().toLocaleDateString('pt-BR', opts);
+    </script>
+
+</body>
+
+</html>>

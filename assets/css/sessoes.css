@@ -1,0 +1,204 @@
+/* ═══════════════════════════════════════════════
+   15. SESSÕES — sessoes.html
+═══════════════════════════════════════════════ */
+.table-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+}
+
+.paciente-sessao-card {
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 12px;
+    padding: 20px 22px;
+    transition: border-color 0.2s;
+    margin-top: 16px;
+}
+
+.paciente-sessao-card:hover {
+    border-color: #d0cbc0;
+}
+
+.paciente-header {
+    margin-bottom: 14px;
+}
+
+.paciente-header h2 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #3d3a28;
+    margin-bottom: 2px;
+}
+
+.paciente-header small {
+    font-size: 11px;
+    color: #a0a090;
+}
+
+.tabela-sessoes {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabela-sessoes th {
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: center;
+    color: #8a8a78;
+    border-bottom: 1px solid #ede8e0;
+    white-space: nowrap;
+}
+
+.tabela-sessoes td {
+    padding: 9px 10px;
+    text-align: center;
+    font-size: 13px;
+    color: #4a4a38;
+    border-bottom: 1px solid #f5f2ec;
+    vertical-align: middle;
+}
+
+.tabela-sessoes tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.status {
+    height: 30px;
+    padding: 0 12px;
+    border: 1px solid #ddd8ce;
+    border-radius: 20px;
+    background-color: #faf8f4;
+    color: #5a5a48;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.status:focus {
+    border-color: #8a9e78;
+}
+
+.btn-excluir-sessao {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+    padding: 0 10px;
+    background-color: #fdf0f0;
+    color: #aa3a3a;
+    border: 1px solid #f0c0c0;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.15s;
+}
+
+.btn-excluir-sessao:hover {
+    background-color: #f8e0e0;
+}
+
+.btn-evolucao {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+    padding: 0 10px;
+    background-color: #f0f3fd;
+    color: #3a3eaa;
+    border: 1px solid #c0c8f0;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.15s;
+}
+
+.btn-evolucao:hover {
+    background-color: #e0e1f8;
+}
+
+.input-data,
+.input-horario {
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid #ddd8ce;
+    border-radius: 20px;
+    background-color: #faf8f4;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #3d3a28;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-duracao {
+    width: 120px;
+    height: 30px;
+    padding: 0 8px;
+    text-align: center;
+    border: 1px solid #ddd8ce;
+    border-radius: 20px;
+    background-color: #faf8f4;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #3d3a28;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-data:focus,
+.input-horario:focus,
+.input-duracao:focus {
+    border-color: #8a9e78;
+}
+
+.sessao-cancelada {
+    background-color: #fdf5f5;
+    text-decoration: line-through;
+    opacity: 0.65;
+    border-left: 3px solid #d87171;
+}
+
+.sessao-realizada {
+    background-color: #f5faf5;
+    border-left: 3px solid #79a155;
+}
+
+.sessao-andamento {
+    background-color: #fff8ec;
+    border-left: 3px solid #cfb05c;
+}
+
+.placeholder-sessoes {
+    max-width: 540px;
+    margin: 60px auto;
+    padding: 40px;
+    text-align: center;
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 14px;
+}
+
+.placeholder-sessoes h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #3d3a28;
+    margin-bottom: 8px;
+}
+
+.placeholder-sessoes p {
+    font-size: 13px;
+    color: #9a9a88;
+}
