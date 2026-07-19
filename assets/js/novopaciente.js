@@ -32,24 +32,26 @@ function verificarIdade() {
 
     const idade = Number(IdadeInput.value);
 
-    if (idade < 18) {
+    if (!idade || idade < 18) {
+
         ResponsavelInput.disabled = false;
         ResponsavelInput.classList.remove("input-desabilitado");
 
-    }
+        if (ResponsavelInput.value === "") {
+            ResponsavelInput.value = "";
+        }
 
-    else {
+    } else {
+
         ResponsavelInput.disabled = true;
         ResponsavelInput.classList.add("input-desabilitado");
         ResponsavelInput.value = "";
-    }
 
+    }
 }
 
 IdadeInput.addEventListener("input", verificarIdade);
 
-
-let pacientes = [];
 
 async function iniciarFormulario() {
 
@@ -68,12 +70,17 @@ async function iniciarFormulario() {
         idInput.value = pacienteEdit.id;
 
         form.nomeCompleto.value = pacienteEdit.nomeCompleto || "";
+        form.cpf.value = pacienteEdit.cpf || "";
+        form.rg.value = pacienteEdit.rg || "";
         form.dataNascimento.value = pacienteEdit.dataNascimento || "";
         form.idade.value = pacienteEdit.idade || "";
+        form.ondeNasceu.value = pacienteEdit.ondeNasceu || "";
         form.sexo.value = pacienteEdit.sexo || "";
         form.estadoCivil.value = pacienteEdit.estadoCivil || "";
         form.profissao.value = pacienteEdit.profissao || "";
         form.responsavel.value = pacienteEdit.responsavel || "";
+        form.pai.value = pacienteEdit.pai || "";
+        form.mae.value = pacienteEdit.mae || "";
 
         form.telefone.value = pacienteEdit.telefone || "";
         form.cntEmergencia.value = pacienteEdit.cntEmergencia || "";
@@ -87,6 +94,8 @@ async function iniciarFormulario() {
         form.cidadeUf.value = pacienteEdit.cidadeUf || "";
 
         form.queixaPrincipal.value = pacienteEdit.queixaPrincipal || "";
+
+        verificarIdade();
     }
 }
 
@@ -101,25 +110,42 @@ bntSalvar.addEventListener("click", async function (event) {
     const dados = Object.fromEntries(formData.entries());
 
     if (!dados.nomeCompleto || !dados.dataNascimento || !dados.telefone) {
-        alert("⚠️ Preencha pelo menos Nome, Data de Nascimento e Telefone!");
+        mostrarMensagem(
+            "Preencha pelo menos Nome, Data de Nascimento e Telefone!",
+            "warning"
+        );
         return;
     }
 
     if (idEdit) {
         const index = pacientes.findIndex(p => p.id === idEdit);
         pacientes[index] = { ...pacientes[index], ...dados };
-        alert("Paciente atualizado com sucesso!");
+
+        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+
+        mostrarMensagem(
+            "Paciente atualizado com sucesso!",
+            "success",
+            () => {
+                window.location.href = "pacientes.html";
+            }
+        );
+
     } else {
         dados.id = gerarIdPaciente(pacientes);
         dados.dataCadastro = new Date().toLocaleDateString("pt-BR");
         pacientes.push(dados);
-        alert("Paciente cadastrado com sucesso!");
+
+        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+
+        mostrarMensagem(
+            "Paciente cadastrado com sucesso!",
+            "success",
+            () => {
+                window.location.href = "pacientes.html";
+            }
+        );
     }
-
-    await window.storage.setItem("pacientes", JSON.stringify(pacientes));
-
-    window.location.href = "pacientes.html";
-
 });
 
 
@@ -148,6 +174,8 @@ btnLimpar.addEventListener("click", () => {
     document.getElementById("cidadeUf").value = "";
 
     document.getElementById("queixaPrincipal").value = "";
+
+    verificarIdade();
 
 });
 

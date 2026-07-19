@@ -24,7 +24,7 @@ body {
     color: #3d3a28;
     -webkit-font-smoothing: antialiased;
 
-  
+
     background-image: url("../img/fundo-pagina.png");
     background-size: cover;
     background-position: center;
@@ -57,6 +57,7 @@ body {
     font-weight: 600;
     margin-bottom: 20px;
 }
+
 .page-subtitle {
     font-size: 13px;
     color: #9a9a88;
@@ -99,7 +100,7 @@ body {
     bottom: 60px;
     left: -50px;
     width: 175px;
-    height: 250px;   
+    height: 250px;
     background-repeat: no-repeat;
     background-size: contain;
     pointer-events: none;
@@ -154,10 +155,12 @@ body {
     text-overflow: ellipsis;
 }
 
+/* LINKS DO MENU PRINCIPAL */
 /* 3b. NAV */
+
 .menu ul {
     list-style: none;
-    padding: 10px 8px;
+    padding: 10px 14px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -167,21 +170,15 @@ body {
     z-index: 1;
 }
 
+
 .menu li {
     border-radius: 8px;
     transition: background-color 0.15s;
 }
 
-.menu li:hover {
-    background-color: #e6e1d5;
-}
 
-.menu li.ativo {
-    background-color: #d8e6c8;
-}
-
-.menu a {
-    margin-top: 10px;
+/* LINKS DO MENU PRINCIPAL */
+.menu ul a {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -192,41 +189,80 @@ body {
     text-decoration: none;
     border-radius: 8px;
     white-space: nowrap;
-    transition: color 0.15s;
+    transition: all 0.15s;
 }
 
-.menu a i {
+
+.menu ul a i {
     font-size: 17px;
     flex-shrink: 0;
     width: 20px;
     text-align: center;
 }
 
-.menu li:hover a {
+
+.menu ul li:hover {
+    background-color: #a8c094;
+}
+
+
+.menu ul li:hover a {
     color: #3d4a30;
 }
 
-.menu li.ativo a {
+
+.menu ul li.ativo {
+    background-color: #d8e6c8;
+}
+
+
+.menu ul li.ativo a {
     color: #3d5a28;
     font-weight: 500;
 }
 
 /* 3c. RODAPÉ DA SIDEBAR */
+/* 3c. RODAPÉ */
+
 .rodape {
+    margin-top: auto;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
     width: 100%;
     padding: 14px 16px;
-    text-align: center;
-    position: relative;
-   
 }
 
+
+/* LINKS DO RODAPÉ */
+.rodape a {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 70%;
+    font-size: 13px;
+    font-weight: 400;
+    color: #6a6a58;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.15s;
+} 
+
+.rodape a i {
+    flex-shrink: 0;
+    text-align: center;
+}
+
+
 .copyright {
+    display: flex;
+    text-align: center;
+    margin: 10px auto;
+    width: 150px;
     font-family: 'Playfair Display', sans-serif;
-    font-size: 18px;
+    font-size: 21px;
     font-style: italic;
     color: #606e41;
     font-weight: 500;
@@ -253,4 +289,3 @@ body {
     flex-direction: column;
 
 }
-

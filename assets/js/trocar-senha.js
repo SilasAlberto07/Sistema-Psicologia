@@ -36,8 +36,13 @@ async function trocarSenha() {
     const novoHash = await gerarHash(nova);
     await window.storage.setItem("senhaHash", novoHash);
 
-    alert("Senha alterada com sucesso!");
-    window.location.href = "../index.html";
+    mostrarMensagem(
+        "Senha alterada com sucesso!",
+        "success",
+        () => {
+            window.location.href = "../index.html";
+        }
+    );
 }
 
 document.getElementById("btnSalvarSenha").addEventListener("click", trocarSenha);

@@ -1,6 +1,6 @@
 {
   "name": "sistema-psicologia",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "better-sqlite3": "^12.11.1",
-    "serve-handler": "^6.1.7"
+    "serve-handler": "^6.1.7",
+    "sweetalert2": "^11.26.25"
   }
 }

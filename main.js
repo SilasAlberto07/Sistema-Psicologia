@@ -5,6 +5,8 @@ const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
 
+app.setName("Sistema Psicologia");
+
 let mainWindow;
 let server;
 let db;

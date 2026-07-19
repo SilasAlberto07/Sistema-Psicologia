@@ -78,19 +78,23 @@
     background-color: #d8ecf8;
 }
 
-.btn-sair {
+.btn-sair, .btn-senha {
     display: flex;
     align-items: center;
-    justify-content: center;
     margin-top: 10px;
     color: #aaa;
-    font-size: 20px;
+    font-size: 14px;
     transition: color 0.2s;
 }
 
 .btn-sair:hover {
     color: #e05a5a;
 }
+
+.btn-senha:hover {
+    color: #3a7aaa;
+}
+
 
 /*═══════════════════════════════════════
     BOTÕES FINANCEIRO
@@ -215,6 +219,48 @@
 
 /* botões evolução*/
 
+.btn-excluir-sessao {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+    padding: 0 10px;
+    background-color: #fdf0f0;
+    color: #aa3a3a;
+    border: 1px solid #f0c0c0;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.15s;
+}
+
+.btn-excluir-sessao:hover {
+    background-color: #f8e0e0;
+}
+
+.btn-evolucao {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+    padding: 0 10px;
+    background-color: #f0f3fd;
+    color: #3a3eaa;
+    border: 1px solid #c0c8f0;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.15s;
+}
+
+.btn-evolucao:hover {
+    background-color: #e0e1f8;
+}
+
 .btn-excluir-evolucao {
     display: inline-flex;
     align-items: center;
@@ -234,5 +280,68 @@
 }
 
 .btn-excluir-evolucao:hover {
+    background-color: #f8e0e0;
+}
+
+
+/* ═══════════════════════════════════════════════
+   9. BOTÕES DE AÇÃO DA TABELA
+═══════════════════════════════════════════════ */
+.btnAnamnese,
+.btnOpen,
+.btnEdit,
+.btnDelete {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 11px;
+    height: 30px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid;
+    transition: background-color 0.15s;
+    white-space: nowrap;
+}
+
+.btnAnamnese {
+    background-color: #eeeaf6;
+    color: #6a5aaa;
+    border-color: #c8c0e0;
+}
+
+.btnAnamnese:hover {
+    background-color: #e0daf0;
+}
+
+.btnOpen {
+    background-color: #e8f4fd;
+    color: #3a7aaa;
+    border-color: #b8d8f0;
+}
+
+.btnOpen:hover {
+    background-color: #d8ecf8;
+}
+
+.btnEdit {
+    background-color: #eaf6ea;
+    color: #3a7a48;
+    border-color: #b8d8b8;
+}
+
+.btnEdit:hover {
+    background-color: #d8eeda;
+}
+
+.btnDelete {
+    background-color: #fdf0f0;
+    color: #aa3a3a;
+    border-color: #f0c0c0;
+}
+
+.btnDelete:hover {
     background-color: #f8e0e0;
 }

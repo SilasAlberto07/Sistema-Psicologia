@@ -246,10 +246,21 @@ document.addEventListener("input", async (e) => {
         const conflito = await horarioJaOcupado(id, data, hora);
 
         if (conflito) {
-            alert(`⚠️ Horário já ocupado por ${conflito}`);
+
+            mostrarMensagem(
+                `Horário já ocupado por ${conflito}`,
+                "warning"
+            );
+
             paciente.sessoes[index].hora = "";
-            await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+
+            await window.storage.setItem(
+                "pacientes",
+                JSON.stringify(pacientes)
+            );
+
             renderSessoes();
+
             return;
         }
     }
@@ -281,18 +292,36 @@ document.addEventListener("click", async (e) => {
 
     if (e.target.classList.contains("btn-excluir-sessao")) {
 
+        const resposta = await mostrarConfirmacao(
+            "Deseja realmente excluir esta sessão?"
+        );
+
+        if (!resposta.isConfirmed) {
+            return;
+        }
+
         const id = e.target.dataset.id;
         const index = e.target.dataset.index;
 
         let pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
 
         const paciente = pacientes.find(p => p.id == id);
+
         if (!paciente) return;
 
         paciente.sessoes.splice(index, 1);
 
-        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+        await window.storage.setItem(
+            "pacientes",
+            JSON.stringify(pacientes)
+        );
+
         renderSessoes();
+
+        mostrarMensagem(
+            "Sessão excluída com sucesso!",
+            "success"
+        );
     }
 });
 
