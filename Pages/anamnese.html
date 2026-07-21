@@ -23,6 +23,34 @@
                 <h3 id="nomePaciente"></h3>
                 <p class="aviso-tipo" id="avisoTipo"></p>
 
+                <button type="button" class="btn-imprimir-tudo" id="btnAbrirModalColar" style="margin-bottom:16px">
+                    <i class="ti ti-clipboard-text"></i> Preencher com Texto Colado
+                </button>
+
+                <div class="modal-colar oculto" id="modalColarAnamnese">
+                    <div class="modal-colar-box">
+                        <div class="modal-colar-header">
+                            <h2><i class="ti ti-clipboard-text"></i> Colar Anamnese Pronta</h2>
+                            <button type="button" id="fecharModalColar"><i class="ti ti-x"></i></button>
+                        </div>
+                        <div class="modal-colar-body">
+                            <p style="color:#9a9a88; font-size:13px; margin-bottom:10px;">
+                                Cole abaixo o texto da anamnese, mantendo os mesmos títulos das perguntas do
+                                formulário (ex: "Queixa principal:", "Tem diagnóstico?:" etc). O sistema localiza
+                                cada título e preenche o campo correspondente automaticamente.
+                            </p>
+                            <textarea id="textoColadoAnamnese" rows="1"
+                                placeholder="Cole aqui a anamnese completa..."></textarea>
+                        </div>
+                        <div class="modal-colar-footer">
+                            <button type="button" class="btn-voltar" id="cancelarModalColar">Cancelar</button>
+                            <button type="button" class="btn-salvar" id="btnPreencherAutomatico">
+                                <i class="ti ti-wand"></i> Preencher Automaticamente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
                 <form id="formAnamnese">
 
                     <fieldset class="form-section">
@@ -222,17 +250,17 @@
 
                     <div class="botoes">
 
-                        <button type="submit" class="btn-salvar"><i 
-                                class="ti ti-device-floppy"></i> Salvar Anamnese</button>
+                        <button type="submit" class="btn-salvar"><i class="ti ti-device-floppy"></i> Salvar
+                            Anamnese</button>
 
                         <button type="button" class="btn-abrir-anamnese" id="btnAbrirAnamnese"><i
                                 class="ti ti-printer"></i> Abrir Anamnese</button>
 
-                        <button type="button" class="btn-imprimir-tudo" id="btnImprimir"><i 
-                                class="ti ti-printer"></i> Imprimir Anamnese</button>
+                        <button type="button" class="btn-imprimir-tudo" id="btnImprimir"><i class="ti ti-printer"></i>
+                            Imprimir Anamnese</button>
 
-                        <button type="button" class="btn-voltar" id="btnVoltar"><i 
-                                class="ti ti-arrow-left"></i> Voltar</button>
+                        <button type="button" class="btn-voltar" id="btnVoltar"><i class="ti ti-arrow-left"></i>
+                            Voltar</button>
                     </div>
 
                 </form>
