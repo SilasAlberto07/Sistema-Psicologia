@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../assets/css/global.css">
     <link rel="stylesheet" href="../assets/css/button.css">
     <link rel="stylesheet" href="../assets/css/evolucao.css">
+    <link rel="styleshet" href="../assets/css/modal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
 
@@ -22,6 +23,30 @@
                 <div class="evolucao-header">
                     <h1><i class="ti ti-clipboard-list" style="color:#8a9e78"></i> Prontuário do Paciente</h1>
                     <h3 id="nomePaciente"></h3>
+                </div>
+
+                <div class="modal-colar oculto" id="modalColar">
+                    <div class="modal-colar-box">
+                        <div class="modal-colar-header">
+                            <h2><i class="ti ti-clipboard-text"></i> Colar Evolução Pronta</h2>
+                            <button type="button" id="fecharModalColar"><i class="ti ti-x"></i></button>
+                        </div>
+                        <div class="modal-colar-body">
+                            <p style="color:#9a9a88; font-size:13px; margin-bottom:10px;">
+                                Cole abaixo o texto do Relato e Evolução completa que será preenchido, mantendo os mesmos títulos das perguntas do
+                                formulário (ex: "Relato da Sessão:", "Evolução da Sessão:" etc). O sistema localiza
+                                cada título e preenche o campo correspondente automaticamente.
+                            </p>
+                            <textarea id="textoColadoPreencher" rows="1" class="texto-colado"
+                                placeholder="Cole aqui o Relato e Evolução completa..."></textarea>
+                        </div>
+                        <div class="modal-colar-footer">
+                            <button type="button" class="btn-voltar" id="cancelarModalColar">Cancelar</button>
+                            <button type="button" class="btn-salvar" id="btnPreencherAutomatico">
+                                <i class="ti ti-wand"></i> Preencher Automaticamente
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <label class="campo-label">Relato da Sessão</label>
@@ -43,7 +68,8 @@
                 <hr>
 
                 <div class="historico-container">
-                    <h2 class="historico-title"><i class="ti ti-history" style="color:#8a9e78"></i> Registros das Sessões</h2>
+                    <h2 class="historico-title"><i class="ti ti-history" style="color:#8a9e78"></i> Registros das
+                        Sessões</h2>
                     <div id="historico"></div>
                 </div>
 

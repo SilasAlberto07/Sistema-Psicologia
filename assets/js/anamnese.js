@@ -258,6 +258,6 @@ document.getElementById("btnPreencherAutomatico").addEventListener("click", () =
 
     preencherAutomaticamente(texto);
 
-    modalColar.style.display = "flex";
+    modalColar.classList.add("oculto");
     textoColadoEl.value = "";
 });

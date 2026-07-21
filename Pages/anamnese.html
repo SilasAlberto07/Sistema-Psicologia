@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../assets/css/global.css">
     <link rel="stylesheet" href="../assets/css/anamnese.css">
     <link rel="stylesheet" href="../assets/css/button.css">
+    <link rel="styleshet" href="../assets/css/modal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
 
@@ -27,7 +28,7 @@
                     <i class="ti ti-clipboard-text"></i> Preencher com Texto Colado
                 </button>
 
-                <div class="modal-colar oculto" id="modalColarAnamnese">
+                <div class="modal-colar oculto" id="modalColar">
                     <div class="modal-colar-box">
                         <div class="modal-colar-header">
                             <h2><i class="ti ti-clipboard-text"></i> Colar Anamnese Pronta</h2>
@@ -35,11 +36,11 @@
                         </div>
                         <div class="modal-colar-body">
                             <p style="color:#9a9a88; font-size:13px; margin-bottom:10px;">
-                                Cole abaixo o texto da anamnese, mantendo os mesmos títulos das perguntas do
+                                Cole abaixo a anamnese completa, mantendo os mesmos títulos das perguntas do
                                 formulário (ex: "Queixa principal:", "Tem diagnóstico?:" etc). O sistema localiza
                                 cada título e preenche o campo correspondente automaticamente.
                             </p>
-                            <textarea id="textoColadoAnamnese" rows="1"
+                            <textarea id="textoColadoPreencher" rows="1" class="texto-colado"
                                 placeholder="Cole aqui a anamnese completa..."></textarea>
                         </div>
                         <div class="modal-colar-footer">
