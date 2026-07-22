@@ -3,8 +3,12 @@
    (Ficha de anamnese estruturada — Adulto / Adolescente)
 ═══════════════════════════════════════════════ */
 .anamnese-container {
+    margin: 0 auto;
     width: 100%;
-    max-width: 100%;
+    max-width: 80%;
+    padding: 50px;
+    background-color: #ffffff;
+    border-radius: 15px;
 }
 
 .anamnese-container h1 {
@@ -12,17 +16,27 @@
     font-size: 24px;
     font-weight: 600;
     color: #3d3a28;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
     
 }
 
 .anamnese-container h3 {
-    font-size: 14px;
+    text-transform: uppercase;   
+    font-size: 15px;
     font-weight: 500;
     color: #6a6a58;
     margin-bottom: 4px;
+}
+
+.aviso-paciente{
+    font-size: 8px;
+    color: #8a9e78;
+    border-radius: 8px;
+    padding: 6px 12px;
+    display: flex;
+    margin-bottom: 20px;
 }
 
 .aviso-tipo {
@@ -30,10 +44,11 @@
     color: #8a9e78;
     background-color: #f0f7ea;
     border: 1px solid #c8d5b5;
-    border-radius: 8px;
-    padding: 6px 12px;
+    border-radius: 5px;
+    padding: 2px 12px;
     display: inline-block;
     margin-bottom: 20px;
+    margin-top: 10px;
 }
 
 .form-section {
@@ -52,7 +67,8 @@
     font-size: 15px;
     font-weight: 500;
     color: #3d4a30;
-    padding: 4px 12px;
+    padding: 0px 12px;
+    margin-left: 12px;
 }
 
 .linha {
@@ -79,8 +95,7 @@
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    margin-bottom: 10px;
+    padding: 0 10px;
 }
 
 .form-group:last-child {
@@ -88,16 +103,16 @@
 }
 
 .form-group label {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
-    color: #7a7a68;
+    color: #000000;
 }
 
 .form-group input{
-    width: 97.5%;
-    padding: 10px 12px;
-    background-color: #faf8f4;
-    border: 1px solid #ddd8ce;
+    width: 150px;
+    padding: 0px 12px;
+    background-color: #faf8f400;
+    border: 1px solid #ddd8ce00;
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
     font-size: 13px;
@@ -109,11 +124,12 @@
 
 .form-group textarea{
     width: 100%;
-    min-height: 38px;
+    min-height: 35px;
+  
 
-    padding: 10px 12px;
-    background-color: #faf8f4;
-    border: 1px solid #ddd8ce;
+    padding: 0px 12px;
+    background-color: #faf8f400;
+    border: 1px solid #ddd8ce00;
     border-radius: 8px;
 
     font-family: 'Inter', sans-serif;
@@ -129,9 +145,8 @@
 
 .form-group input:focus,
 .form-group textarea:focus {
-    border-color: #8a9e78;
-    background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(138, 158, 120, 0.15);
+    border-color: none;
+    background-color: #fdfdfd;
 }
 
 .secao-adolescente-titulo {

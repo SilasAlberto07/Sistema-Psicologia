@@ -37,9 +37,9 @@ async function iniciarAnamnese() {
 
     if (menorDeIdade) {
         secaoAdolescente.style.display = "block";
-        avisoTipo.textContent = "Paciente menor de idade — seção adicional de anamnese habilitada.";
+        avisoTipo.textContent = "Paciente menor de idade — Seção adicional de anamnese habilitada.";
     } else {
-        avisoTipo.textContent = "Ficha de anamnese — adulto.";
+        avisoTipo.textContent = "Ficha de anamnese — ADULTO.";
     }
 
     // garante estrutura

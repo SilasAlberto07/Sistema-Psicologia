@@ -19,7 +19,10 @@
 .btn-imprimir-sessao,
 #btnEditar,
 #btnVoltar, 
-.btn-abrir {
+.btn-abrir, 
+.btn-cancelar, 
+.btn-preencher, 
+.btn-modal {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -39,7 +42,8 @@
 /* verde */
 #salvar,
 .btn-salvar,
-#btnEditar {
+#btnEditar,
+.btn-preencher {
     background-color: #8a9e78;
     color: #ffffff;
     border-color: #8a9e78;
@@ -47,7 +51,8 @@
 
 #salvar:hover,
 .btn-salvar:hover,
-#btnEditar:hover {
+#btnEditar:hover,
+.btn-preencher:hover {
     background-color: #7a8e68;
     border-color: #7a8e68;
 }
@@ -55,7 +60,8 @@
 /* areia */
 #limpar,
 .btn-voltar,
-#btnVoltar {
+#btnVoltar,
+.btn-cancelar {
     background-color: #f5f0e8;
     color: #6a6a58;
     border-color: #ddd8ce;
@@ -63,18 +69,21 @@
 
 #limpar:hover,
 .btn-voltar:hover,
-#btnVoltar:hover {
+#btnVoltar:hover,
+.btn-cancelar:hover {
     background-color: #ede8dc;
 }
 
 /* azul claro */
-.btn-imprimir-tudo {
+.btn-imprimir-tudo,
+.btn-modal{
     background-color: #e8f4fd;
     color: #3a7aaa;
     border-color: #b8d8f0;
 }
 
-.btn-imprimir-tudo:hover {
+.btn-imprimir-tudo:hover,
+.btn-modal:hover {
     background-color: #d8ecf8;
 }
 
@@ -190,6 +199,25 @@
 
 }
 
+.btn-modal {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    height: 30px;
+    padding: 0 10px;
+    background-color: #f0f8ff;
+    color: #3a7aaa;
+    border: 1px solid #b8d8f0;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.15s;
+}
+
+
 /* ==========================
    BOTÃO FLUTUANTE (só aparece na tela,
    nunca sai na impressão)
@@ -265,13 +293,13 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    margin: 0 18px 14px;
+    margin: 0 6px 15px;
     padding: 0 12px;
     height: 32px;
     background-color: #fdf0f0;
     color: #aa3a3a;
     border: 1px solid #f0c0c0;
-    border-radius: 6px;
+    border-radius: 20px;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
@@ -283,6 +311,28 @@
     background-color: #f8e0e0;
 }
 
+.btn-editar-evolucao{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 695px;
+    padding: 0 12px;
+    height: 32px;
+    background-color: #f0f8ff;
+    color: #3a7aaa;
+    border: 1px solid #b8d8f0;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.15s;
+
+}
+
+.btn-editar-evolucao:hover{
+    background-color: #e0f0f8;
+}
 
 /* ═══════════════════════════════════════════════
    9. BOTÕES DE AÇÃO DA TABELA

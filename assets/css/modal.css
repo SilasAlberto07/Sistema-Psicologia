@@ -18,14 +18,13 @@
 
 .modal-colar-box {
     width: 1000px;
+    height: 1000px;
     max-width: 95%;
     max-height: 90vh;
-
     background: #fff;
     border-radius: 14px;
     display: flex;
     flex-direction: column;
-
     overflow: hidden;
 }
 
@@ -62,8 +61,9 @@
     flex: 1;
 }
 
-.texto-colado {
+.modal-colar-body textarea {
     width: 100%;
+    min-height: 90%;
     padding: 16px 14px;
     background-color: #faf8f4;
     border: 1px solid #ddd8ce;

@@ -259,11 +259,7 @@ body {
 .copyright {
     display: flex;
     text-align: center;
-<<<<<<< HEAD
     margin: 10px auto;
-=======
-    margin: 50px auto;
->>>>>>> 94cbac638c5f251b83f082964d4438cc3d52d8fc
     width: 150px;
     font-family: 'Playfair Display', sans-serif;
     font-size: 21px;
