@@ -86,3 +86,27 @@
     outline: none;
 }
 
+/* ═══════════════════════════════════════════════
+   9. ORDENAÇÃO DA TABELA
+═══════════════════════════════════════════════ */
+.th-sortavel {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+}
+
+.th-sortavel:hover {
+    color: #8a9e78;
+}
+
+.icone-ordem {
+    font-size: 12px;
+    margin-left: 4px;
+    opacity: 0.45;
+    vertical-align: middle;
+}
+
+.icone-ordem-ativo {
+    opacity: 1;
+    color: #8a9e78;
+}

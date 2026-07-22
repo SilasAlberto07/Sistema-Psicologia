@@ -1,12 +1,49 @@
 const tabelaPacientes = document.getElementById("tabela-pacientes");
 let pacientes = []; // agora é "let" e fica no escopo do módulo, não dentro da função
 
+// controla o estado atual de ordenação da tabela
+let ordenacaoAtual = { campo: null, direcao: 1 }; // direcao: 1 = ascendente, -1 = descendente
+
 async function carregarPacientes() {
     pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
+    renderizarTabela();
+}
 
+function renderizarTabela() {
     tabelaPacientes.innerHTML = "";
 
-    const pacientesAtivos = pacientes.filter(p => !p.excluido);
+    // mantém o índice original de cada paciente (usado por excluir/editar sessões)
+    // e remove os que estão na lixeira
+    let pacientesAtivos = pacientes
+        .map((p, indice) => ({ ...p, _indiceOriginal: indice }))
+        .filter((p) => !p.excluido);
+
+    if (ordenacaoAtual.campo) {
+        const campo = ordenacaoAtual.campo;
+        const direcao = ordenacaoAtual.direcao;
+
+        pacientesAtivos.sort((a, b) => {
+            const valorA = a[campo] ?? "";
+            const valorB = b[campo] ?? "";
+
+            const numA = Number(valorA);
+            const numB = Number(valorB);
+
+            let resultado;
+
+            // se os dois valores forem numéricos, compara como número
+            if (valorA !== "" && valorB !== "" && !isNaN(numA) && !isNaN(numB)) {
+                resultado = numA - numB;
+            } else {
+                resultado = valorA
+                    .toString()
+                    .toLowerCase()
+                    .localeCompare(valorB.toString().toLowerCase(), "pt-BR");
+            }
+
+            return resultado * direcao;
+        });
+    }
 
     if (pacientesAtivos.length === 0) {
         tabelaPacientes.innerHTML = `
@@ -17,9 +54,8 @@ async function carregarPacientes() {
         return;
     }
 
-    pacientes.forEach((paciente, indice) => {
-
-        if (paciente.excluido) return; // não mostra quem está na lixeira
+    pacientesAtivos.forEach((paciente) => {
+        const indice = paciente._indiceOriginal;
 
         tabelaPacientes.innerHTML += `
             <tr>
@@ -44,6 +80,44 @@ async function carregarPacientes() {
     });
 }
 
+// clique nos cabeçalhos ordenáveis (ID, Nome, Data de Cadastro)
+document.querySelectorAll(".th-sortavel").forEach((th) => {
+    th.addEventListener("click", () => {
+        const campo = th.dataset.sort;
+
+        if (ordenacaoAtual.campo === campo) {
+            // já está ordenando por esse campo -> inverte a direção
+            ordenacaoAtual.direcao *= -1;
+        } else {
+            // novo campo -> começa ascendente
+            ordenacaoAtual.campo = campo;
+            ordenacaoAtual.direcao = 1;
+        }
+
+        atualizarIconesOrdenacao();
+        renderizarTabela();
+    });
+});
+
+function atualizarIconesOrdenacao() {
+    document.querySelectorAll(".th-sortavel .icone-ordem").forEach((icone) => {
+        icone.className = "ti ti-arrows-sort icone-ordem";
+    });
+
+    if (!ordenacaoAtual.campo) return;
+
+    const thAtivo = document.querySelector(
+        `.th-sortavel[data-sort="${ordenacaoAtual.campo}"] .icone-ordem`
+    );
+
+    if (thAtivo) {
+        thAtivo.className =
+            ordenacaoAtual.direcao === 1
+                ? "ti ti-arrow-narrow-up icone-ordem icone-ordem-ativo"
+                : "ti ti-arrow-narrow-down icone-ordem icone-ordem-ativo";
+    }
+}
+
 document.addEventListener("click", async function (event) {
 
     if (event.target.classList.contains("btnDelete")) {
@@ -64,7 +138,7 @@ document.addEventListener("click", async function (event) {
             JSON.stringify(pacientes)
         );
 
-        carregarPacientes();
+        renderizarTabela();
 
     }
 });
@@ -116,6 +190,9 @@ document.addEventListener("input", async (e) => {
                 paciente.sessoes.splice(novoValor);
             }
         }
+
+        // atualiza também o array local para não perder a alteração ao reordenar
+        pacientes = pacientesAtualizados;
 
         await window.storage.setItem("pacientes", JSON.stringify(pacientesAtualizados));
     }
