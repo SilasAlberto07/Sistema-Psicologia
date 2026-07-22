@@ -208,7 +208,15 @@ async function renderSessoes() {
             <div class="paciente-sessao-card">
 
                 <div class="paciente-header">
-                    <h2>${paciente.nomeCompleto}</h2>
+                    <div class="titulo-paciente">
+                        <h2>
+                            ${paciente.nomeCompleto}
+                            <span class="tipo-consulta ${paciente.tipoConsulta?.toLowerCase()}">
+                                ${paciente.tipoConsulta || "Presencial"}
+                            </span>
+                        </h2>
+                    </div>
+
                     <small>📅 Início: ${paciente.dataCadastro ?? "-"}</small>
                 </div>
 

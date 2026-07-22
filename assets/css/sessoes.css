@@ -185,3 +185,20 @@
     font-weight: 600;
     white-space: nowrap;
 }
+
+.tipo-consulta{
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+
+.tipo-consulta.presencial{
+    background: #eef7ec;
+    color: #4d7d46;
+}
+
+.tipo-consulta.online{
+    background: #eaf4ff;
+    color: #2d6ca2;
+}

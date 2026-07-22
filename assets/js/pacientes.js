@@ -71,6 +71,13 @@ function renderizarTabela() {
                     min="0">
                 </td>
                 <td>
+                    <select class="input-consulta" data-index="${indice}">
+                        <option value="Presencial" ${paciente.tipoConsulta === "Presencial" ? "selected" : ""}>Presencial</option>
+                        <option value="Online" ${paciente.tipoConsulta === "Online" ? "selected" : ""}>Online</option>
+                    </select>
+                </td>
+
+                <td>
                     <button class="btnAnamnese" data-id="${paciente.id}">Anamnese</button>
                     <button class="btnOpen" data-id="${paciente.id}">Ficha</button>
                     <button class="btnDelete" data-indice="${indice}">Excluir</button>
@@ -199,6 +206,22 @@ document.addEventListener("input", async (e) => {
 });
 
 
+document.addEventListener("change", async (e) => {
+
+    if (e.target.classList.contains("input-consulta")) {
+
+        const index = e.target.dataset.index;
+
+        pacientes[index].tipoConsulta = e.target.value;
+
+        await window.storage.setItem(
+            "pacientes",
+            JSON.stringify(pacientes)
+        );
+    }
+
+});
+
 //pesquisar
 const inputSearch = document.querySelector(".search-box");
 
@@ -217,5 +240,7 @@ inputSearch.addEventListener("input", function () {
         }
     });
 });
+
+
 
 carregarPacientes();
