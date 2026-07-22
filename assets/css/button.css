@@ -75,15 +75,13 @@
 }
 
 /* azul claro */
-.btn-imprimir-tudo,
-.btn-modal{
+.btn-imprimir-tudo {
     background-color: #e8f4fd;
     color: #3a7aaa;
     border-color: #b8d8f0;
 }
 
-.btn-imprimir-tudo:hover,
-.btn-modal:hover {
+.btn-imprimir-tudo:hover{
     background-color: #d8ecf8;
 }
 
@@ -217,6 +215,10 @@
     transition: background-color 0.15s;
 }
 
+.btn-modal:hover{
+    background-color: #e8f4fd;
+}
+
 
 /* ==========================
    BOTÃO FLUTUANTE (só aparece na tela,
@@ -314,8 +316,7 @@
 .btn-editar-evolucao{
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    margin-left: 695px;
+    gap: 5px;    
     padding: 0 12px;
     height: 32px;
     background-color: #f0f8ff;
@@ -332,6 +333,29 @@
 
 .btn-editar-evolucao:hover{
     background-color: #e0f0f8;
+}
+
+.acoes-evolucao{
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin: 15px 18px;
+}
+
+.btn-editar-evolucao,
+.btn-excluir-evolucao{
+    margin: 0;
+}
+
+.acoes-evolucao{
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+
+    padding: 14px 18px 0;
+    margin-top: 16px;
+
+    border-top: 1px solid #ede8e0;
 }
 
 /* ═══════════════════════════════════════════════

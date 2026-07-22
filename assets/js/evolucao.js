@@ -79,16 +79,19 @@ function renderHistorico() {
                     <small>${item.data}</small>
                 </summary>
                 <div class="conteudo-evolucao">
-                    <strong>Relato da Sessão:</strong> ${item.relato}
-                    <br><br><strong>Evolução:</strong> ${item.texto}
-                    ${item.plano ? `<br><br><strong>Plano de ação:</strong> ${item.plano}` : ""}
+                    <p><strong>Relato da Sessão:</strong> ${item.relato}</p>
+                    <p><strong>Evolução:</strong> ${item.texto}</p>
+                    ${item.plano ? `<p><strong>Plano de ação:</strong> ${item.plano}</p>` : ""}
                 </div>
-                <button class="btn-editar-evolucao" data-index="${index}">
-                    <i class="ti ti-pencil"></i> Editar
-                </button>
-                <button class="btn-excluir-evolucao" data-index="${index}">
-                <i class="ti ti-trash"></i> Excluir
-                </button>
+                <div class="acoes-evolucao">
+                    <button class="btn-editar-evolucao" data-index="${index}">
+                        <i class="ti ti-pencil"></i> Editar
+                    </button>
+
+                    <button class="btn-excluir-evolucao" data-index="${index}">
+                        <i class="ti ti-trash"></i> Excluir
+                    </button>
+                </div>
             </details>
         `;
     });
@@ -111,26 +114,48 @@ btnSalvar.addEventListener("click", async () => {
 
     if (editandoIndex !== null) {
 
-        // atualiza o registro existente, mantendo a data original
-        paciente.evolucoes[editandoIndex].relato = relato;
-        paciente.evolucoes[editandoIndex].texto = conteudo;
-        paciente.evolucoes[editandoIndex].plano = plano;
+        // guarda qual sessão está sendo editada
+        const indice = Number(editandoIndex);
 
-        editandoIndex = null;
+        // atualiza o registro existente
+        paciente.evolucoes[indice].relato = relato;
+        paciente.evolucoes[indice].texto = conteudo;
+        paciente.evolucoes[indice].plano = plano;
 
         await window.storage.setItem("pacientes", JSON.stringify(pacientes));
 
+        // limpa os campos
         relatoSessao.value = "";
         textoEvolucao.value = "";
         planoAcao.value = "";
 
+        // atualiza a lista
         renderHistorico();
 
-        mostrarMensagem("Registro atualizado com sucesso!", "success");
+        // volta para a sessão que acabou de editar
+        const cards = document.querySelectorAll(".card-evolucao");
+        const card = cards[indice];
+
+        if (card) {
+            card.open = true;
+
+            card.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        }
+
+        // encerra o modo edição
+        editandoIndex = null;
+
+        mostrarMensagem(
+            "Registro atualizado com sucesso!",
+            "success"
+        );
 
     } else {
 
-        // cria um registro novo (comportamento original)
+        // cria um registro novo
         paciente.evolucoes.push({
             data: new Date().toLocaleString("pt-BR"),
             relato: relato,
@@ -149,13 +174,11 @@ btnSalvar.addEventListener("click", async () => {
 
         mostrarMensagem(
             "Evolução salva com sucesso!",
-            "success",
-            () => {
-                window.location.href = `evolucao.html?id=${idPaciente}`;
-            }
+            "success"
         );
     }
 });
+
 
 // ================= EXCLUIR =================
 historico.addEventListener("click", async (e) => {
@@ -199,6 +222,13 @@ historico.addEventListener("click", (e) => {
         relatoSessao.value = registro.relato || "";
         textoEvolucao.value = registro.texto || "";
         planoAcao.value = registro.plano || "";
+
+        textoEvolucao.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+        textoEvolucao.focus();
 
         editandoIndex = index;
 

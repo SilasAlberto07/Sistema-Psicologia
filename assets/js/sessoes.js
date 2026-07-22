@@ -3,9 +3,23 @@ async function horarioJaOcupado(idPacienteAtual, data, hora) {
     const pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
 
     for (let p of pacientes) {
+
+        if (p.id == idPacienteAtual) continue;
+
+        // verifica conflito com a consulta inicial
+        if (
+            p.consulta &&
+            p.consulta.data === data &&
+            p.consulta.hora === hora &&
+            data !== "" &&
+            hora !== ""
+        ) {
+            return p.nomeCompleto;
+        }
+
+        // verifica conflito com as sessões normais
         for (let s of (p.sessoes || [])) {
             if (
-                p.id != idPacienteAtual &&
                 s.data === data &&
                 s.hora === hora &&
                 s.data !== "" &&
@@ -29,11 +43,6 @@ async function renderSessoes() {
 
     container.innerHTML = "<h1 class=\"page-title\"><i class=\"ti ti-clipboard-list\" style=\"color:#8a9e78\"></i> Sessões</h1>";
 
-    // ... TODO O RESTO DO CONTEÚDO DA FUNÇÃO CONTINUA EXATAMENTE IGUAL,
-    // desde o "if (pacientes.length === 0)" até o fechamento da função.
-    // Só a linha de cima (JSON.parse(...)) e a palavra "async" na frente
-    // de "function" mudaram.
-
     if (pacientes.length === 0) {
         container.innerHTML += `
             <div class="placeholder-sessoes">
@@ -44,11 +53,85 @@ async function renderSessoes() {
         return;
     }
 
+    let precisaSalvar = false;
+
     pacientes.forEach(paciente => {
+
+        // cria automaticamente a "1ª Consulta" na primeira vez que o paciente aparece aqui
+        if (!paciente.consulta) {
+            paciente.consulta = {
+                data: paciente.dataCadastro || "",
+                hora: "",
+                duracao: 50,
+                status: "realizada"
+            };
+            precisaSalvar = true;
+        }
+
+        if (!paciente.consulta.duracao) {
+            paciente.consulta.duracao = 50;
+        }
 
         let sessoes = paciente.sessoes || [];
 
-        let sessoesHTML = "";
+        // linha da 1ª consulta — sempre aparece primeiro, não entra na contagem de sessões
+        let linhaConsulta = `
+            <tr class="linha-consulta">
+                <td><span class="badge-consulta">📋 1ª Consulta</span></td>
+
+                <td>
+                    <input type="date"
+                        class="input-data"
+                        data-tipo="consulta"
+                        data-id="${paciente.id}"
+                        value="${paciente.consulta.data || ""}">
+                </td>
+
+                <td>
+                    <input type="time"
+                        class="input-horario"
+                        data-tipo="consulta"
+                        data-id="${paciente.id}"
+                        value="${paciente.consulta.hora || ""}">
+                </td>
+
+                <td>
+                    <select class="input-duracao"
+                        data-tipo="consulta"
+                        data-id="${paciente.id}">
+
+                        <option value="30" ${paciente.consulta.duracao == 30 ? "selected" : ""}>30 minutos</option>
+                        <option value="45" ${paciente.consulta.duracao == 45 ? "selected" : ""}>45 minutos</option>
+                        <option value="50" ${(!paciente.consulta.duracao || paciente.consulta.duracao == 50) ? "selected" : ""}>50 minutos</option>
+                        <option value="60" ${paciente.consulta.duracao == 60 ? "selected" : ""}>60 minutos</option>
+                        <option value="75" ${paciente.consulta.duracao == 75 ? "selected" : ""}>75 minutos</option>
+                        <option value="90" ${paciente.consulta.duracao == 90 ? "selected" : ""}>90 minutos</option>
+                        <option value="120" ${paciente.consulta.duracao == 120 ? "selected" : ""}>120 minutos</option>
+                    </select>
+                </td>
+
+                <td>
+                    <select class="status"
+                        data-tipo="consulta"
+                        data-id="${paciente.id}">
+
+                        <option value="agendada" ${paciente.consulta.status === "agendada" ? "selected disabled hidden" : ""}>Agendada</option>
+                        <option value="realizada" ${paciente.consulta.status === "realizada" ? "selected" : ""}>Realizada</option>
+                        <option value="cancelada" ${paciente.consulta.status === "cancelada" ? "selected" : ""}>Cancelada</option>
+                        <option value="andamento" ${paciente.consulta.status === "andamento" ? "selected" : ""}>Em Andamento</option>
+
+                    </select>
+                </td>
+
+                <td>
+                    <button class="btn-evolucao" data-id="${paciente.id}">
+                        Prontuário
+                    </button>
+                </td>
+            </tr>
+        `;
+
+        let sessoesHTML = linhaConsulta;
 
         sessoes.forEach((sessao, i) => {
 
@@ -149,6 +232,10 @@ async function renderSessoes() {
             </div>
         `;
     });
+
+    if (precisaSalvar) {
+        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+    }
 }
 renderSessoes();
 
@@ -163,36 +250,37 @@ async function atualizarStatusAutomatico() {
     const agora = new Date();
     let alterou = false;
 
+    function calcularNovoStatus(item) {
+        if (!item.data || !item.hora) return null;
+        if (item.status === "cancelada") return null; // respeita status manual
+
+        const duracao = Number(item.duracao) || 60;
+        const inicio = new Date(`${item.data}T${item.hora}`);
+        const fim = new Date(inicio);
+        fim.setMinutes(fim.getMinutes() + duracao);
+
+        if (agora < inicio) return "agendada";
+        if (agora >= inicio && agora < fim) return "andamento";
+        return "realizada";
+    }
+
     pacientes.forEach(paciente => {
-        (paciente.sessoes || []).forEach(sessao => {
 
-            if (!sessao.data || !sessao.hora) return;
-
-            // respeita status definidos manualmente (ex: cancelada)
-            if (sessao.status === "cancelada") return;
-
-            const duracao = Number(sessao.duracao) || 60;
-
-            const inicio = new Date(`${sessao.data}T${sessao.hora}`);
-            const fim = new Date(inicio);
-
-            fim.setMinutes(fim.getMinutes() + duracao);
-
-            let novoStatus = "";
-
-            if (agora < inicio) {
-                novoStatus = "agendada";
-            } else if (agora >= inicio && agora < fim) {
-                novoStatus = "andamento";
-            } else {
-                novoStatus = "realizada";
+        // atualiza status da 1ª consulta também
+        if (paciente.consulta) {
+            const novoStatus = calcularNovoStatus(paciente.consulta);
+            if (novoStatus && paciente.consulta.status !== novoStatus) {
+                paciente.consulta.status = novoStatus;
+                alterou = true;
             }
+        }
 
-            if (sessao.status !== novoStatus) {
+        (paciente.sessoes || []).forEach(sessao => {
+            const novoStatus = calcularNovoStatus(sessao);
+            if (novoStatus && sessao.status !== novoStatus) {
                 sessao.status = novoStatus;
                 alterou = true;
             }
-
         });
 
     });
@@ -212,10 +300,67 @@ document.addEventListener("input", async (e) => {
     let pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
 
     const id = e.target.dataset.id;
-    const index = e.target.dataset.index;
+    const tipo = e.target.dataset.tipo; // "consulta" quando é a 1ª consulta
 
     const paciente = pacientes.find(p => p.id == id);
     if (!paciente) return;
+
+    // ===== edição da 1ª consulta =====
+    if (tipo === "consulta") {
+
+        if (!paciente.consulta) paciente.consulta = {};
+        if (!paciente.consulta.duracao) paciente.consulta.duracao = 50;
+
+        if (e.target.classList.contains("input-data")) {
+            paciente.consulta.data = e.target.value;
+        }
+
+        if (e.target.classList.contains("input-horario")) {
+            paciente.consulta.hora = e.target.value;
+        }
+
+        if (e.target.classList.contains("input-duracao")) {
+            paciente.consulta.duracao = Number(e.target.value);
+        }
+
+        if (e.target.classList.contains("status")) {
+            paciente.consulta.status = e.target.value;
+        }
+
+        const data = paciente.consulta.data;
+        const hora = paciente.consulta.hora;
+
+        if (data && hora) {
+
+            const conflito = await horarioJaOcupado(id, data, hora);
+
+            if (conflito) {
+
+                mostrarMensagem(
+                    `Horário já ocupado por ${conflito}`,
+                    "warning"
+                );
+
+                paciente.consulta.hora = "";
+
+                await window.storage.setItem(
+                    "pacientes",
+                    JSON.stringify(pacientes)
+                );
+
+                renderSessoes();
+
+                return;
+            }
+        }
+
+        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+        return;
+    }
+
+    // ===== edição de sessões normais (comportamento original) =====
+
+    const index = e.target.dataset.index;
 
     if (!paciente.sessoes) paciente.sessoes = [];
 
