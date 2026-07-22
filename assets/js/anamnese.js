@@ -68,8 +68,10 @@ async function iniciarAnamnese() {
 // ==========================================
 
 function autoExpand(textarea) {
-    textarea.style.height = "auto";
+
+    textarea.style.height = "0px";
     textarea.style.height = textarea.scrollHeight + "px";
+
 }
 
 document.querySelectorAll("textarea").forEach(textarea => {
@@ -130,3 +132,132 @@ btnImprimir.addEventListener("click", async () => {
 btnVoltar.addEventListener("click", () => history.back());
 
 iniciarAnamnese();
+
+// ==========================================
+// PREENCHIMENTO AUTOMÁTICO A PARTIR DE TEXTO COLADO
+// ==========================================
+
+// mapa: [ "título exatamente como aparece no texto colado", "name do campo no form" ]
+const mapaCampos = [
+    ["Queixa principal", "queixaPrincipal"],
+    ["Tem diagnóstico?", "temDiagnostico"],
+    ["Faz uso de medicação?", "usoMedicacao"],
+    ["Quando os sintomas iniciaram?", "queixaInicio"],
+    ["Como os sintomas se manifestam?", "queixaManifestacao"],
+    ["Em quais situações se intensificam ou diminuem?", "queixaSituacoes"],
+    ["Que pensamentos e emoções acompanham os sintomas?", "queixaPensamentos"],
+    ["Já buscou ajuda profissional para essa queixa? Qual o resultado?", "queixaAjudaAnterior"],
+    ["Infância e adolescência", "historicoInfancia"],
+    ["Como se descreveria?", "autodescricao"],
+    ["Hobbies e atividades de lazer", "hobbies"],
+    ["Doença grave ou cirurgia?", "doencaGrave"],
+    ["Medicações contínuas", "medicacaoContinua"],
+    ["Tabagismo, alcoolismo ou uso de outras drogas?", "habitos"],
+    ["Relação com familiares (pais, irmãos, cônjuge, filhos)", "relacaoFamiliares"],
+    ["Histórico de doenças psicológicas na família", "doencasFamilia"],
+    ["Trabalho / Estudos", "trabalhoEstudos"],
+    ["Situação financeira atual", "situacaoFinanceira"],
+    ["Diagnóstico psicológico anterior", "diagnosticoAnterior"],
+    ["Acompanhamento psicológico/psiquiátrico anterior (tempo, como foi)", "acompanhamentoAnterior"],
+    ["Medicações psicotrópicas (já tomou ou toma)", "medicacaoPsicotropica"],
+    ["Nome do Pai", "nomePai"],
+    ["Nome da Mãe", "nomeMae"],
+    ["Irmãos (idades)", "irmaos"],
+    ["Como a família lida com a queixa?", "familiaLidaQueixa"],
+    ["História pré/perinatal e condições do parto", "desenvolvimentoParto"],
+    ["Desenvolvimento motor (sentou, engatinhou, andou, fala)", "desenvolvimentoMotor"],
+    ["Desenvolvimento socioemocional (comportamento, amizades, agressividade)", "desenvolvimentoSocioemocional"],
+    ["Adaptação e desempenho escolar", "escolaDesempenho"],
+    ["Dificuldades de aprendizagem", "escolaDificuldades"],
+    ["Algo mais a acrescentar?", "observacoesAdicionais"],
+    ["Dados de observação do entrevistador", "observacoesEntrevistador"]
+];
+
+function preencherAutomaticamente(textoColado) {
+
+    // ordena do título mais longo pro mais curto — evita que um título
+    // curto "engula" por engano um trecho de um título mais específico
+    const camposOrdenados = [...mapaCampos].sort((a, b) => b[0].length - a[0].length);
+
+    const escapados = camposOrdenados.map(([label]) =>
+        label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    );
+
+    const regexLabels = new RegExp(`(${escapados.join("|")})\\s*:?\\s*`, "gi");
+
+    // encontra todas as ocorrências de títulos no texto colado
+    let matches = [];
+    let m;
+    while ((m = regexLabels.exec(textoColado)) !== null) {
+        matches.push({ label: m[1], inicio: m.index, fim: regexLabels.lastIndex });
+    }
+
+    if (matches.length === 0) {
+        mostrarMensagem(
+            "Não encontrei nenhum título conhecido no texto colado. Confira se os títulos estão iguais aos do formulário.",
+            "warning"
+        );
+        return;
+    }
+
+    let preenchidos = 0;
+
+    matches.forEach((match, i) => {
+        const proximaOcorrencia = matches[i + 1];
+        const fimConteudo = proximaOcorrencia ? proximaOcorrencia.inicio : textoColado.length;
+        const valor = textoColado.slice(match.fim, fimConteudo).trim();
+
+        const encontrado = mapaCampos.find(
+            ([label]) => label.toLowerCase() === match.label.toLowerCase()
+        );
+
+        if (encontrado && valor) {
+            const [, nomeCampo] = encontrado;
+
+            if (form.elements[nomeCampo]) {
+                form.elements[nomeCampo].value = valor;
+                preenchidos++;
+
+                if (form.elements[nomeCampo].tagName === "TEXTAREA") {
+                    autoExpand(form.elements[nomeCampo]);
+                }
+            }
+        }
+    });
+
+    mostrarMensagem(`${preenchidos} campo(s) preenchido(s) automaticamente!`, "success");
+}
+
+// ==========================================
+// ABRIR / FECHAR MODAL DE COLAR TEXTO
+// ==========================================
+
+const modalColar = document.getElementById("modalColarAnamnese");
+const textoColadoEl = document.getElementById("textoColadoAnamnese");
+
+document.getElementById("btnAbrirModalColar").addEventListener("click", () => {
+    modalColar.classList.remove("oculto");
+});
+
+document.getElementById("fecharModalColar").addEventListener("click", () => {
+    modalColar.classList.add("oculto");
+});
+
+document.getElementById("cancelarModalColar").addEventListener("click", () => {
+    modalColar.classList.add("oculto");
+});
+
+document.getElementById("btnPreencherAutomatico").addEventListener("click", () => {
+
+    const texto = textoColadoEl.value.trim();
+
+    if (!texto) {
+        mostrarMensagem("Cole o texto da anamnese antes de preencher.", "warning");
+        return;
+    }
+
+    preencherAutomaticamente(texto);
+
+    modalColar.classList.add("oculto");
+    textoColadoEl.value = "";
+});

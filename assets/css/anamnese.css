@@ -110,18 +110,22 @@
 .form-group textarea{
     width: 100%;
     min-height: 38px;
+
     padding: 10px 12px;
     background-color: #faf8f4;
     border: 1px solid #ddd8ce;
     border-radius: 8px;
+
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     color: #3d3a28;
-    resize: vertical;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
-}
 
+    resize: none;
+    overflow-y: hidden;
+
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background-color .2s;
+}
 
 .form-group input:focus,
 .form-group textarea:focus {
