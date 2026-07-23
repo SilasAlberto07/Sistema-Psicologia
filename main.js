@@ -2,11 +2,12 @@ const path = require('path');
 const { startBackupScheduler } = require('./src/backups/scheduler');
 const { runBackup } = require('./src/backups/backupManager');
 
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const http = require('http');
 const handler = require('serve-handler');
 const fs = require('fs');
 const Database = require('better-sqlite3');
+const { autoUpdater } = require('electron-updater');
 
 app.setName("Sistema Psicologia");
 
@@ -146,14 +147,43 @@ async function criarJanela() {
 
     mainWindow.once("ready-to-show", () => {
         mainWindow.show();
-    }
-    );
+    });
 }
 
-app.whenReady().then(criarJanela);
+// ================================
+// ATUALIZAÇÃO AUTOMÁTICA (GitHub Releases)
+// ================================
+autoUpdater.on('update-available', () => {
+    console.log('[update] Atualização encontrada, baixando...');
+});
 
-    app.on('window-all-closed', () => {
-        if (server) server.close();
-        if (db) db.close();
-        if (process.platform !== 'darwin') app.quit();
+autoUpdater.on('update-downloaded', () => {
+    dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: 'Atualização disponível',
+        message: 'Uma nova versão do sistema foi baixada.',
+        detail: 'Deseja instalar agora? O programa vai fechar e abrir de novo sozinho.',
+        buttons: ['Instalar agora', 'Depois'],
+        defaultId: 0,
+        cancelId: 1
+    }).then((result) => {
+        if (result.response === 0) {
+            autoUpdater.quitAndInstall();
+        }
     });
+});
+
+autoUpdater.on('error', (err) => {
+    console.error('[update] Erro no auto-updater:', err);
+});
+
+app.whenReady().then(() => {
+    criarJanela();
+    autoUpdater.checkForUpdatesAndNotify();
+});
+
+app.on('window-all-closed', () => {
+    if (server) server.close();
+    if (db) db.close();
+    if (process.platform !== 'darwin') app.quit();
+});
