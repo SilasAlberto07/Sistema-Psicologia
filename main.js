@@ -1,6 +1,6 @@
 const path = require('path');
-const { startBackupScheduler } = require('./src/backup/scheduler');
-const { runBackup } = require('./src/backup/backupManager');
+const { startBackupScheduler } = require('./src/backups/scheduler');
+const { runBackup } = require('./src/backups/backupManager');
 
 const { app, BrowserWindow, ipcMain } = require('electron');
 const http = require('http');
