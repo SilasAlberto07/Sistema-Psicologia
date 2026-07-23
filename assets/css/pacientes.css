@@ -30,13 +30,36 @@
 /* ═══════════════════════════════════════════════
    8. TABELA — pacientes.html
 ═══════════════════════════════════════════════ */
+
+/* Permite a tabela rolar na horizontal em telas menores,
+   em vez de espremer e quebrar linha dentro das células. */
+.tabela-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid #ede8e0;
+}
+
 .tabela {
     width: 100%;
+    min-width: 820px; /* garante espaço mínimo pra tudo ficar numa linha só */
     border-collapse: collapse;
     background-color: #ffffff;
     border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid #ede8e0;
+}
+
+/* Coluna de Ações nunca quebra os botões em mais de uma linha */
+.tabela td:last-child {
+    white-space: nowrap;
+}
+
+.tabela td:last-child .btnAnamnese,
+.tabela td:last-child .btnOpen,
+.tabela td:last-child .btnDelete,
+.tabela td:last-child button {
+    display: inline-block;
+    margin: 2px 3px;
+    white-space: nowrap;
 }
 
 .tabela thead tr {
@@ -72,7 +95,7 @@
 }
 
 .input-sessoes {
-    width: 70px;
+    width: 55px;
     height: 30px;
     padding: 0 11px;
     text-align: center;
@@ -90,7 +113,7 @@
 }
 
 .input-consulta {
-    width: 100%;
+    width: 100px;
     height: 30px;
     padding: 0 11px;
     background-color: #faf8f4;
@@ -106,6 +129,13 @@
 
 .input-consulta:hover {
     background-color: #ffffff;
+}
+
+.nome-paciente{
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* ═══════════════════════════════════════════════
@@ -131,4 +161,20 @@
 .icone-ordem-ativo {
     opacity: 1;
     color: #8a9e78;
+}
+
+/* ═══════════════════════════════════════════════
+   10. AJUSTE PARA TELAS MENORES (notebooks)
+═══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+    .tabela th,
+    .tabela td {
+        padding: 10px 10px;
+        font-size: 12px;
+    }
+
+    .tabela td:last-child button {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
 }

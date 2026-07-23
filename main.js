@@ -1,7 +1,10 @@
+const path = require('path');
+const { startBackupScheduler } = require('./src/backup/scheduler');
+const { runBackup } = require('./src/backup/backupManager');
+
 const { app, BrowserWindow, ipcMain } = require('electron');
 const http = require('http');
 const handler = require('serve-handler');
-const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
 
@@ -10,6 +13,29 @@ app.setName("Sistema Psicologia");
 let mainWindow;
 let server;
 let db;
+
+// Guardados aqui para serem reutilizados pelo backup disparado a cada salvamento
+let caminhoBancoAtual;
+let pastaBackupAtual;
+let timerBackupDebounce = null;
+
+/**
+ * Dispara um backup criptografado alguns segundos depois do último
+ * salvamento (evita rodar um backup para cada tecla digitada — só roda
+ * quando a pessoa realmente parou de mexer no sistema).
+ */
+function agendarBackupAposSalvar() {
+    if (!caminhoBancoAtual || !pastaBackupAtual) return;
+
+    clearTimeout(timerBackupDebounce);
+    timerBackupDebounce = setTimeout(() => {
+        runBackup({
+            dbPath: caminhoBancoAtual,
+            dataDir: null,
+            backupDir: pastaBackupAtual,
+        }).catch((err) => console.error('[backup] Falha no backup após salvar:', err));
+    }, 5000); // espera 5s de "silêncio" antes de rodar
+}
 
 // ================================
 // BANCO DE DADOS
@@ -28,28 +54,21 @@ function iniciarBanco() {
         )
     `);
 
-    fazerBackup(caminhoBanco);
-}
+    caminhoBancoAtual = caminhoBanco;
+    // Pasta na Área de Trabalho do usuário logado (funciona tanto no seu PC quanto no notebook dela).
+    // Você só precisa criar uma pasta com ESSE MESMO NOME na Área de Trabalho e sincronizá-la com o Google Drive.
+    pastaBackupAtual = path.join(app.getPath('desktop'), 'Backups-Sistema-Psicologia');
 
-// ================================
-// BACKUP AUTOMÁTICO (mantém os últimos 10)
-// ================================
-function fazerBackup(caminhoBanco) {
-    const pastaBackup = path.join(app.getPath('userData'), 'backups');
-    if (!fs.existsSync(pastaBackup)) fs.mkdirSync(pastaBackup, { recursive: true });
-
-    const agora = new Date().toISOString().replace(/[:.]/g, '-');
-    const destino = path.join(pastaBackup, `sistema-${agora}.db`);
-
-    fs.copyFileSync(caminhoBanco, destino);
-
-    // limpa backups antigos, mantendo só os 10 mais recentes
-    const arquivos = fs.readdirSync(pastaBackup)
-        .filter(f => f.endsWith('.db'))
-        .map(f => ({ nome: f, tempo: fs.statSync(path.join(pastaBackup, f)).mtimeMs }))
-        .sort((a, b) => b.tempo - a.tempo);
-
-    arquivos.slice(10).forEach(f => fs.unlinkSync(path.join(pastaBackup, f.nome)));
+    // Backup automático, criptografado, direto na pasta sincronizada com o Google Drive.
+    // Além disso, roda logo depois de cada salvamento (ver agendarBackupAposSalvar).
+    // O agendamento por hora fica como uma segunda camada de segurança (caso o
+    // sistema fique aberto muito tempo sem ninguém salvar nada).
+    startBackupScheduler({
+        dbPath: caminhoBanco,
+        dataDir: null, // não há pasta separada de anexos hoje; deixe null
+        backupDir: pastaBackupAtual,
+        cronExpr: '0 */6 * * *',
+    });
 }
 
 // ================================
@@ -65,11 +84,15 @@ ipcMain.handle('storage-set', (event, chave, valor) => {
         INSERT INTO armazenamento (chave, valor) VALUES (?, ?)
         ON CONFLICT(chave) DO UPDATE SET valor = excluded.valor
     `).run(chave, valor);
+
+    agendarBackupAposSalvar();
     return true;
 });
 
 ipcMain.handle('storage-remove', (event, chave) => {
     db.prepare('DELETE FROM armazenamento WHERE chave = ?').run(chave);
+
+    agendarBackupAposSalvar();
     return true;
 });
 

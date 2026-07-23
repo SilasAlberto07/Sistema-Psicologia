@@ -48,7 +48,7 @@ function renderizarTabela() {
     if (pacientesAtivos.length === 0) {
         tabelaPacientes.innerHTML = `
             <tr>
-                <td colspan="6">Nenhum paciente cadastrado</td>
+                <td colspan="7">Nenhum paciente cadastrado</td>
             </tr>
         `;
         return;
@@ -60,8 +60,10 @@ function renderizarTabela() {
         tabelaPacientes.innerHTML += `
             <tr>
                 <td name="id">${paciente.id}</td>
-                <td name="nomeCompleto">${paciente.nomeCompleto}</td>
-                <td name="telefone">${paciente.telefone}</td>
+                <td class="nome-paciente" title="${paciente.nomeCompleto}">
+                    ${paciente.nomeCompleto}
+                </td>
+                <td name="telefone">${paciente.telefone ?? "-"}</td>            
                 <td name="dataCadastro">${paciente.dataCadastro ?? "-"}</td>
                 <td>
                     <input type="number"

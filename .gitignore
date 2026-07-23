@@ -21,3 +21,6 @@ tmp/
 
 # VS Code
 .vscode/
+
+# env
+*.env

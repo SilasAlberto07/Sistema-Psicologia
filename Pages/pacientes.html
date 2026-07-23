@@ -21,20 +21,22 @@
             <div class="page-card">
                 <h1 class="page-title"><i class="ti ti-users" style="color:#8a9e78"></i> Pacientes</h1>
                 <input type="text" class="search-box" placeholder="🔍  Buscar por nome ou ID...">
-                <table class="tabela">
-                    <thead>
-                        <tr>
-                            <th class="th-sortavel" data-sort="id">ID <i class="ti ti-arrows-sort icone-ordem"></i></th>
-                            <th class="th-sortavel" data-sort="nomeCompleto">Nome <i class="ti ti-arrows-sort icone-ordem"></i></th>
-                            <th>Telefone</th>
-                            <th class="th-sortavel" data-sort="dataCadastro">Data de Cadastro <i class="ti ti-arrows-sort icone-ordem"></i></th>
-                            <th>Sessões</th>
-                            <th>Presencial / Online</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-pacientes"></tbody>
-                </table>
+                <div class="tabela-wrapper">
+                    <table class="tabela">
+                        <thead>
+                            <tr>
+                                <th class="th-sortavel" data-sort="id">ID <i class="ti ti-arrows-sort icone-ordem"></i></th>
+                                <th class="th-sortavel" data-sort="nomeCompleto">Nome <i class="ti ti-arrows-sort icone-ordem"></i></th>
+                                <th>Telefone</th>
+                                <th class="th-sortavel" data-sort="dataCadastro">Data de Cadastro <i class="ti ti-arrows-sort icone-ordem"></i></th>
+                                <th>Sessões</th>
+                                <th>Tipo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-pacientes"></tbody>
+                    </table>
+                </div>
             </div>
         </main>
 
