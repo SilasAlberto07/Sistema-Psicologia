@@ -203,6 +203,19 @@
     color: #7a3a3a;
 }
 
+.badge-consulta-mini {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background-color: #eaf0e3;
+    color: #5c7a48;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 /* popup que aparece embaixo do título */
 .seletor-mes-popup {
     background: #fff;

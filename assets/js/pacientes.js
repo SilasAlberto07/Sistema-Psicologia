@@ -72,6 +72,7 @@ function renderizarTabela() {
                 </td>
                 <td>
                     <select class="input-consulta" data-index="${indice}">
+                        <option value="-"${paciente.consulta ? "" : "selected"}>-</option>
                         <option value="Presencial" ${paciente.tipoConsulta === "Presencial" ? "selected" : ""}>Presencial</option>
                         <option value="Online" ${paciente.tipoConsulta === "Online" ? "selected" : ""}>Online</option>
                     </select>

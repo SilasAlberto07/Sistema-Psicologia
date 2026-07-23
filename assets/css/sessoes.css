@@ -1,6 +1,42 @@
 /* ═══════════════════════════════════════════════
    15. SESSÕES — sessoes.html
 ═══════════════════════════════════════════════ */
+
+.busca-sessoes {
+    position: relative;
+    max-width: 360px;
+    margin: 4px 0 10px;
+}
+
+.busca-sessoes i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0a090;
+    font-size: 15px;
+    pointer-events: none;
+}
+
+.input-busca-paciente {
+    width: 100%;
+    height: 38px;
+    padding: 0 14px 0 38px;
+    border: 1px solid #ddd8ce;
+    border-radius: 20px;
+    background-color: #faf8f4;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #3d3a28;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-busca-paciente:focus {
+    border-color: #8a9e78;
+    background-color: #ffffff;
+}
+
 .table-container {
     width: 100%;
     display: flex;

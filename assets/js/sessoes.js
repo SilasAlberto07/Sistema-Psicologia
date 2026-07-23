@@ -38,13 +38,11 @@ async function horarioJaOcupado(idPacienteAtual, data, hora) {
 // =========================
 async function renderSessoes() {
 
-    const container = document.querySelector(".page-container-sessoes");
+    const container = document.getElementById("containerSessoes");
     let pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
 
-    container.innerHTML = "<h1 class=\"page-title\"><i class=\"ti ti-clipboard-list\" style=\"color:#8a9e78\"></i> Sessões</h1>";
-
     if (pacientes.length === 0) {
-        container.innerHTML += `
+        container.innerHTML = `
             <div class="placeholder-sessoes">
                 <h3>Nenhuma sessão registrada</h3>
                 <p>Cadastre um paciente e defina a quantidade de sessões.</p>
@@ -55,9 +53,9 @@ async function renderSessoes() {
 
     let precisaSalvar = false;
 
+    // garante a "1ª Consulta" e a duração padrão para todos os pacientes,
+    // mesmo os que estiverem escondidos pelo filtro de busca no momento
     pacientes.forEach(paciente => {
-
-        // cria automaticamente a "1ª Consulta" na primeira vez que o paciente aparece aqui
         if (!paciente.consulta) {
             paciente.consulta = {
                 data: paciente.dataCadastro || "",
@@ -67,10 +65,36 @@ async function renderSessoes() {
             };
             precisaSalvar = true;
         }
-
         if (!paciente.consulta.duracao) {
             paciente.consulta.duracao = 50;
         }
+    });
+
+    if (precisaSalvar) {
+        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+    }
+
+    // ===== filtro de pesquisa por nome do paciente =====
+    const campoBusca = document.getElementById("pesquisaPaciente");
+    const termoBusca = (campoBusca?.value || "").trim().toLowerCase();
+
+    const pacientesFiltrados = termoBusca
+        ? pacientes.filter(p => (p.nomeCompleto || "").toLowerCase().includes(termoBusca))
+        : pacientes;
+
+    container.innerHTML = "";
+
+    if (pacientesFiltrados.length === 0) {
+        container.innerHTML = `
+            <div class="placeholder-sessoes">
+                <h3>Nenhum paciente encontrado</h3>
+                <p>Verifique se o nome digitado está correto.</p>
+            </div>
+        `;
+        return;
+    }
+
+    pacientesFiltrados.forEach(paciente => {
 
         let sessoes = paciente.sessoes || [];
 
@@ -136,7 +160,7 @@ async function renderSessoes() {
         sessoes.forEach((sessao, i) => {
 
             if (!sessao.duracao) {
-                sessao.duracao = 60;
+                sessao.duracao = 50;
             }
 
             sessoesHTML += `
@@ -212,7 +236,7 @@ async function renderSessoes() {
                         <h2>
                             ${paciente.nomeCompleto}
                             <span class="tipo-consulta ${paciente.tipoConsulta?.toLowerCase()}">
-                                ${paciente.tipoConsulta || "Presencial"}
+                                ${paciente.tipoConsulta || "-"}
                             </span>
                         </h2>
                     </div>
@@ -240,10 +264,6 @@ async function renderSessoes() {
             </div>
         `;
     });
-
-    if (precisaSalvar) {
-        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
-    }
 }
 renderSessoes();
 
@@ -484,6 +504,16 @@ async function iniciarSessoes() {
 }
 
 iniciarSessoes();
+
+// =========================
+// PESQUISA DE PACIENTE
+// =========================
+
+document.addEventListener("input", (e) => {
+    if (e.target && e.target.id === "pesquisaPaciente") {
+        renderSessoes();
+    }
+});
 
 setInterval(async () => {
     await atualizarStatusAutomatico();

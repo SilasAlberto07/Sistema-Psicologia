@@ -7,6 +7,24 @@ const historico = document.getElementById("historico");
 const textoEvolucao = document.getElementById("textoEvolucao");
 const planoAcao = document.getElementById("planoAcao");
 const relatoSessao = document.getElementById("relatoSessao");
+const dataSessao = document.getElementById("dataSessao");
+
+// ================= DATA/HORA MANUAL DA SESSÃO =================
+
+// retorna a data/hora atual no formato aceito pelo input datetime-local (yyyy-MM-ddTHH:mm)
+function agoraParaInputDatetime() {
+    const agora = new Date();
+    const local = new Date(agora.getTime() - agora.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 16);
+}
+
+// converte o valor do input datetime-local para o formato de exibição pt-BR
+function formatarDataSessaoBR(valorInput) {
+    if (!valorInput) return "";
+    const [dataParte, horaParte] = valorInput.split("T");
+    const [ano, mes, dia] = dataParte.split("-");
+    return `${dia}/${mes}/${ano} ${horaParte}`;
+}
 
 const btnSalvar = document.querySelector(".btn-salvar");
 const btnVoltar = document.querySelector(".btn-voltar");
@@ -47,6 +65,10 @@ async function iniciarEvolucao() {
     if (draft) {
         textoEvolucao.value = draft.texto || "";
         planoAcao.value = draft.plano || "";
+        relatoSessao.value = draft.relato || "";
+        dataSessao.value = draft.dataSessao || agoraParaInputDatetime();
+    } else {
+        dataSessao.value = agoraParaInputDatetime();
     }
 
     renderHistorico();
@@ -55,12 +77,16 @@ async function iniciarEvolucao() {
 function salvarRascunho() {
     localStorage.setItem(draftKey, JSON.stringify({
         texto: textoEvolucao.value,
-        plano: planoAcao.value
+        plano: planoAcao.value,
+        relato: relatoSessao.value,
+        dataSessao: dataSessao.value
     }));
 }
 
 textoEvolucao.addEventListener("input", salvarRascunho);
 planoAcao.addEventListener("input", salvarRascunho);
+relatoSessao.addEventListener("input", salvarRascunho);
+dataSessao.addEventListener("input", salvarRascunho);
 
 function renderHistorico() {
     historico.innerHTML = "";
@@ -103,10 +129,19 @@ btnSalvar.addEventListener("click", async () => {
     const relato = relatoSessao.value.trim();
     const conteudo = textoEvolucao.value.trim();
     const plano = planoAcao.value.trim();
+    const dataSessaoValor = dataSessao.value;
 
     if (!conteudo) {
         mostrarMensagem(
             "Digite algo antes de salvar!",
+            "warning"
+        );
+        return;
+    }
+
+    if (!dataSessaoValor) {
+        mostrarMensagem(
+            "Selecione a data e a hora da sessão!",
             "warning"
         );
         return;
@@ -121,6 +156,8 @@ btnSalvar.addEventListener("click", async () => {
         paciente.evolucoes[indice].relato = relato;
         paciente.evolucoes[indice].texto = conteudo;
         paciente.evolucoes[indice].plano = plano;
+        paciente.evolucoes[indice].dataSessao = dataSessaoValor;
+        paciente.evolucoes[indice].data = formatarDataSessaoBR(dataSessaoValor);
 
         await window.storage.setItem("pacientes", JSON.stringify(pacientes));
 
@@ -128,6 +165,8 @@ btnSalvar.addEventListener("click", async () => {
         relatoSessao.value = "";
         textoEvolucao.value = "";
         planoAcao.value = "";
+        dataSessao.value = agoraParaInputDatetime();
+        localStorage.removeItem(draftKey);
 
         // atualiza a lista
         renderHistorico();
@@ -157,7 +196,8 @@ btnSalvar.addEventListener("click", async () => {
 
         // cria um registro novo
         paciente.evolucoes.push({
-            data: new Date().toLocaleString("pt-BR"),
+            data: formatarDataSessaoBR(dataSessaoValor),
+            dataSessao: dataSessaoValor,
             relato: relato,
             texto: conteudo,
             plano: plano
@@ -169,6 +209,7 @@ btnSalvar.addEventListener("click", async () => {
         relatoSessao.value = "";
         textoEvolucao.value = "";
         planoAcao.value = "";
+        dataSessao.value = agoraParaInputDatetime();
 
         renderHistorico();
 
@@ -222,6 +263,8 @@ historico.addEventListener("click", (e) => {
         relatoSessao.value = registro.relato || "";
         textoEvolucao.value = registro.texto || "";
         planoAcao.value = registro.plano || "";
+        // registros antigos não têm "dataSessao" salvo (só o texto já formatado) — nesse caso mantém a data/hora atual
+        dataSessao.value = registro.dataSessao || agoraParaInputDatetime();
 
         textoEvolucao.scrollIntoView({
             behavior: "smooth",
@@ -359,4 +402,58 @@ document.getElementById("btnPreencherAutomatico").addEventListener("click", () =
 
     modalColarEvolucao.classList.add("oculto");
     textoColadoEvolucao.value = "";
+});
+// ==========================================
+// GERAR PROMPT PRONTO PARA IA (somente perguntas)
+// ==========================================
+
+function gerarPromptEvolucao() {
+    const aviso = "Preencha as perguntas baseado com o relato do paciente citado abaixo, a resposta sendo de acordo com CFP e TCC:\n\n";
+
+    const campos = mapaCamposEvolucao.map(([label]) => `${label}:`).join("\n");
+
+    return aviso + campos;
+}
+
+const modalPromptIAEvolucao = document.getElementById("modalPromptIAEvolucao");
+const textoPromptIAEvolucao = document.getElementById("textoPromptIA");
+const relatoPacienteIAEvolucao = document.getElementById("relatoPacienteIA");
+
+document.getElementById("btnGerarPromptIA").addEventListener("click", () => {
+    textoPromptIAEvolucao.value = gerarPromptEvolucao();
+    relatoPacienteIAEvolucao.value = "";
+    modalPromptIAEvolucao.classList.remove("oculto");
+});
+
+document.getElementById("fecharModalPromptIA").addEventListener("click", () => {
+    modalPromptIAEvolucao.classList.add("oculto");
+});
+
+document.getElementById("cancelarModalPromptIA").addEventListener("click", () => {
+    modalPromptIAEvolucao.classList.add("oculto");
+});
+
+document.getElementById("btnCopiarPromptIA").addEventListener("click", async () => {
+
+    const relato = relatoPacienteIAEvolucao.value.trim();
+
+    if (!relato) {
+        mostrarMensagem("Preencha o relato da sessão antes de copiar.", "warning");
+        return;
+    }
+
+    const textoFinal = `${textoPromptIAEvolucao.value}\n\nRelato da sessão:\n${relato}`;
+
+    try {
+        await navigator.clipboard.writeText(textoFinal);
+        mostrarMensagem("Prompt copiado! Agora é só colar no chat da IA.", "success");
+    } catch (err) {
+        const temporario = document.createElement("textarea");
+        temporario.value = textoFinal;
+        document.body.appendChild(temporario);
+        temporario.select();
+        document.execCommand("copy");
+        document.body.removeChild(temporario);
+        mostrarMensagem("Prompt copiado! Agora é só colar no chat da IA.", "success");
+    }
 });

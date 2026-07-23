@@ -43,6 +43,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const datas = new Set();
 
         pacientes.forEach(p => {
+            // 1ª Consulta também conta como dia com sessão
+            if (p.consulta && p.consulta.data) {
+                datas.add(p.consulta.data);
+            }
+
             (p.sessoes || []).forEach(s => {
                 if (s.data) {
                     datas.add(s.data);
@@ -155,12 +160,24 @@ document.addEventListener("DOMContentLoaded", () => {
         let sessoes = [];
 
         pacientes.forEach(p => {
+
+            // 1ª Consulta também aparece na agenda do dia
+            if (p.consulta && p.consulta.data && p.consulta.hora) {
+                sessoes.push({
+                    paciente: p.nomeCompleto,
+                    data: p.consulta.data,
+                    horario: p.consulta.hora,
+                    tipo: "consulta"
+                });
+            }
+
             (p.sessoes || []).forEach(s => {
                 if (s.data && s.hora) {
                     sessoes.push({
                         paciente: p.nomeCompleto,
                         data: s.data,
-                        horario: s.hora
+                        horario: s.hora,
+                        tipo: "sessao"
                     });
                 }
             });
@@ -182,7 +199,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (sessao) {
                 div.classList.add("ocupado-bg");
-                div.innerHTML = `<span>${horario}</span><span>${sessao.paciente}</span>`;
+                const rotulo = sessao.tipo === "consulta"
+                    ? `${sessao.paciente} <span class="badge-consulta-mini">1ª Consulta</span>`
+                    : sessao.paciente;
+                div.innerHTML = `<span>${horario}</span><span>${rotulo}</span>`;
             } else {
                 div.classList.add("livre-bg");
                 div.innerHTML = `<span>${horario}</span><span>Livre</span>`;

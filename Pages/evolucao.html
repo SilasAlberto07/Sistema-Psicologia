@@ -28,6 +28,38 @@
                     <i class="ti ti-clipboard-text"></i> Preencher com Texto Colado
                 </button>
 
+                <button type="button" class="btn-modal" id="btnGerarPromptIA" style="margin-bottom:16px; margin-left:10px">
+                    <i class="ti ti-robot"></i> Gerar Prompt para IA
+                </button>
+
+                <div class="modal-colar oculto" id="modalPromptIAEvolucao">
+                    <div class="modal-colar-box">
+                        <div class="modal-colar-header">
+                            <h2><i class="ti ti-robot"></i> Prompt Pronto para IA</h2>
+                            <button type="button" id="fecharModalPromptIA"><i class="ti ti-x"></i></button>
+                        </div>
+                        <div class="modal-colar-body">
+                            <p style="color:#9a9a88; font-size:13px; margin-bottom:10px;">
+                                Este é o modelo de perguntas. Clique em "Copiar Prompt", cole em um chat de IA,
+                                complete com o que foi conversado na sessão e cole a resposta da IA no botão
+                                "Preencher com Texto Colado".
+                            </p>
+                            <textarea id="textoPromptIA" rows="12" readonly></textarea>
+
+                            <label for="relatoPacienteIA" style="font-size:13px; font-weight:500; color:#3d3a28; margin:14px 0 6px; display:block;">
+                                Relato da sessão (preencha manualmente, é específico de cada caso):
+                            </label>
+                            <textarea id="relatoPacienteIA" rows="6" placeholder="Cole ou digite aqui o que foi conversado na sessão..."></textarea>
+                        </div>
+                        <div class="modal-colar-footer">
+                            <button type="button" class="btn-cancelar" id="cancelarModalPromptIA">Fechar</button>
+                            <button type="button" class="btn-preencher" id="btnCopiarPromptIA">
+                                <i class="ti ti-copy"></i> Copiar Prompt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="modal-colar oculto" id="modalColarEvolucao">
                     <div class="modal-colar-box">
                         <div class="modal-colar-header">
@@ -50,6 +82,11 @@
                         </div>
                     </div>
                 </div>
+
+                <fieldset class="form-evolucao fieldset-data-sessao">
+                    <legend>Data e Hora da Sessão</legend>
+                    <input type="datetime-local" id="dataSessao">
+                </fieldset>
 
                 <fieldset class="form-evolucao">
                     <legend>Relato da Sessão</legend>

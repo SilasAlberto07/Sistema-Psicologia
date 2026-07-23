@@ -261,3 +261,70 @@ document.getElementById("btnPreencherAutomatico").addEventListener("click", () =
     modalColar.classList.add("oculto");
     textoColadoEl.value = "";
 });
+// ==========================================
+// GERAR PROMPT PRONTO PARA IA (somente perguntas)
+// ==========================================
+
+const camposAdulto = mapaCampos
+    .map(([label]) => label)
+    .filter(label => ![
+        "Nome do Pai", "Nome da Mãe", "Irmãos (idades)", "Como a família lida com a queixa?",
+        "História pré/perinatal e condições do parto",
+        "Desenvolvimento motor (sentou, engatinhou, andou, fala)",
+        "Desenvolvimento socioemocional (comportamento, amizades, agressividade)",
+        "Adaptação e desempenho escolar", "Dificuldades de aprendizagem"
+    ].includes(label));
+
+function gerarPromptAnamnese() {
+    const idade = Number(paciente.idade);
+    const menor = !isNaN(idade) && idade < 18;
+
+    const campos = menor ? mapaCampos.map(([label]) => label) : camposAdulto;
+
+    const aviso = "Preencha as perguntas baseado com o relato do paciente citado abaixo, e responda de acordo com o código de ética e a abordagem da TCC:\n\n";
+
+    return aviso + campos.map(label => `${label}:`).join("\n");
+}
+
+const modalPromptIA = document.getElementById("modalPromptIAAnamnese");
+const textoPromptIA = document.getElementById("textoPromptIA");
+const relatoPacienteIA = document.getElementById("relatoPacienteIA");
+
+document.getElementById("btnGerarPromptIA").addEventListener("click", () => {
+    textoPromptIA.value = gerarPromptAnamnese();
+    relatoPacienteIA.value = "";
+    modalPromptIA.classList.remove("oculto");
+});
+
+document.getElementById("fecharModalPromptIA").addEventListener("click", () => {
+    modalPromptIA.classList.add("oculto");
+});
+
+document.getElementById("cancelarModalPromptIA").addEventListener("click", () => {
+    modalPromptIA.classList.add("oculto");
+});
+
+document.getElementById("btnCopiarPromptIA").addEventListener("click", async () => {
+
+    const relato = relatoPacienteIA.value.trim();
+
+    if (!relato) {
+        mostrarMensagem("Preencha o relato do paciente antes de copiar.", "warning");
+        return;
+    }
+
+    const textoFinal = `${textoPromptIA.value}\n\nRelato do paciente:\n${relato}`;
+
+    try {
+        await navigator.clipboard.writeText(textoFinal);
+        mostrarMensagem("Prompt copiado! Agora é só colar no chat da IA.", "success");
+    } catch (err) {
+        const temporario = document.createElement("textarea");
+        temporario.value = textoFinal;
+        document.body.appendChild(temporario);
+        temporario.select();
+        document.execCommand("copy");
+        document.body.removeChild(temporario);
+        mostrarMensagem("Prompt copiado! Agora é só colar no chat da IA.", "success");
+    }
+});

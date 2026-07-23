@@ -57,6 +57,28 @@
     margin-left: 12px;
 }
 
+.fieldset-data-sessao {
+    max-width: 260px;
+}
+
+#dataSessao {
+    width: 100%;
+    padding: 10px 14px;
+    background-color: #faf8f4;
+    border: 1px solid #ede8e0;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #3d3a28;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+#dataSessao:focus {
+    border-color: #8a9e78;
+    background-color: #ffffff;
+}
+
 #textoEvolucao,
 #planoAcao,
 #relatoSessao {
