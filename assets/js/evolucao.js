@@ -406,9 +406,12 @@ document.getElementById("btnPreencherAutomatico").addEventListener("click", () =
 // ==========================================
 // GERAR PROMPT PRONTO PARA IA (somente perguntas)
 // ==========================================
+const estiloSwal = document.createElement('style');
+estiloSwal.innerHTML = `.swal2-container { z-index: 999999 !important; }`;
+document.head.appendChild(estiloSwal);7
 
 function gerarPromptEvolucao() {
-    const aviso = "Preencha as perguntas baseado com o relato do paciente citado abaixo, a resposta sendo de acordo com CFP e TCC:\n\n";
+    const aviso = "Preencha as perguntas baseado com o relato do paciente citado abaixo, a responda deve ser de acordo com o código de ética CFP e a abordagem da TCC::\n\n";
 
     const campos = mapaCamposEvolucao.map(([label]) => `${label}:`).join("\n");
 

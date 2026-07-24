@@ -275,13 +275,18 @@ const camposAdulto = mapaCampos
         "Adaptação e desempenho escolar", "Dificuldades de aprendizagem"
     ].includes(label));
 
+    
+const estiloSwal = document.createElement('style');
+estiloSwal.innerHTML = `.swal2-container { z-index: 999999 !important; }`;
+document.head.appendChild(estiloSwal);
+
 function gerarPromptAnamnese() {
     const idade = Number(paciente.idade);
     const menor = !isNaN(idade) && idade < 18;
 
     const campos = menor ? mapaCampos.map(([label]) => label) : camposAdulto;
 
-    const aviso = "Preencha as perguntas baseado com o relato do paciente citado abaixo, e responda de acordo com o código de ética e a abordagem da TCC:\n\n";
+    const aviso = "Preencha as perguntas baseado com o relato do paciente citado abaixo, a responda deve ser de acordo com o código de ética CFPe a abordagem da TCC:\n\n";
 
     return aviso + campos.map(label => `${label}:`).join("\n");
 }
@@ -317,6 +322,7 @@ document.getElementById("btnCopiarPromptIA").addEventListener("click", async () 
 
     try {
         await navigator.clipboard.writeText(textoFinal);
+        modalPromptIA.classList.add("oculto"); // fecha o modal ANTES de mostrar a mensagem
         mostrarMensagem("Prompt copiado! Agora é só colar no chat da IA.", "success");
     } catch (err) {
         const temporario = document.createElement("textarea");
@@ -325,6 +331,7 @@ document.getElementById("btnCopiarPromptIA").addEventListener("click", async () 
         temporario.select();
         document.execCommand("copy");
         document.body.removeChild(temporario);
+        modalPromptIA.classList.add("oculto"); // fecha o modal aqui também
         mostrarMensagem("Prompt copiado! Agora é só colar no chat da IA.", "success");
     }
 });
