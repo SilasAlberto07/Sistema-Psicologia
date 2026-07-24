@@ -21,18 +21,39 @@ function obterRegistrosUnificados() {
         _tipo: "individual",
         _indiceOriginal: indice,
         _nomeExibicao: p.nomeCompleto || "-",
-        _telefoneExibicao: p.telefone || "-",
     }));
 
     const casaisUnificados = casais.map((c, indice) => ({
         ...c,
         _tipo: "casal",
         _indiceOriginal: indice,
-        _nomeExibicao: `${c.p1NomeCompleto || "?"} e ${c.p2NomeCompleto || "?"}`,
-        _telefoneExibicao: c.p1Telefone || c.p2Telefone || "-",
+        _nomeExibicao: c.nomeCasal || "-",
     }));
 
     return [...individuais, ...casaisUnificados].filter((r) => !r.excluido);
+}
+
+// ===============================
+// TELEFONE — monta as opções do select de acordo com o tipo do registro
+// ===============================
+function gerarOpcoesTelefone(registro, ehCasal) {
+    if (ehCasal) {
+        const opcoes = [];
+        if (registro.p1Telefone) opcoes.push(registro.p1Telefone);
+        if (registro.p2Telefone) opcoes.push(registro.p2Telefone);
+
+        if (opcoes.length === 0) return `<option value="-">-</option>`;
+
+        return opcoes
+            .map(
+                (tel) =>
+                    `<option value="${tel}" ${registro.telefoneSelecionado === tel ? "selected" : ""}>${tel}</option>`
+            )
+            .join("");
+    }
+
+    const tel = registro.telefone || "-";
+    return `<option value="${tel}">${tel}</option>`;
 }
 
 function renderizarTabela() {
@@ -94,7 +115,11 @@ function renderizarTabela() {
                 <td class="nome-paciente" title="${registro._nomeExibicao}">
                     ${ehCasal ? '<i class="ti ti-users-group badge-casal" title="Casal"></i> ' : ""}${registro._nomeExibicao}
                 </td>
-                <td name="telefone">${registro._telefoneExibicao}</td>
+                <td name="telefone">
+                    <select class="input-telefone" data-index="${indice}" data-tipo="${tipo}">
+                        ${gerarOpcoesTelefone(registro, ehCasal)}
+                    </select>
+                </td>
                 <td name="dataCadastro">${registro.dataCadastro ?? "-"}</td>
                 <td>
                     <input type="number"
@@ -275,6 +300,27 @@ document.addEventListener("change", async (e) => {
             await window.storage.setItem("casais", JSON.stringify(casais));
         } else {
             pacientes[index].tipoConsulta = e.target.value;
+            await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+        }
+    }
+
+});
+
+// ===============================
+// TELEFONE — grava qual telefone foi selecionado (pacientes ou casais)
+// ===============================
+document.addEventListener("change", async (e) => {
+
+    if (e.target.classList.contains("input-telefone")) {
+
+        const index = e.target.dataset.index;
+        const tipo = e.target.dataset.tipo;
+
+        if (tipo === "casal") {
+            casais[index].telefoneSelecionado = e.target.value;
+            await window.storage.setItem("casais", JSON.stringify(casais));
+        } else {
+            pacientes[index].telefoneSelecionado = e.target.value;
             await window.storage.setItem("pacientes", JSON.stringify(pacientes));
         }
     }

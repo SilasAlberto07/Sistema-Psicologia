@@ -120,8 +120,43 @@ form h1 {
     min-width: 0;
 }
 
+.w-5px {
+    width: 5px;
+    flex-shrink: 0;
+}
+
+.w-10px {
+    width: 10px;
+    flex-shrink: 0;
+}
+
+.w-25px {
+    width: 25px;
+    flex-shrink: 0;
+}
+
+.w-50px {
+    width: 50px;
+    flex-shrink: 0;
+}
+
+.w-70px {
+    width: 70px;
+    flex-shrink: 0;
+}
+
 .w-100px {
     width: 100px;
+    flex-shrink: 0;
+}
+
+.w-120px {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.w-150px {
+    width: 150px;
     flex-shrink: 0;
 }
 

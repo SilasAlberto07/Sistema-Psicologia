@@ -276,7 +276,8 @@ async function renderSessoes() {
     const casaisFiltrados = termoBusca
         ? casais.filter(c =>
             (c.p1NomeCompleto || "").toLowerCase().includes(termoBusca) ||
-            (c.p2NomeCompleto || "").toLowerCase().includes(termoBusca)
+            (c.p2NomeCompleto || "").toLowerCase().includes(termoBusca) ||
+            (c.nomeCasal || "").toLowerCase().includes(termoBusca)
         )
         : casais;
 
@@ -358,7 +359,7 @@ async function renderSessoes() {
                     <div class="titulo-paciente">
                         <h2>
                             <i class="ti ti-users-group" style="color:#7a8e69"></i>
-                            ${casal.p1NomeCompleto || "?"} e ${casal.p2NomeCompleto || "?"}
+                            ${casal.nomeCasal || "?"}
                             <span class="tipo-consulta ${casal.tipoConsulta?.toLowerCase()}">
                                 ${casal.tipoConsulta || "-"}
                             </span>
