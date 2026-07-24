@@ -12,7 +12,10 @@ const log = require('electron-log');
 
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
+autoUpdater.autoDownload = false; // não baixa sozinho — só depois que o usuário confirmar
 log.info('=== App iniciado, versão:', app.getVersion(), '===');
+
+let janelaProgresso = null;
 
 app.setName("Sistema Psicologia");
 
@@ -163,19 +166,45 @@ autoUpdater.on('checking-for-update', () => {
 });
 
 autoUpdater.on('update-available', (info) => {
-    log.info('[update] Atualização encontrada, baixando...', info);
+    log.info('[update] Atualização encontrada:', info.version);
+
+    dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: 'Atualização disponível',
+        message: `Uma nova versão (${info.version}) está disponível.`,
+        detail: 'Deseja baixar agora?',
+        buttons: ['Baixar agora', 'Depois'],
+        defaultId: 0,
+        cancelId: 1
+    }).then((result) => {
+        if (result.response === 0) {
+            criarJanelaProgresso();
+            autoUpdater.downloadUpdate();
+        }
+    });
 });
 
 autoUpdater.on('update-not-available', (info) => {
     log.info('[update] Nenhuma atualização disponível. Versão atual já é a mais recente.', info);
 });
 
+autoUpdater.on('download-progress', (progress) => {
+    log.info(`[update] Baixando... ${Math.round(progress.percent)}%`);
+    if (janelaProgresso) {
+        janelaProgresso.webContents.send('progresso-download', Math.round(progress.percent));
+    }
+});
+
 autoUpdater.on('update-downloaded', () => {
     log.info('[update] Atualização baixada, perguntando ao usuário...');
+    if (janelaProgresso) {
+        janelaProgresso.close();
+        janelaProgresso = null;
+    }
     dialog.showMessageBox(mainWindow, {
         type: 'info',
-        title: 'Atualização disponível',
-        message: 'Uma nova versão do sistema foi baixada.',
+        title: 'Atualização pronta',
+        message: 'A atualização foi baixada com sucesso.',
         detail: 'Deseja instalar agora? O programa vai fechar e abrir de novo sozinho.',
         buttons: ['Instalar agora', 'Depois'],
         defaultId: 0,
@@ -187,13 +216,35 @@ autoUpdater.on('update-downloaded', () => {
     });
 });
 
+/**
+ * Cria uma janelinha simples só para mostrar a barra de progresso do download.
+ */
+function criarJanelaProgresso() {
+    janelaProgresso = new BrowserWindow({
+        width: 380,
+        height: 160,
+        resizable: false,
+        minimizable: false,
+        maximizable: false,
+        title: 'Baixando atualização',
+        parent: mainWindow,
+        webPreferences: {
+            contextIsolation: true,
+            preload: path.join(__dirname, 'preload-progresso.js')
+        }
+    });
+
+    janelaProgresso.setMenu(null);
+    janelaProgresso.loadFile(path.join(__dirname, 'progresso.html'));
+}
+
 autoUpdater.on('error', (err) => {
     log.error('[update] Erro no auto-updater:', err);
 });
 
 app.whenReady().then(() => {
     criarJanela();
-    autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.checkForUpdates();
 });
 
 app.on('window-all-closed', () => {
