@@ -13,6 +13,7 @@ const log = require('electron-log');
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
 autoUpdater.autoDownload = false; // não baixa sozinho — só depois que o usuário confirmar
+autoUpdater.disableWebInstaller = true; // não usamos web installer, evita o aviso nos logs
 log.info('=== App iniciado, versão:', app.getVersion(), '===');
 
 let janelaProgresso = null;
