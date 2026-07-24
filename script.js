@@ -1,38 +1,100 @@
-async function atualizarStatusAutomatico() {
-    let pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
-    const agora = new Date();
-    let alterou = false;
+// ===============================
+// Junta as sessões de pacientes individuais + casais em uma lista só,
+// já com o nome certo pra exibir (no caso do casal, o nome de quem
+// foi atendido naquela sessão específica).
+// ===============================
+function obterSessoesUnificadas(pacientes, casais) {
+    const sessoesUnificadas = [];
 
     pacientes.forEach(paciente => {
         (paciente.sessoes || []).forEach(sessao => {
-            if (!sessao.data || !sessao.hora) return;
-            if (sessao.status === "cancelada") return;
+            sessoesUnificadas.push({
+                nomeExibicao: paciente.nomeCompleto,
+                data: sessao.data,
+                hora: sessao.hora,
+                status: sessao.status,
+                duracao: sessao.duracao,
+                isCasal: false,
+            });
+        });
+    });
 
-            const duracao = Number(sessao.duracao) || 50;
-            const inicio = new Date(`${sessao.data}T${sessao.hora}`);
-            const fim = new Date(inicio);
-            fim.setMinutes(fim.getMinutes() + duracao);
+    casais.forEach(casal => {
+        (casal.sessoes || []).forEach(sessao => {
+            let nomeAtendido;
 
-            let novoStatus = "";
-            if (agora < inicio) {
-                novoStatus = "agendada";
-            } else if (agora >= inicio && agora < fim) {
-                novoStatus = "andamento";
+            if (sessao.atendido === "p1") {
+                nomeAtendido = casal.p1NomeCompleto || "Pessoa 1";
+            } else if (sessao.atendido === "p2") {
+                nomeAtendido = casal.p2NomeCompleto || "Pessoa 2";
             } else {
-                novoStatus = "realizada";
+                // ainda não escolheram quem vai nessa sessão
+                nomeAtendido = `${casal.p1NomeCompleto || "?"} e ${casal.p2NomeCompleto || "?"}`;
             }
 
-            if (sessao.status !== novoStatus) {
+            sessoesUnificadas.push({
+                nomeExibicao: `${nomeAtendido} (Casal)`,
+                data: sessao.data,
+                hora: sessao.hora,
+                status: sessao.status,
+                duracao: sessao.duracao,
+                isCasal: true,
+            });
+        });
+    });
+
+    return sessoesUnificadas;
+}
+
+async function atualizarStatusAutomatico() {
+    let pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
+    let casais = JSON.parse(await window.storage.getItem("casais")) || [];
+    const agora = new Date();
+    let alterouPacientes = false;
+    let alterouCasais = false;
+
+    function calcularNovoStatus(sessao) {
+        if (!sessao.data || !sessao.hora) return null;
+        if (sessao.status === "cancelada") return null;
+
+        const duracao = Number(sessao.duracao) || 50;
+        const inicio = new Date(`${sessao.data}T${sessao.hora}`);
+        const fim = new Date(inicio);
+        fim.setMinutes(fim.getMinutes() + duracao);
+
+        if (agora < inicio) return "agendada";
+        if (agora >= inicio && agora < fim) return "andamento";
+        return "realizada";
+    }
+
+    pacientes.forEach(paciente => {
+        (paciente.sessoes || []).forEach(sessao => {
+            const novoStatus = calcularNovoStatus(sessao);
+            if (novoStatus && sessao.status !== novoStatus) {
                 sessao.status = novoStatus;
-                alterou = true;
+                alterouPacientes = true;
             }
         });
     });
 
-    if (alterou) {
+    casais.forEach(casal => {
+        (casal.sessoes || []).forEach(sessao => {
+            const novoStatus = calcularNovoStatus(sessao);
+            if (novoStatus && sessao.status !== novoStatus) {
+                sessao.status = novoStatus;
+                alterouCasais = true;
+            }
+        });
+    });
+
+    if (alterouPacientes) {
         await window.storage.setItem("pacientes", JSON.stringify(pacientes));
     }
-    return alterou;
+    if (alterouCasais) {
+        await window.storage.setItem("casais", JSON.stringify(casais));
+    }
+
+    return alterouPacientes || alterouCasais;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -54,6 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
         await atualizarStatusAutomatico(); // atualiza status antes de ler
 
         const pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
+        const casais = JSON.parse(await window.storage.getItem("casais")) || [];
         const agora = new Date();
         const hojeFormatado = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, "0")}-${String(agora.getDate()).padStart(2, "0")}`;
 
@@ -61,28 +124,30 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("totalPacientes").textContent =
             `${pacientes.length} cadastrados`;
 
+        // TOTAL DE CASAIS
+        document.getElementById("totalCasais").textContent = casais.length;
+
+        // junta tudo (pacientes + casais) numa lista só de sessões
+        const todasSessoes = obterSessoesUnificadas(pacientes, casais);
+
         // SESSÕES HOJE
         let totalHoje = 0;
-        pacientes.forEach(p => {
-            (p.sessoes || []).forEach(s => {
-                if (s.data === hojeFormatado && s.status !== "cancelada") totalHoje++;
-            });
+        todasSessoes.forEach(s => {
+            if (s.data === hojeFormatado && s.status !== "cancelada") totalHoje++;
         });
         document.getElementById("sessoesHoje").textContent = totalHoje;
 
         // PRÓXIMA SESSÃO
         let proximaSessao = null;
-        pacientes.forEach(paciente => {
-            (paciente.sessoes || []).forEach(sessao => {
-                if (!sessao.data || !sessao.hora) return;
-                if ((sessao.status || "").trim().toLowerCase() !== "agendada") return;
-                if (!sessao.hora.includes(":")) return;
-                const dataSessao = new Date(`${sessao.data}T${sessao.hora.trim()}`);
-                if (isNaN(dataSessao) || dataSessao < agora) return;
-                if (!proximaSessao || dataSessao < proximaSessao.dataHora) {
-                    proximaSessao = { paciente: paciente.nomeCompleto, dataHora: dataSessao };
-                }
-            });
+        todasSessoes.forEach(sessao => {
+            if (!sessao.data || !sessao.hora) return;
+            if ((sessao.status || "").trim().toLowerCase() !== "agendada") return;
+            if (!sessao.hora.includes(":")) return;
+            const dataSessao = new Date(`${sessao.data}T${sessao.hora.trim()}`);
+            if (isNaN(dataSessao) || dataSessao < agora) return;
+            if (!proximaSessao || dataSessao < proximaSessao.dataHora) {
+                proximaSessao = { nomeExibicao: sessao.nomeExibicao, dataHora: dataSessao };
+            }
         });
 
         const el = document.getElementById("proximaSessao");
@@ -93,20 +158,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const diaSessao = new Date(proximaSessao.dataHora); diaSessao.setHours(0, 0, 0, 0);
             const diffDias = Math.round((diaSessao - hoje) / (1000 * 60 * 60 * 24));
             const statusVisual = diffDias === 0 ? "🟢 Hoje" : diffDias === 1 ? "🟡 Amanhã" : diffDias <= 3 ? "🟡 Próximos dias" : "🔵 Agendada";
-            el.innerHTML = `<strong>${proximaSessao.paciente}</strong><br>${dataBR} às ${horaBR}<br><small>${statusVisual}</small>`;
+            el.innerHTML = `<strong>${proximaSessao.nomeExibicao}</strong><br>${dataBR} às ${horaBR}<br><small>${statusVisual}</small>`;
         } else {
             el.textContent = "Nenhuma";
         }
 
         // AGENDA DE HOJE
-        const agendaHoje = [];
-        pacientes.forEach(paciente => {
-            (paciente.sessoes || []).forEach(sessao => {
-                if (sessao.data === hojeFormatado) {
-                    agendaHoje.push({ paciente: paciente.nomeCompleto, horario: sessao.hora, status: sessao.status });
-                }
-            });
-        });
+        const agendaHoje = todasSessoes
+            .filter(s => s.data === hojeFormatado)
+            .map(s => ({ nomeExibicao: s.nomeExibicao, horario: s.hora, status: s.status }));
+
         agendaHoje.sort((a, b) => a.horario.localeCompare(b.horario));
 
         const agendaHojeEl = document.getElementById("agendaHoje");
@@ -128,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="item-agenda ${classe}">
                     <strong>${item.horario}</strong>
                     <div class="item-agenda-info">
-                        <div class="item-agenda-name">${item.paciente}</div>
+                        <div class="item-agenda-name">${item.nomeExibicao}</div>
                     </div>
                     <span class="item-agenda-badge ${badge}">${textoBadge}</span>
                 </div>`;
@@ -144,17 +205,15 @@ document.addEventListener("DOMContentLoaded", () => {
         ultimoDiaSemana.setDate(ultimoDiaSemana.getDate() + 6);
         ultimoDiaSemana.setHours(23, 59, 59, 999);
 
-        pacientes.forEach(paciente => {
-            (paciente.sessoes || []).forEach(sessao => {
-                if (!sessao.data) return;
-                const dataSessao = new Date(sessao.data + "T00:00:00");
-                if (dataSessao < primeiroDiaSemana || dataSessao > ultimoDiaSemana) return;
-                const status = (sessao.status || "").trim().toLowerCase();
-                if (status === "realizada") realizadas++;
-                if (status === "agendada") agendadas++;
-                if (status === "andamento") andamento++;
-                if (status === "cancelada") canceladas++;
-            });
+        todasSessoes.forEach(sessao => {
+            if (!sessao.data) return;
+            const dataSessao = new Date(sessao.data + "T00:00:00");
+            if (dataSessao < primeiroDiaSemana || dataSessao > ultimoDiaSemana) return;
+            const status = (sessao.status || "").trim().toLowerCase();
+            if (status === "realizada") realizadas++;
+            if (status === "agendada") agendadas++;
+            if (status === "andamento") andamento++;
+            if (status === "cancelada") canceladas++;
         });
 
         document.getElementById("resumoRealizadas").textContent = realizadas;
