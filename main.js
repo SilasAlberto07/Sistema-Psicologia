@@ -16,6 +16,18 @@ autoUpdater.autoDownload = false; // não baixa sozinho — só depois que o usu
 autoUpdater.disableWebInstaller = true; // não usamos web installer, evita o aviso nos logs
 log.info('=== App iniciado, versão:', app.getVersion(), '===');
 
+// ================================
+// REDE DE SEGURANÇA — evita que um erro não previsto derrube o app
+// inteiro com aquele popup assustador. Registra no log e segue rodando.
+// ================================
+process.on('uncaughtException', (err) => {
+    log.error('[uncaughtException] Erro não tratado (app continuou rodando):', err);
+});
+
+process.on('unhandledRejection', (motivo) => {
+    log.error('[unhandledRejection] Promise rejeitada sem tratamento:', motivo);
+});
+
 let janelaProgresso = null;
 
 app.setName("Sistema Psicologia");
@@ -45,7 +57,7 @@ function agendarBackupAposSalvar() {
             backupDir: pastaBackupAtual,
             password: process.env.BACKUP_PASSWORD,
         }).catch((err) => log.error('[backup] Falha no backup após salvar:', err));
-    }, 5000); // espera 5s de "silêncio" antes de rodar
+    }, 20000); // espera 20s de "silêncio" antes de rodar — dá tempo do backup inicial terminar
 }
 
 // ================================

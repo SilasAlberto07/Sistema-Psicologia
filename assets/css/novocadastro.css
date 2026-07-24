@@ -1,0 +1,103 @@
+/* ═══════════════════════════════════════════════
+   11. NOVO CADASTRO — novocadastro.html
+═══════════════════════════════════════════════ */
+
+.page-container-cadastro {
+    gap: 28px;
+}
+
+.cadastro-subtitulo {
+    font-size: 13px;
+    color: #7a7a68;
+    margin-top: 6px;
+}
+
+.cadastro-data {
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 13px;
+    color: #6a6a58;
+    white-space: nowrap;
+}
+
+/* Grade dos dois cards */
+.cadastro-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 50px;
+    max-width: 1200px;
+    margin: auto;
+
+}
+
+.cadastro-card {
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 16px;
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.cadastro-card-icone {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background-color: #eaf0e3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.cadastro-card-icone i {
+    font-size: 40px;
+    color: #7a8e69;
+}
+
+.cadastro-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #3d5a28;
+}
+
+.cadastro-card-divisor {
+    width: 36px;
+    height: 2px;
+    background-color: #7a8e69;
+    margin: 10px 0 16px;
+}
+
+.cadastro-card p {
+    font-size: 13px;
+    color: #7a7a68;
+    line-height: 1.5;
+    margin-bottom: 28px;
+}
+
+.btn-cadastro {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #4f6440;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 22px;
+    border-radius: 9px;
+    transition: background-color 0.15s;
+}
+
+.btn-cadastro:hover {
+    background-color: #3d5030;
+}
+
+.btn-cadastro i {
+    font-size: 15px;
+}

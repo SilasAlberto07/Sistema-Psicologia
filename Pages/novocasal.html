@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Novo Cadastro de Casal</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/button.css">
+    <link rel="stylesheet" href="../assets/css/novopaciente.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+
+<body>
+
+    <div class="container-menu">
+
+        <div id="menu"></div>
+
+        <main class="form-container">
+            <form>
+                <h1 class="page-title"><i class="ti ti-users-group" style="color:#8a9e78"></i> Novo Cadastro de Casal
+                </h1>
+
+                <fieldset class="form-section">
+                    <legend>Dados do Casal</legend>
+                    <div class="linha">
+                        <div class="form-group w-12">
+                            <label>ID</label>
+                            <input type="text" id="id" name="id" readonly disabled>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Identificação do Casal</label>
+                            <input type="text" id="nomeCasal" name="nomeCasal" placeholder="Ex: João e Maria" required>
+                        </div>
+                        <div class="form-group w-180px">
+                            <label>Tipo de Relacionamento</label>
+                            <select id="tipoRelacionamento" name="tipoRelacionamento">
+                                <option value="Namoro">Namoro</option>
+                                <option value="União Estável">União Estável</option>
+                                <option value="Casado(a)">Casado(a)</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                        <div class="form-group w-180px">
+                            <label>Início do Relacionamento</label>
+                            <input type="date" id="inicioRelacionamento" name="inicioRelacionamento">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>Pessoa 1</legend>
+                    <div class="linha">
+                        <div class="form-group w-100">
+                            <label>Nome Completo</label>
+                            <input type="text" id="p1NomeCompleto" name="p1NomeCompleto" required>
+                        </div>
+                        <div class="form-group w-180px">
+                            <label>CPF</label>
+                            <input type="text" id="p1Cpf" name="p1Cpf">
+                        </div>
+                        <div class="form-group w-15">
+                            <label>RG</label>
+                            <input type="text" id="p1Rg" name="p1Rg">
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-180px">
+                            <label>Data de Nasc.</label>
+                            <input type="date" id="p1DataNascimento" name="p1DataNascimento">
+                        </div>
+                        <div class="form-group w-100px">
+                            <label>Idade</label>
+                            <input type="number" id="p1Idade" name="p1Idade">
+                        </div>
+                        <div class="form-group w-100px">
+                            <label>Sexo</label>
+                            <select id="p1Sexo" name="p1Sexo">
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-50">
+                                <label>Profissão / Ocupação</label>
+                                <input type="text" id="p1Profissao" name="p1Profissao">
+                            </div>
+                            <div class="form-group w-50">
+                                <label>Telefone</label>
+                                <input type="text" id="p1Telefone" placeholder="(00) 00000-0000" name="p1Telefone">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-100">
+                            <label>E-mail</label>
+                            <input type="email" id="p1Email" placeholder="nome@email.com" name="p1Email">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>Pessoa 2</legend>
+                    <div class="linha">
+                        <div class="form-group w-100">
+                            <label>Nome Completo</label>
+                            <input type="text" id="p2NomeCompleto" name="p2NomeCompleto" required>
+                        </div>
+                        <div class="form-group w-180px">
+                            <label>CPF</label>
+                            <input type="text" id="p2Cpf" name="p2Cpf">
+                        </div>
+                        <div class="form-group w-15">
+                            <label>RG</label>
+                            <input type="text" id="p2Rg" name="p2Rg">
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-180px">
+                            <label>Data de Nasc.</label>
+                            <input type="date" id="p2DataNascimento" name="p2DataNascimento">
+                        </div>
+                        <div class="form-group w-12px">
+                            <label>Idade</label>
+                            <input type="number" id="p2Idade" name="p2Idade">
+                        </div>
+                        <div class="form-group w-100px">
+                            <label>Sexo</label>
+                            <select id="p2Sexo" name="p2Sexo">
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-50">
+                                <label>Profissão / Ocupação</label>
+                                <input type="text" id="p1Profissao" name="p1Profissao">
+                            </div>
+                            <div class="form-group w-50">
+                                <label>Telefone</label>
+                                <input type="text" id="p1Telefone" placeholder="(00) 00000-0000" name="p1Telefone">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-100">
+                            <label>E-mail</label>
+                            <input type="email" id="p2Email" placeholder="nome@email.com" name="p2Email">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>Endereço Residencial</legend>
+                    <div class="linha">
+                        <div class="form-group w-30">
+                            <label>CEP</label>
+                            <input type="text" id="cep" placeholder="00000-000" name="cep">
+                        </div>
+                        <div class="form-group w-50">
+                            <label>Rua / Logradouro</label>
+                            <input type="text" id="endereco" name="endereco">
+                        </div>
+                        <div class="form-group w-15">
+                            <label>Número</label>
+                            <input type="text" id="numero" name="numero">
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-40">
+                            <label>Complemento</label>
+                            <input type="text" id="complemento" placeholder="Apto, Bloco, etc." name="complemento">
+                        </div>
+                        <div class="form-group w-30">
+                            <label>Bairro</label>
+                            <input type="text" id="bairro" name="bairro">
+                        </div>
+                        <div class="form-group w-25">
+                            <label>Cidade / UF</label>
+                            <input type="text" id="cidadeUf" name="cidadeUf">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>Relato Inicial do Casal / Primeira Consulta</legend>
+                    <div class="form-group w-100">
+                        <label>Motivo da Busca por Terapia de Casal</label>
+                        <textarea id="queixaPrincipal" rows="4" name="queixaPrincipal"
+                            placeholder="O que levou o casal a buscar atendimento..."></textarea>
+                    </div>
+                </fieldset>
+
+                <div class="botoes">
+                    <button type="submit" id="salvar"><i class="ti ti-device-floppy"></i> Salvar Casal</button>
+                    <button type="button" id="limpar"><i class="ti ti-eraser"></i> Limpar Formulário</button>
+                </div>
+            </form>
+        </main>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../assets/js/alert.js"></script>
+    <script src="../assets/js/menu.js"></script>
+    <script src="../assets/js/novocasal.js"></script>
+</body>
+
+</html>

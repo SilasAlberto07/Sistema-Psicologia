@@ -138,6 +138,12 @@
     white-space: nowrap;
 }
 
+.badge-casal {
+    color: #7a8e69;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
 /* ═══════════════════════════════════════════════
    9. ORDENAÇÃO DA TABELA
 ═══════════════════════════════════════════════ */

@@ -155,10 +155,24 @@ function rotateBackups(backupDir, keepLast = 10) {
  * @param {string} opts.password      Senha/chave de criptografia
  * @param {number} [opts.keepLast=10] Quantos backups manter
  */
+// ------------------------------------------------------------------
+// Trava simples: impede que dois backups rodem ao mesmo tempo
+// (evita conflitos nos arquivos temporários se dois gatilhos —
+// ex: backup inicial e backup após salvar — disparam quase juntos)
+// ------------------------------------------------------------------
+let backupEmAndamento = false;
+
 async function runBackup({ dbPath, dataDir, backupDir, password, keepLast = 10 }) {
+  if (backupEmAndamento) {
+    console.log('[backup] Ignorado: já existe um backup em andamento.');
+    return null;
+  }
+
   if (!password) {
     throw new Error('Backup abortado: nenhuma senha de criptografia foi configurada.');
   }
+
+  backupEmAndamento = true;
 
   fs.mkdirSync(backupDir, { recursive: true });
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'backup-'));
@@ -179,6 +193,7 @@ async function runBackup({ dbPath, dataDir, backupDir, password, keepLast = 10 }
   } finally {
     // limpa arquivos temporários (nunca deixa .zip/.sqlite sem criptografar por aí)
     fs.rmSync(tmpDir, { recursive: true, force: true });
+    backupEmAndamento = false;
   }
 }
 
