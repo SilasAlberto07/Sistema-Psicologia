@@ -7,8 +7,15 @@
  * -----------------------------------------------------------------------
  */
 
-require('dotenv').config();
+const path = require('path');
+
+// Caminho explícito do .env — necessário porque dentro do app instalado
+// o diretório de trabalho (process.cwd()) pode não ser a pasta do projeto,
+// então o dotenv não acharia o .env sem indicarmos o caminho exato.
+require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
+
 const cron = require('node-cron');
+const log = require('electron-log');
 const { runBackup } = require('./backupManager');
 
 /**
@@ -21,13 +28,19 @@ const { runBackup } = require('./backupManager');
 function startBackupScheduler(config) {
   const cronExpr = config.cronExpr || '0 */6 * * *'; // a cada 6 horas
 
+  if (!process.env.BACKUP_PASSWORD) {
+    log.error('[backup] BACKUP_PASSWORD não encontrado no .env — os backups vão falhar até isso ser corrigido.');
+  }
+
   // Roda uma vez logo ao iniciar o app, além do agendamento
   runBackup({
     dbPath: config.dbPath,
     dataDir: config.dataDir,
     backupDir: config.backupDir,
     password: process.env.BACKUP_PASSWORD,
-  }).catch((err) => console.error('[backup] Falha no backup inicial:', err));
+  }).then((finalPath) => {
+    log.info(`[backup] Backup inicial concluído -> ${finalPath}`);
+  }).catch((err) => log.error('[backup] Falha no backup inicial:', err));
 
   cron.schedule(cronExpr, () => {
     runBackup({
@@ -35,10 +48,12 @@ function startBackupScheduler(config) {
       dataDir: config.dataDir,
       backupDir: config.backupDir,
       password: process.env.BACKUP_PASSWORD,
-    }).catch((err) => console.error('[backup] Falha no backup agendado:', err));
+    }).then((finalPath) => {
+      log.info(`[backup] Backup agendado concluído -> ${finalPath}`);
+    }).catch((err) => log.error('[backup] Falha no backup agendado:', err));
   });
 
-  console.log(`[backup] Agendador iniciado (expressão cron: "${cronExpr}")`);
+  log.info(`[backup] Agendador iniciado (expressão cron: "${cronExpr}")`);
 }
 
 module.exports = { startBackupScheduler };

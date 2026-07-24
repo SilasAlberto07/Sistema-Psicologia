@@ -42,7 +42,8 @@ function agendarBackupAposSalvar() {
             dbPath: caminhoBancoAtual,
             dataDir: null,
             backupDir: pastaBackupAtual,
-        }).catch((err) => console.error('[backup] Falha no backup após salvar:', err));
+            password: process.env.BACKUP_PASSWORD,
+        }).catch((err) => log.error('[backup] Falha no backup após salvar:', err));
     }, 5000); // espera 5s de "silêncio" antes de rodar
 }
 
