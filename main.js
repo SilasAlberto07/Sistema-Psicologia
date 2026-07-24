@@ -8,6 +8,11 @@ const handler = require('serve-handler');
 const fs = require('fs');
 const Database = require('better-sqlite3');
 const { autoUpdater } = require('electron-updater');
+const log = require('electron-log');
+
+autoUpdater.logger = log;
+autoUpdater.logger.transports.file.level = 'info';
+log.info('=== App iniciado, versão:', app.getVersion(), '===');
 
 app.setName("Sistema Psicologia");
 
@@ -153,11 +158,20 @@ async function criarJanela() {
 // ================================
 // ATUALIZAÇÃO AUTOMÁTICA (GitHub Releases)
 // ================================
-autoUpdater.on('update-available', () => {
-    console.log('[update] Atualização encontrada, baixando...');
+autoUpdater.on('checking-for-update', () => {
+    log.info('[update] Checando por atualização...');
+});
+
+autoUpdater.on('update-available', (info) => {
+    log.info('[update] Atualização encontrada, baixando...', info);
+});
+
+autoUpdater.on('update-not-available', (info) => {
+    log.info('[update] Nenhuma atualização disponível. Versão atual já é a mais recente.', info);
 });
 
 autoUpdater.on('update-downloaded', () => {
+    log.info('[update] Atualização baixada, perguntando ao usuário...');
     dialog.showMessageBox(mainWindow, {
         type: 'info',
         title: 'Atualização disponível',
@@ -174,7 +188,7 @@ autoUpdater.on('update-downloaded', () => {
 });
 
 autoUpdater.on('error', (err) => {
-    console.error('[update] Erro no auto-updater:', err);
+    log.error('[update] Erro no auto-updater:', err);
 });
 
 app.whenReady().then(() => {
