@@ -6,7 +6,8 @@
   "scripts": {
     "start": "electron .",
     "dist": "dotenv -- electron-builder --publish always",
-    "release": "npm version patch && git push origin main --follow-tags && npm run dist"
+    "release": "npm version patch && git push origin main --follow-tags && npm run dist",
+    "postinstall": "electron-builder install-app-deps"
   },
   "build": {
     "appId": "com.claudiabethania.sistemapsicologia",
@@ -51,7 +52,7 @@
   },
   "dependencies": {
     "adm-zip": "^0.6.0",
-    "archiver": "^8.0.0",
+    "archiver": "^7.0.1",
     "better-sqlite3": "^12.11.1",
     "dotenv": "^17.4.2",
     "electron-log": "^5.4.4",

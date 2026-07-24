@@ -1,4 +1,4 @@
-// ================= PACIENTE =================
+// ================= PACIENTE / CASAL =================
 const params = new URLSearchParams(window.location.search);
 const idPaciente = params.get("id");
 
@@ -34,15 +34,33 @@ const btnAbrirProntuario = document.querySelector(".btn-abrir");
 const draftKey = `draft_evolucao_${idPaciente}`;
 
 let pacientes = [];
-let paciente = null;
+let casaisLista = [];
+let registro = null;   // paciente individual OU casal, o que for encontrado
+let ehCasal = false;
 let editandoIndex = null;
+
+// grava de volta no storage certo (pacientes ou casais), dependendo de quem é o registro
+async function salvarRegistro() {
+    if (ehCasal) {
+        await window.storage.setItem("casais", JSON.stringify(casaisLista));
+    } else {
+        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+    }
+}
 
 async function iniciarEvolucao() {
 
     pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
-    paciente = pacientes.find(p => String(p.id) === String(idPaciente));
+    casaisLista = JSON.parse(await window.storage.getItem("casais")) || [];
 
-    if (!paciente) {
+    registro = pacientes.find(p => String(p.id) === String(idPaciente));
+
+    if (!registro) {
+        registro = casaisLista.find(c => String(c.id) === String(idPaciente));
+        ehCasal = !!registro;
+    }
+
+    if (!registro) {
         mostrarMensagem(
             "Paciente não encontrado!",
             "error",
@@ -53,10 +71,12 @@ async function iniciarEvolucao() {
         return;
     }
 
-    nomePaciente.innerText = paciente.nomeCompleto;
+    nomePaciente.innerText = ehCasal
+        ? `${registro.p1NomeCompleto || "?"} e ${registro.p2NomeCompleto || "?"}`
+        : registro.nomeCompleto;
 
-    if (!Array.isArray(paciente.evolucoes)) {
-        paciente.evolucoes = [];
+    if (!Array.isArray(registro.evolucoes)) {
+        registro.evolucoes = [];
     }
 
     // rascunho continua no localStorage — é dado temporário/descartável,
@@ -91,13 +111,13 @@ dataSessao.addEventListener("input", salvarRascunho);
 function renderHistorico() {
     historico.innerHTML = "";
 
-    if (paciente.evolucoes.length === 0) {
+    if (registro.evolucoes.length === 0) {
         historico.innerHTML = "<p>Nenhum registro de evolução.</p>";
         return;
     }
 
-    paciente.evolucoes.forEach((item, index) => {
-        const aberta = index === paciente.evolucoes.length - 1 ? "open" : "";
+    registro.evolucoes.forEach((item, index) => {
+        const aberta = index === registro.evolucoes.length - 1 ? "open" : "";
         historico.innerHTML += `
             <details class="card-evolucao" ${aberta}>
                 <summary>
@@ -153,13 +173,13 @@ btnSalvar.addEventListener("click", async () => {
         const indice = Number(editandoIndex);
 
         // atualiza o registro existente
-        paciente.evolucoes[indice].relato = relato;
-        paciente.evolucoes[indice].texto = conteudo;
-        paciente.evolucoes[indice].plano = plano;
-        paciente.evolucoes[indice].dataSessao = dataSessaoValor;
-        paciente.evolucoes[indice].data = formatarDataSessaoBR(dataSessaoValor);
+        registro.evolucoes[indice].relato = relato;
+        registro.evolucoes[indice].texto = conteudo;
+        registro.evolucoes[indice].plano = plano;
+        registro.evolucoes[indice].dataSessao = dataSessaoValor;
+        registro.evolucoes[indice].data = formatarDataSessaoBR(dataSessaoValor);
 
-        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+        await salvarRegistro();
 
         // limpa os campos
         relatoSessao.value = "";
@@ -195,7 +215,7 @@ btnSalvar.addEventListener("click", async () => {
     } else {
 
         // cria um registro novo
-        paciente.evolucoes.push({
+        registro.evolucoes.push({
             data: formatarDataSessaoBR(dataSessaoValor),
             dataSessao: dataSessaoValor,
             relato: relato,
@@ -203,7 +223,7 @@ btnSalvar.addEventListener("click", async () => {
             plano: plano
         });
 
-        await window.storage.setItem("pacientes", JSON.stringify(pacientes));
+        await salvarRegistro();
         localStorage.removeItem(draftKey);
 
         relatoSessao.value = "";
@@ -236,12 +256,9 @@ historico.addEventListener("click", async (e) => {
 
         const index = e.target.dataset.index;
 
-        paciente.evolucoes.splice(index, 1);
+        registro.evolucoes.splice(index, 1);
 
-        await window.storage.setItem(
-            "pacientes",
-            JSON.stringify(pacientes)
-        );
+        await salvarRegistro();
 
         renderHistorico();
 
@@ -258,13 +275,13 @@ historico.addEventListener("click", (e) => {
     if (e.target.closest(".btn-editar-evolucao")) {
 
         const index = e.target.closest(".btn-editar-evolucao").dataset.index;
-        const registro = paciente.evolucoes[index];
+        const item = registro.evolucoes[index];
 
-        relatoSessao.value = registro.relato || "";
-        textoEvolucao.value = registro.texto || "";
-        planoAcao.value = registro.plano || "";
+        relatoSessao.value = item.relato || "";
+        textoEvolucao.value = item.texto || "";
+        planoAcao.value = item.plano || "";
         // registros antigos não têm "dataSessao" salvo (só o texto já formatado) — nesse caso mantém a data/hora atual
-        dataSessao.value = registro.dataSessao || agoraParaInputDatetime();
+        dataSessao.value = item.dataSessao || agoraParaInputDatetime();
 
         textoEvolucao.scrollIntoView({
             behavior: "smooth",
@@ -289,7 +306,7 @@ btnAbrirProntuario.addEventListener("click", () => {
 // ================= IMPRIMIR PRONTUÁRIO =================
 btnImprimir.addEventListener("click", () => {
 
-    if (!paciente.evolucoes || paciente.evolucoes.length === 0) {
+    if (!registro.evolucoes || registro.evolucoes.length === 0) {
         mostrarMensagem(
             "Não há evoluções registradas para imprimir!",
             "warning"
@@ -408,7 +425,7 @@ document.getElementById("btnPreencherAutomatico").addEventListener("click", () =
 // ==========================================
 const estiloSwal = document.createElement('style');
 estiloSwal.innerHTML = `.swal2-container { z-index: 999999 !important; }`;
-document.head.appendChild(estiloSwal);7
+document.head.appendChild(estiloSwal);
 
 function gerarPromptEvolucao() {
     const aviso = "Preencha as perguntas baseado com o relato do paciente citado abaixo, a responda deve ser de acordo com o código de ética CFP e a abordagem da TCC::\n\n";

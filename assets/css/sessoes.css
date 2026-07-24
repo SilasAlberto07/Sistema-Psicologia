@@ -122,6 +122,24 @@
     border-color: #8a9e78;
 }
 
+.input-atendido {
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid #ddd8ce;
+    border-radius: 20px;
+    background-color: #faf8f4;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #3d3a28;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+}
+
+.input-atendido:focus {
+    border-color: #8a9e78;
+}
+
 
 .input-data,
 .input-horario {

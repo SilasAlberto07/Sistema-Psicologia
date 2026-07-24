@@ -33,28 +33,65 @@ const container = document.getElementById("conteudo-impressao");
 async function iniciarVisualizacaoProntuario() {
 
     let pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
+    let casais = JSON.parse(await window.storage.getItem("casais")) || [];
+
     const paciente = pacientes.find(p => String(p.id) === String(idPaciente));
+    const casal = casais.find(c => String(c.id) === String(idPaciente));
 
-    if (!paciente) {
+    const registro = paciente || casal;
+    const ehCasal = !!casal;
+
+    if (!registro) {
         container.innerHTML = "<h1>Paciente não encontrado</h1>";
-    } else {
+        return;
+    }
 
-        const evolucoes = paciente.evolucoes || [];
+    const evolucoes = registro.evolucoes || [];
 
-        let linhasHTML = "";
+    let linhasHTML = "";
 
-        evolucoes.forEach((registro, index) => {
-            linhasHTML += `
-            <tr>
-                <td class="centro">${String(index + 1).padStart(2, "0")}</td>
-                <td class="centro">${registro.data}</td>
-                <td>${registro.texto || "-"}</td>
-                <td>${registro.plano || "-"}</td>
-            </tr>
+    evolucoes.forEach((evolucao, index) => {
+        linhasHTML += `
+        <tr>
+            <td class="centro">${String(index + 1).padStart(2, "0")}</td>
+            <td class="centro">${evolucao.data}</td>
+            <td>${evolucao.texto || "-"}</td>
+            <td>${evolucao.plano || "-"}</td>
+        </tr>
+    `;
+    });
+
+    // ===== Identificação: individual ou casal =====
+    const identificacaoHTML = ehCasal
+        ? `
+            ${item("Pessoa 1: ", registro.p1NomeCompleto, true)}
+            ${item("Data de nascimento (P1): ", formatarDataBR(registro.p1DataNascimento))}
+            ${item("Idade (P1): ", registro.p1Idade)}
+            ${item("Telefone (P1): ", registro.p1Telefone)}
+
+            ${item("Pessoa 2: ", registro.p2NomeCompleto, true)}
+            ${item("Data de nascimento (P2): ", formatarDataBR(registro.p2DataNascimento))}
+            ${item("Idade (P2): ", registro.p2Idade)}
+            ${item("Telefone (P2): ", registro.p2Telefone)}
+
+            ${item("Tipo de relacionamento: ", registro.tipoRelacionamento)}
+            ${item("Início do relacionamento: ", formatarDataBR(registro.inicioRelacionamento))}
+        `
+        : `
+            ${item("Nome do paciente: ", registro.nomeCompleto, true)}
+            ${item("Data de nascimento: ", formatarDataBR(registro.dataNascimento))}
+            ${item("Idade: ", registro.idade)}
+            ${item("Sexo: ", capitalizar(registro.sexo))}
+            ${item("Estado civil: ", registro.estadoCivil)}
+            ${item("Profissão: ", registro.profissao)}
+            ${item("Telefone: ", registro.telefone)}
         `;
-        });
 
-        container.innerHTML = `
+    const tituloFicha = ehCasal
+        ? "Ficha de Prontuário Psicológica — Casal"
+        : "Ficha de Prontuário Psicológica";
+
+    container.innerHTML = `
         <div class="prontuario">
 
             <img class="marca-dagua" src="../assets/img/logo-marca-dagua.png" alt="">
@@ -62,18 +99,12 @@ async function iniciarVisualizacaoProntuario() {
             <div class="cabecalho-print">
                 <div class="clinica-nome">Cláudia Bethânia — Psicóloga Clínica</div>
                 <div class="subtitulo-clinica">CRP 18/9851</div>
-                <h1>Ficha de Prontuário Psicológica</h1>
-                
+                <h1>${tituloFicha}</h1>
+
             </div>
 
             <div class="identificacao-grid">
-                ${item("Nome do paciente: ", paciente.nomeCompleto, true)}
-                ${item("Data de nascimento: ", formatarDataBR(paciente.dataNascimento))}
-                ${item("Idade: ", paciente.idade)}
-                ${item("Sexo: ", capitalizar(paciente.sexo))}
-                ${item("Estado civil: ", paciente.estadoCivil)}
-                ${item("Profissão: ", paciente.profissao)}
-                ${item("Telefone: ", paciente.telefone)}
+                ${identificacaoHTML}
             </div>
 
             <h2 class="titulo-secao">Evolução das Sessões</h2>
@@ -105,8 +136,6 @@ async function iniciarVisualizacaoProntuario() {
             <div class="timestamp-impressao">${carimboGeracao()}</div>
         </div>
     `;
-
-    }
 }
 
 iniciarVisualizacaoProntuario();
