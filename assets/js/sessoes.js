@@ -319,24 +319,24 @@ async function renderSessoes() {
 
                     <small>📅 Início: ${paciente.dataCadastro ?? "-"}</small>
                 </div>
+                <div class="tabela-wrapper">
+                    <table class="tabela-sessoes">
+                        <thead>
+                            <tr>
+                                <th>Sessão</th>
+                                <th>Data</th>
+                                <th>Horário</th>
+                                <th>Duração</th>
+                                <th>Status</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
 
-                <table class="tabela-sessoes">
-                    <thead>
-                        <tr>
-                            <th>Sessão</th>
-                            <th>Data</th>
-                            <th>Horário</th>
-                            <th>Duração</th>
-                            <th>Status</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        ${sessoesHTML}
-                    </tbody>
-                </table>
-
+                        <tbody>
+                            ${sessoesHTML}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         `;
     });
@@ -368,25 +368,25 @@ async function renderSessoes() {
 
                     <small>📅 Início: ${casal.dataCadastro ?? "-"}</small>
                 </div>
+                <div class="tabela-wrapper">
+                    <table class="tabela-sessoes">
+                        <thead>
+                            <tr>
+                                <th>Sessão</th>
+                                <th>Atendido(a)</th>
+                                <th>Data</th>
+                                <th>Horário</th>
+                                <th>Duração</th>
+                                <th>Status</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
 
-                <table class="tabela-sessoes">
-                    <thead>
-                        <tr>
-                            <th>Sessão</th>
-                            <th>Atendido(a)</th>
-                            <th>Data</th>
-                            <th>Horário</th>
-                            <th>Duração</th>
-                            <th>Status</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        ${sessoesHTML}
-                    </tbody>
-                </table>
-
+                        <tbody>
+                            ${sessoesHTML}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         `;
     });

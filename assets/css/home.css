@@ -59,6 +59,8 @@
     transition: transform 0.2s, box-shadow 0.2s;
     position: relative;
     overflow: hidden;
+    container-type: inline-size;
+    container-name: home-card;
 }
 
 .home-card:hover {
@@ -67,13 +69,17 @@
 }
 
 .home-card-icon {
-    width: 80px;
-    height: 80px;
+    width: clamp(40px, 22cqw, 80px);
+    height: clamp(40px, 22cqw, 80px);
     border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+}
+
+.home-card-icon i {
+    font-size: clamp(18px, 10cqw, 32px) !important;
 }
 
 .home-card-arrow {
@@ -91,29 +97,34 @@
 }
 
 .home-card h3 {
-    font-size: 11px;
+    font-size: clamp(8px, 3.2cqw, 11px);
     font-weight: 400;
     color: #9a9a88;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-bottom: 4px;
+    white-space: nowrap;
 }
 
 .home-card p {
     font-family: serif;
-    font-size: 25px;
+    font-size: clamp(13px, 6.5cqw, 25px);
     font-weight: 500;
     color: #3d3a28;
     line-height: 1.2;
     margin-bottom: 2px;
+    width: 100%;
+    white-space: nowrap;
 }
 
 .home-card-sub {
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
+    font-size: clamp(9px, 3.5cqw, 12px);
     color: #a0a090;
     display: block;
     margin-bottom: 0px;
+    width: 100%;
+    white-space: nowrap;
 }
 
 .home-card-link {
@@ -139,7 +150,7 @@
 
 .home-card.card-proxima p {
     color: #4a3a7a;
-    font-size: 20px;
+    font-size: clamp(11px, 5.2cqw, 20px);
 }
 
 .home-card.card-proxima .home-card-sub {
@@ -159,6 +170,7 @@
 
 .home-card-info {
     flex: 1;
+    min-width: 0;
 }
 
 .home-bottom {
@@ -177,6 +189,8 @@
     padding: 22px 24px;
     display: flex;
     flex-direction: column;
+    container-type: inline-size;
+    container-name: home-agenda;
 }
 
 .home-agenda-header {
@@ -190,16 +204,21 @@
 
 .home-agenda h2 {
     font-family: 'Playfair Display', serif;
-    font-size: 17px;
+    font-size: clamp(13px, 4cqw, 17px);
     font-weight: 500;
     color: #3d3a28;
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
+}
+
+.home-agenda h2 i {
+    font-size: clamp(13px, 4cqw, 17px) !important;
 }
 
 .home-agenda-link {
-    font-size: 12px;
+    font-size: clamp(10px, 3cqw, 12px);
     color: #8a9e78;
     text-decoration: none;
     background-color: #f0f7ea;
@@ -212,6 +231,10 @@
     white-space: nowrap;
     flex-shrink: 0;
     transition: background-color 0.15s;
+}
+
+.home-agenda-link i {
+    font-size: clamp(10px, 3cqw, 12px) !important;
 }
 
 .home-agenda-link:hover {
@@ -235,6 +258,8 @@
     padding: 22px;
     display: flex;
     flex-direction: column;
+    container-type: inline-size;
+    container-name: home-resumo;
 }
 
 .home-resumo-header {
@@ -247,9 +272,14 @@
     gap: 8px;
 
     font-family: 'Playfair Display', serif;
-    font-size: 17px;
+    font-size: clamp(13px, 4cqw, 17px);
     font-weight: 500;
     color: #3d3a28;
+    white-space: nowrap;
+}
+
+.home-resumo-header h2 i {
+    font-size: clamp(13px, 4cqw, 17px) !important;
 }
 
 .resumo-item {
@@ -271,14 +301,19 @@
     align-items: center;
     gap: 8px;
 
-    font-size: 14px;
+    font-size: clamp(11px, 3.6cqw, 14px);
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .resumo-item strong {
-    font-size: 18px;
+    font-size: clamp(14px, 4.8cqw, 18px);
     font-weight: 600;
     color: #3d3a28;
+    flex-shrink: 0;
 }
 
 
@@ -308,6 +343,8 @@
     border: 1px solid #ede8e0;
     border-radius: 8px;
     transition: background-color 0.15s;
+    container-type: inline-size;
+    container-name: item-agenda;
 }
 
 .item-agenda:hover {
@@ -316,7 +353,7 @@
 
 /* caixinha do horário — mantém o strong do HTML original */
 .item-agenda strong {
-    font-size: 13px;
+    font-size: clamp(10px, 4cqw, 13px);
     font-weight: 500;
     color: #5a5a48;
     background-color: #ede8e0;
@@ -326,6 +363,7 @@
     text-align: center;
     flex-shrink: 0;
     display: inline-block;
+    white-space: nowrap;
 }
 
 /* Horário - Agendada */
@@ -353,12 +391,12 @@
 }
 
 .item-agenda-avatar {
-    width: 32px;
-    height: 32px;
+    width: clamp(24px, 9cqw, 32px);
+    height: clamp(24px, 9cqw, 32px);
     border-radius: 50%;
     background-color: #e6e1d5;
     color: #5a5a48;
-    font-size: 11px;
+    font-size: clamp(9px, 3.2cqw, 11px);
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -372,7 +410,7 @@
 }
 
 .item-agenda-name {
-    font-size: 13px;
+    font-size: clamp(10px, 3.6cqw, 13px);
     font-weight: 500;
     color: #3d3a28;
     white-space: nowrap;
@@ -381,13 +419,13 @@
 }
 
 .item-agenda-sub {
-    font-size: 11px;
+    font-size: clamp(8px, 3cqw, 11px);
     color: #a0a090;
     margin-top: 2px;
 }
 
 .item-agenda-badge {
-    font-size: 14px;
+    font-size: clamp(10px, 4cqw, 14px);
     padding: 3px 10px;
     border-radius: 20px;
     white-space: nowrap;

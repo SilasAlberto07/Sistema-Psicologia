@@ -74,9 +74,28 @@
     color: #a0a090;
 }
 
+.tabela-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid #ede8e0;
+}
+
 .tabela-sessoes {
     width: 100%;
+    min-width: 720px; /* garante espaço mínimo pra tudo ficar numa linha só */
     border-collapse: collapse;
+}
+
+/* Coluna de Ação nunca quebra os botões em mais de uma linha */
+.tabela-sessoes td:last-child {
+    white-space: nowrap;
+}
+
+.tabela-sessoes td:last-child button {
+    display: inline-block;
+    margin: 2px 3px;
+    white-space: nowrap;
 }
 
 .tabela-sessoes th {
