@@ -83,6 +83,7 @@
     width: 100%;
     border-radius: 12px;
     border: 1px solid #ede8e0;
+    overflow-x: auto;
     container-type: inline-size;
     container-name: tabela-sessoes;
 }
@@ -107,8 +108,8 @@
     display: inline-block;
     margin: 0;
     white-space: nowrap;
-    padding: clamp(4px, 1cqw, 7px) clamp(6px, 1.6cqw, 12px);
-    font-size: clamp(10px, 1.4cqw, 12px);
+    padding: clamp(3px, 1cqw, 7px) clamp(5px, 1.6cqw, 12px);
+    font-size: clamp(9px, 1.4cqw, 12px);
 }
 
 .tabela-sessoes th {
@@ -155,6 +156,7 @@
 }
 
 .input-atendido {
+    max-width: clamp(70px, 13cqw, 150px);
     height: clamp(24px, 3.6cqw, 30px);
     padding: 0 clamp(5px, 1.4cqw, 10px);
     border: 1px solid #ddd8ce;

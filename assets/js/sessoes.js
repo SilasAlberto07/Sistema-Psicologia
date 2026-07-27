@@ -613,12 +613,48 @@ document.addEventListener("change", async (e) => {
 // PRONTUÁRIO
 // =========================
 
-document.addEventListener("click", function (event) {
+document.addEventListener("click", async function (event) {
 
-    if (event.target.classList.contains("btn-evolucao")) {
-        const id = event.target.dataset.id;
+    if (!event.target.classList.contains("btn-evolucao")) return;
+
+    const id = event.target.dataset.id;
+    const origem = event.target.dataset.origem === "casal" ? "casal" : "individual";
+
+    // sessão de paciente individual: comportamento igual ao de sempre
+    if (origem === "individual") {
         window.location.href = `evolucao.html?id=${id}`;
+        return;
     }
+
+    // 1ª Consulta do casal: essa linha não tem seleção de "atendido"
+    // (é tratada como consulta conjunta), então mantém o comportamento atual
+    if (event.target.dataset.index === undefined) {
+        window.location.href = `evolucao.html?id=${id}&origem=casal`;
+        return;
+    }
+
+    // sessão normal de casal: descobre para quem é essa sessão específica
+    const linha = event.target.closest("tr");
+    const selectAtendido = linha ? linha.querySelector(".input-atendido") : null;
+    const atendido = selectAtendido ? selectAtendido.value : "";
+
+    if (!atendido) {
+        mostrarMensagem(
+            "Selecione para quem é essa sessão em \"Atendido(a)\" antes de abrir o prontuário.",
+            "warning"
+        );
+        return;
+    }
+
+    const casais = JSON.parse(await window.storage.getItem("casais")) || [];
+    const casal = casais.find(c => c.id == id);
+
+    const nomePessoa = atendido === "p1"
+        ? (casal?.p1NomeCompleto || "Pessoa 1")
+        : (casal?.p2NomeCompleto || "Pessoa 2");
+
+    window.location.href =
+        `evolucao.html?id=${id}&origem=casal&pessoa=${atendido}&nome=${encodeURIComponent(nomePessoa)}`;
 });
 
 // =========================
