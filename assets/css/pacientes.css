@@ -183,6 +183,10 @@
     transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 }
 
+.input-telefone:hover {
+    background-color: #ffffff;
+}
+
 /* ═══════════════════════════════════════════════
    10. AJUSTE PARA TELAS MENORES (notebooks)
 ═══════════════════════════════════════════════ */
