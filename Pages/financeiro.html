@@ -238,6 +238,11 @@
 
             <div class="modal-body">
 
+                <!-- Info de pagamento (só aparece ao editar um lançamento existente) -->
+                <div class="grupo full" id="infoPagamentoEdicaoWrapper" style="display:none;">
+                    <p id="infoPagamentoEdicao" class="info-pagamento"></p>
+                </div>
+
                 <!-- Tipo -->
 
                 <div class="grupo">
@@ -300,11 +305,11 @@
 
                     <label>
 
-                        Valor
+                        Valor Total
 
                     </label>
 
-                    <input type="number" id="valorModal" min="0" step="0.01">
+                    <input type="number" id="valorModal" min="0" step="0.01" placeholder="Ex.: 1600,00">
 
                 </div>
 
@@ -336,27 +341,28 @@
 
                 </div>
 
-                <!-- Status -->
+                <!-- Valor Recebido Agora -->
 
                 <div class="grupo">
 
                     <label>
 
-                        Status
+                        Valor Recebido Agora
 
                     </label>
 
-                    <select id="statusModal">
+                    <input type="number" id="valorRecebidoModal" min="0" step="0.01" placeholder="Ex.: 800,00">
 
-                        <option>Recebido</option>
+                </div>
 
-                        <option>Pendente</option>
+                <!-- Cancelado -->
 
-                        <option>Pago</option>
+                <div class="grupo checkbox-inline">
 
-                        <option>Cancelado</option>
-
-                    </select>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="canceladoModal">
+                        Marcar como cancelado
+                    </label>
 
                 </div>
 
@@ -390,6 +396,49 @@
 
                 </button>
 
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==================================================
+     MODAL DE PAGAMENTO
+=================================================== -->
+
+    <div class="modal" id="modalPagamento">
+
+        <div class="modal-box modal-box-pequeno">
+
+            <div class="modal-header">
+
+                <h2>Registrar Pagamento</h2>
+
+                <button id="fecharModalPagamento">
+                    <i class="ti ti-x"></i>
+                </button>
+
+            </div>
+
+            <div class="modal-body modal-body-coluna">
+
+                <p id="infoPagamentoModal" class="info-pagamento"></p>
+
+                <div class="grupo">
+                    <label>Valor Recebido Agora</label>
+                    <input type="number" id="valorPagamentoInput" min="0" step="0.01" placeholder="Ex.: 800,00">
+                </div>
+
+                <div class="grupo">
+                    <label>Data do Pagamento</label>
+                    <input type="date" id="dataPagamentoInput">
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-cancelar" id="cancelarModalPagamento">Cancelar</button>
+                <button class="btn-salvar" id="confirmarModalPagamento">Confirmar</button>
             </div>
 
         </div>

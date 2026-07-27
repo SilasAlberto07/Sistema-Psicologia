@@ -41,16 +41,33 @@ async function iniciarImpressaoProntuario() {
 
         const evolucoes = paciente.evolucoes || [];
 
-        let linhasHTML = "";
+        let sessoesHTML = "";
 
         evolucoes.forEach((registro, index) => {
-            linhasHTML += `
-            <tr>
-                <td class="centro">${String(index + 1).padStart(2, "0")}</td>
-                <td class="centro">${registro.data}</td>
-                <td>${registro.texto || "-"}</td>
-                <td>${registro.plano || "-"}</td>
-            </tr>
+            sessoesHTML += `
+            <div class="sessao-bloco">
+
+                <div class="sessao-cabecalho">
+                    <span class="sessao-numero">Sessão ${String(index + 1).padStart(2, "0")}</span>
+                    <span class="sessao-data">${registro.data || "-"}</span>
+                </div>
+
+                <div class="campo-impresso">
+                    <strong>Relato da Sessão</strong>
+                    <span>${registro.relato && String(registro.relato).trim() ? registro.relato : "-"}</span>
+                </div>
+
+                <div class="campo-impresso">
+                    <strong>Evolução / Impressão Clínica</strong>
+                    <span>${registro.texto && String(registro.texto).trim() ? registro.texto : "-"}</span>
+                </div>
+
+                <div class="campo-impresso">
+                    <strong>Plano de Ação</strong>
+                    <span>${registro.plano && String(registro.plano).trim() ? registro.plano : "-"}</span>
+                </div>
+
+            </div>
         `;
         });
 
@@ -58,6 +75,8 @@ async function iniciarImpressaoProntuario() {
         <div class="prontuario">
 
             <img class="marca-dagua" src="../assets/img/logo-marca-dagua.png" alt="">
+
+            <div class="tag-confidencial">Confidencial</div>
 
             <div class="cabecalho-print">
                 <div class="clinica-nome">Cláudia Bethânia — Psicóloga Clínica</div>
@@ -76,21 +95,9 @@ async function iniciarImpressaoProntuario() {
                 ${item("Telefone: ", paciente.telefone)}
             </div>
 
-            <h2 class="titulo-secao">Evolução das Sessões</h2>
+            <h2 class="titulo-secao">Registro de Sessões</h2>
 
-            <table class="tabela-impressa">
-                <thead>
-                    <tr>
-                        <th style="width:60px">Sessão</th>
-                        <th style="width:100px">Data/Hora</th>
-                        <th>Evolução da sessão</th>
-                        <th>Plano de ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${linhasHTML || `<tr><td colspan="4" class="centro">Nenhum registro de evolução</td></tr>`}
-                </tbody>
-            </table>
+            ${sessoesHTML || `<p class="sem-registro">Nenhum registro de sessão até o momento.</p>`}
 
             <div class="assinatura">
                 <div class="linha-assinatura"></div>

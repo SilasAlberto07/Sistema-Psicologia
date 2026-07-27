@@ -22,7 +22,7 @@ const filtroMes = document.getElementById("filtroMes");
 
 
 // ==========================================
-// MODAL
+// MODAL PRINCIPAL (novo lançamento / edição)
 // ==========================================
 
 const modal = document.getElementById("modalFinanceiro");
@@ -36,17 +36,21 @@ const salvarModal = document.getElementById("salvarModal");
 
 
 // ==========================================
-// CAMPOS
+// CAMPOS DO MODAL PRINCIPAL
 // ==========================================
 
 const tipoLancamento = document.getElementById("tipoModal");
 const paciente = document.getElementById("pacienteModal");
 const categoria = document.getElementById("categoriaModal");
 const descricao = document.getElementById("descricaoModal");
-const valor = document.getElementById("valorModal");
+const valorTotalInput = document.getElementById("valorModal");
+const valorRecebidoAgoraInput = document.getElementById("valorRecebidoModal");
+const canceladoModal = document.getElementById("canceladoModal");
 const formaPagamento = document.getElementById("pagamentoModal");
-const status = document.getElementById("statusModal");
 const data = document.getElementById("dataModal");
+
+const infoPagamentoEdicaoWrapper = document.getElementById("infoPagamentoEdicaoWrapper");
+const infoPagamentoEdicao = document.getElementById("infoPagamentoEdicao");
 
 
 // índice para edição
@@ -55,7 +59,22 @@ let editando = null;
 
 
 // ==========================================
-// ABRIR MODAL
+// MODAL DE PAGAMENTO (registrar recebimento avulso)
+// ==========================================
+
+const modalPagamento = document.getElementById("modalPagamento");
+const infoPagamentoModal = document.getElementById("infoPagamentoModal");
+const valorPagamentoInput = document.getElementById("valorPagamentoInput");
+const dataPagamentoInput = document.getElementById("dataPagamentoInput");
+const fecharModalPagamento = document.getElementById("fecharModalPagamento");
+const cancelarModalPagamento = document.getElementById("cancelarModalPagamento");
+const confirmarModalPagamento = document.getElementById("confirmarModalPagamento");
+
+let indicePagamentoAtual = null;
+
+
+// ==========================================
+// ABRIR MODAL PRINCIPAL
 // ==========================================
 
 function abrirModal(tipo) {
@@ -71,6 +90,8 @@ function abrirModal(tipo) {
     data.value = new Date().toISOString().split("T")[0];
 
     atualizarCategorias();
+
+    infoPagamentoEdicaoWrapper.style.display = "none";
 
     modal.classList.add("ativo");
 
@@ -101,11 +122,13 @@ function limparCampos() {
 
     descricao.value = "";
 
-    valor.value = "";
+    valorTotalInput.value = "";
+
+    valorRecebidoAgoraInput.value = "";
+
+    canceladoModal.checked = false;
 
     formaPagamento.value = "Pix";
-
-    status.value = "Recebido";
 
 }
 
@@ -144,7 +167,7 @@ function atualizarCategorias() {
 
 
 // ==========================================
-// EVENTOS
+// EVENTOS — MODAL PRINCIPAL
 // ==========================================
 
 btnReceita.addEventListener("click", () => {
@@ -178,6 +201,7 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
 
         fechar();
+        fecharModalPagamentoFn();
 
     }
 
@@ -228,14 +252,77 @@ function obterMes(dataISO) {
 
 
 // ==========================================
-// SALVAR
+// CÁLCULO DE VALOR TOTAL / PAGO / RESTANTE
+// ==========================================
+// Compatível com registros antigos que só tinham
+// "valor" + "status" (sem pagamentos parciais).
+
+function valorTotalDe(item) {
+    return Number(item.valorTotal ?? item.valor ?? 0);
+}
+
+function pagamentosDe(item) {
+
+    if (Array.isArray(item.pagamentos)) {
+        return item.pagamentos;
+    }
+
+    // registro antigo: se já estava marcado como recebido/pago,
+    // considera que o valor total inteiro já tinha sido pago
+    if (item.status === "Recebido" || item.status === "Pago") {
+        return [{
+            data: item.data,
+            dataISO: item.dataISO,
+            valor: valorTotalDe(item)
+        }];
+    }
+
+    return [];
+}
+
+function valorPagoDe(item) {
+    return pagamentosDe(item).reduce((soma, p) => soma + Number(p.valor || 0), 0);
+}
+
+function valorRestanteDe(item) {
+    return Math.max(valorTotalDe(item) - valorPagoDe(item), 0);
+}
+
+function estaCancelado(item) {
+    return item.cancelado === true || item.status === "Cancelado";
+}
+
+function statusCalculado(item) {
+
+    if (estaCancelado(item)) {
+        return "Cancelado";
+    }
+
+    const restante = valorRestanteDe(item);
+    const pago = valorPagoDe(item);
+
+    if (restante <= 0 && pago > 0) {
+        return item.tipo === "Receita" ? "Recebido" : "Pago";
+    }
+
+    if (pago > 0) {
+        return "Parcial";
+    }
+
+    return "Pendente";
+
+}
+
+
+// ==========================================
+// SALVAR (novo lançamento ou edição)
 // ==========================================
 
 salvarModal.addEventListener("click", async () => {
 
-    if (valor.value === "") {
+    if (valorTotalInput.value === "") {
         mostrarMensagem(
-            "Informe o valor.",
+            "Informe o valor total.",
             "warning"
         );
         return;
@@ -249,23 +336,82 @@ salvarModal.addEventListener("click", async () => {
         return;
     }
 
-    const registro = {
-        tipo: tipoLancamento.value,
-        paciente: paciente.value.trim(),
-        categoria: categoria.value,
-        descricao: descricao.value.trim(),
-        valor: Number(valor.value),
-        pagamento: formaPagamento.value,
-        status: status.value,
-        data: formatarData(data.value),
-        dataISO: data.value,
-        mes: obterMes(data.value)
-    };
+    const valorTotalNum = Number(valorTotalInput.value);
+    const recebidoAgoraNum = valorRecebidoAgoraInput.value === ""
+        ? 0
+        : Number(valorRecebidoAgoraInput.value);
+
+    if (recebidoAgoraNum < 0) {
+        mostrarMensagem(
+            "O valor recebido não pode ser negativo.",
+            "warning"
+        );
+        return;
+    }
 
     if (editando === null) {
+
+        // ----- novo lançamento -----
+
+        const pagamentos = [];
+
+        if (recebidoAgoraNum > 0) {
+            pagamentos.push({
+                data: formatarData(data.value),
+                dataISO: data.value,
+                valor: recebidoAgoraNum
+            });
+        }
+
+        const registro = {
+            tipo: tipoLancamento.value,
+            paciente: paciente.value.trim(),
+            categoria: categoria.value,
+            descricao: descricao.value.trim(),
+            valorTotal: valorTotalNum,
+            pagamentos,
+            pagamento: formaPagamento.value,
+            cancelado: canceladoModal.checked,
+            data: formatarData(data.value),
+            dataISO: data.value,
+            mes: obterMes(data.value)
+        };
+
         financeiro.push(registro);
+
     } else {
-        financeiro[editando] = registro;
+
+        // ----- editando um lançamento existente -----
+        // mantém o histórico de pagamentos já registrado;
+        // se informar um novo "valor recebido agora", isso
+        // conta como mais um pagamento adicionado ao histórico
+
+        const registroAtual = financeiro[editando];
+        const pagamentosExistentes = pagamentosDe(registroAtual).slice();
+
+        if (recebidoAgoraNum > 0) {
+            pagamentosExistentes.push({
+                data: formatarData(data.value),
+                dataISO: data.value,
+                valor: recebidoAgoraNum
+            });
+        }
+
+        financeiro[editando] = {
+            ...registroAtual,
+            tipo: tipoLancamento.value,
+            paciente: paciente.value.trim(),
+            categoria: categoria.value,
+            descricao: descricao.value.trim(),
+            valorTotal: valorTotalNum,
+            pagamentos: pagamentosExistentes,
+            pagamento: formaPagamento.value,
+            cancelado: canceladoModal.checked,
+            data: formatarData(data.value),
+            dataISO: data.value,
+            mes: obterMes(data.value)
+        };
+
     }
 
     await window.storage.setItem(
@@ -274,8 +420,7 @@ salvarModal.addEventListener("click", async () => {
     );
 
     fechar();
-    atualizarCards();
-    carregarTabela();
+    atualizarFinanceiro();
 });
 
 // ======================================================
@@ -288,6 +433,8 @@ salvarModal.addEventListener("click", async () => {
 // ==========================================
 // ATUALIZAR CARDS
 // ==========================================
+// "Receitas" e "Despesas" mostram o que já entrou/saiu de fato
+// (soma dos pagamentos recebidos), não o valor total contratado.
 
 function atualizarCards() {
 
@@ -297,15 +444,21 @@ function atualizarCards() {
 
     financeiro.forEach(item => {
 
-        if (item.status === "Pendente") {
-            qtdPendentes++;
+        if (estaCancelado(item)) {
+            return;
+        }
+
+        const pago = valorPagoDe(item);
+        const restante = valorRestanteDe(item);
+
+        if (item.tipo === "Receita") {
+            receitas += pago;
         } else {
-            // só entra na soma se estiver "Recebido" ou "Pago"
-            if (item.tipo === "Receita") {
-                receitas += Number(item.valor);
-            } else {
-                despesas += Number(item.valor);
-            }
+            despesas += pago;
+        }
+
+        if (restante > 0) {
+            qtdPendentes++;
         }
 
     });
@@ -346,6 +499,12 @@ function carregarTabela() {
 
         }
 
+        const total = valorTotalDe(item);
+        const pago = valorPagoDe(item);
+        const restante = valorRestanteDe(item);
+        const cancelado = estaCancelado(item);
+        const statusFinal = statusCalculado(item);
+
         tabela.innerHTML += `
 
         <tr>
@@ -354,16 +513,28 @@ function carregarTabela() {
             <td>${item.tipo}</td>
             <td>${item.paciente || "-"}</td>
             <td>${item.descricao}</td>
-            <td>${moeda(item.valor)}</td>
+            <td>
+                <div class="valor-info">
+                    <strong>${moeda(total)}</strong>
+                    ${(!cancelado && pago > 0 && restante > 0) ? `<small class="valor-restante">Falta ${moeda(restante)}</small>` : ""}
+                </div>
+            </td>
             <td>${item.pagamento}</td>
 
             <td>
-                <span class="status ${item.status.toLowerCase()}">
-                    ${item.status}
+                <span class="status ${statusFinal.toLowerCase()}">
+                    ${statusFinal}
                 </span>
             </td>
 
             <td>
+
+                ${(!cancelado && restante > 0) ? `
+                <button
+                    class="btn-receber-financeiro"
+                    onclick="abrirModalPagamento(${index})">
+                    Receber
+                </button>` : ""}
 
                 <button
                     class="btn-editar-financeiro"
@@ -387,7 +558,7 @@ function carregarTabela() {
 
         <tr>
 
-            <td colspan="9">
+            <td colspan="8">
                 Nenhum lançamento encontrado.
             </td>
 
@@ -452,7 +623,7 @@ async function iniciarFinanceiro() {
 // ======================================================
 // SISTEMA FINANCEIRO
 // Parte 3
-// Editar • Excluir • LocalStorage
+// Editar • Excluir • Registrar Pagamento • LocalStorage
 // ======================================================
 
 
@@ -472,11 +643,22 @@ function editarRegistro(index) {
     paciente.value = item.paciente;
     categoria.value = item.categoria;
     descricao.value = item.descricao;
-    valor.value = item.valor;
+    valorTotalInput.value = valorTotalDe(item);
+    valorRecebidoAgoraInput.value = "";
+    canceladoModal.checked = estaCancelado(item);
     formaPagamento.value = item.pagamento;
-    status.value = item.status;
     data.value = item.dataISO;
 
+    const total = valorTotalDe(item);
+    const pago = valorPagoDe(item);
+    const restante = valorRestanteDe(item);
+
+    infoPagamentoEdicao.innerHTML =
+        `Total: <strong>${moeda(total)}</strong> &nbsp;·&nbsp; ` +
+        `Já pago: <strong>${moeda(pago)}</strong> &nbsp;·&nbsp; ` +
+        `Falta: <strong>${moeda(restante)}</strong>`;
+
+    infoPagamentoEdicaoWrapper.style.display = "block";
 
 }
 
@@ -515,5 +697,110 @@ async function salvarFinanceiro() {
 
     atualizarFinanceiro();
 }
+
+
+// ==========================================
+// MODAL DE PAGAMENTO (registrar recebimento avulso)
+// ==========================================
+
+function abrirModalPagamento(index) {
+
+    indicePagamentoAtual = index;
+    const item = financeiro[index];
+
+    const total = valorTotalDe(item);
+    const pago = valorPagoDe(item);
+    const restante = valorRestanteDe(item);
+
+    infoPagamentoModal.innerHTML =
+        `Total: <strong>${moeda(total)}</strong> &nbsp;·&nbsp; ` +
+        `Já pago: <strong>${moeda(pago)}</strong> &nbsp;·&nbsp; ` +
+        `Falta: <strong>${moeda(restante)}</strong>`;
+
+    valorPagamentoInput.value = "";
+    dataPagamentoInput.value = new Date().toISOString().split("T")[0];
+
+    modalPagamento.classList.add("ativo");
+
+}
+
+function fecharModalPagamentoFn() {
+
+    modalPagamento.classList.remove("ativo");
+    indicePagamentoAtual = null;
+
+}
+
+fecharModalPagamento.addEventListener("click", fecharModalPagamentoFn);
+cancelarModalPagamento.addEventListener("click", fecharModalPagamentoFn);
+
+modalPagamento.addEventListener("click", (e) => {
+
+    if (e.target === modalPagamento) {
+        fecharModalPagamentoFn();
+    }
+
+});
+
+confirmarModalPagamento.addEventListener("click", async () => {
+
+    if (indicePagamentoAtual === null) {
+        return;
+    }
+
+    const valorRecebido = Number(valorPagamentoInput.value);
+
+    if (!valorRecebido || valorRecebido <= 0) {
+        mostrarMensagem(
+            "Informe um valor válido.",
+            "warning"
+        );
+        return;
+    }
+
+    if (dataPagamentoInput.value === "") {
+        mostrarMensagem(
+            "Informe a data do pagamento.",
+            "warning"
+        );
+        return;
+    }
+
+    const item = financeiro[indicePagamentoAtual];
+    const restanteAtual = valorRestanteDe(item);
+
+    if (valorRecebido > restanteAtual) {
+        mostrarMensagem(
+            `Esse valor é maior que o restante (${moeda(restanteAtual)}). Ajuste o valor.`,
+            "warning"
+        );
+        return;
+    }
+
+    if (!Array.isArray(item.pagamentos)) {
+        item.pagamentos = pagamentosDe(item);
+    }
+
+    item.pagamentos.push({
+        data: formatarData(dataPagamentoInput.value),
+        dataISO: dataPagamentoInput.value,
+        valor: valorRecebido
+    });
+
+    // garante que o valorTotal fique explícito no registro
+    // (registros antigos usavam só o campo "valor")
+    item.valorTotal = valorTotalDe(item);
+
+    await salvarFinanceiro();
+
+    fecharModalPagamentoFn();
+
+    mostrarMensagem(
+        "Pagamento registrado com sucesso!",
+        "success"
+    );
+
+});
+
 
 iniciarFinanceiro();

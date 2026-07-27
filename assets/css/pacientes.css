@@ -33,24 +33,32 @@
 
 /* Permite a tabela rolar na horizontal em telas menores,
    em vez de espremer e quebrar linha dentro das células. */
+/* Container query: o conteúdo da tabela escala com a largura
+   disponível em vez de forçar scroll horizontal. */
 .tabela-wrapper {
     width: 100%;
-    overflow-x: auto;
     border-radius: 12px;
     border: 1px solid #ede8e0;
+    container-type: inline-size;
+    container-name: tabela-pacientes;
 }
 
 .tabela {
     width: 100%;
-    min-width: 820px; /* garante espaço mínimo pra tudo ficar numa linha só */
     border-collapse: collapse;
     background-color: #ffffff;
     border-radius: 12px;
 }
 
-/* Coluna de Ações nunca quebra os botões em mais de uma linha */
+/* Coluna de Ações: botões escalam com o container e quebram
+   dentro da própria célula em vez de forçar scroll horizontal */
 .tabela td:last-child {
-    white-space: nowrap;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    white-space: normal;
 }
 
 .tabela td:last-child .btnAnamnese,
@@ -58,8 +66,10 @@
 .tabela td:last-child .btnDelete,
 .tabela td:last-child button {
     display: inline-block;
-    margin: 2px 3px;
+    margin: 0;
     white-space: nowrap;
+    padding: clamp(4px, 1cqw, 7px) clamp(6px, 1.6cqw, 12px);
+    font-size: clamp(10px, 1.4cqw, 12px);
 }
 
 .tabela thead tr {
@@ -67,8 +77,8 @@
 }
 
 .tabela th {
-    padding: 13px 16px;
-    font-size: 11px;
+    padding: clamp(8px, 2cqw, 13px) clamp(6px, 1.6cqw, 16px);
+    font-size: clamp(9px, 1.4cqw, 11px);
     font-weight: 500;
     color: #5a5a48;
     text-transform: uppercase;
@@ -78,9 +88,9 @@
 }
 
 .tabela td {
-    padding: 13px 16px;
+    padding: clamp(8px, 2cqw, 13px) clamp(6px, 1.6cqw, 16px);
     text-align: center;
-    font-size: 13px;
+    font-size: clamp(10px, 1.6cqw, 13px);
     color: #4a4a38;
     border-bottom: 1px solid #f5f2ec;
     vertical-align: middle;
@@ -95,15 +105,15 @@
 }
 
 .input-sessoes {
-    width: 55px;
-    height: 30px;
-    padding: 0 11px;
+    width: clamp(38px, 6cqw, 55px);
+    height: clamp(24px, 3.6cqw, 30px);
+    padding: 0 clamp(6px, 1.4cqw, 11px);
     text-align: center;
     border: 1px solid #ddd8ce;
     border-radius: 20px;
     background-color: #faf8f4;
     font-family: 'Inter', sans-serif;
-    font-size: 13px;
+    font-size: clamp(11px, 1.6cqw, 13px);
     color: #3d3a28;
     outline: none;
 }
@@ -113,14 +123,14 @@
 }
 
 .input-consulta {
-    width: 100px;
-    height: 30px;
-    padding: 0 11px;
+    width: clamp(70px, 11cqw, 100px);
+    height: clamp(24px, 3.6cqw, 30px);
+    padding: 0 clamp(6px, 1.2cqw, 11px);
     background-color: #faf8f4;
     border: 1px solid #ddd8ce;
     border-radius: 20px;
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
+    font-size: clamp(10px, 1.4cqw, 12px);
     color: #3d3a28;
     outline: none;
     cursor: pointer;
@@ -132,7 +142,7 @@
 }
 
 .nome-paciente{
-    max-width: 150px;
+    max-width: clamp(70px, 15cqw, 150px);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -140,7 +150,7 @@
 
 .badge-casal {
     color: #7a8e69;
-    font-size: 13px;
+    font-size: clamp(11px, 1.6cqw, 13px);
     vertical-align: middle;
 }
 
@@ -169,36 +179,17 @@
     color: #8a9e78;
 }
 .input-telefone{
-    width: 125px;
-    height: 30px;
-    padding: 0 11px;
+    width: clamp(85px, 13cqw, 125px);
+    height: clamp(24px, 3.6cqw, 30px);
+    padding: 0 clamp(6px, 1.2cqw, 11px);
     background-color: #faf8f4;
     border: 1px solid #ddd8ce;
     border-radius: 20px;
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
+    font-size: clamp(10px, 1.4cqw, 12px);
     color: #3d3a28;
     outline: none;
     cursor: pointer;
     transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 }
 
-.input-telefone:hover {
-    background-color: #ffffff;
-}
-
-/* ═══════════════════════════════════════════════
-   10. AJUSTE PARA TELAS MENORES (notebooks)
-═══════════════════════════════════════════════ */
-@media (max-width: 900px) {
-    .tabela th,
-    .tabela td {
-        padding: 10px 10px;
-        font-size: 12px;
-    }
-
-    .tabela td:last-child button {
-        padding: 4px 8px;
-        font-size: 11px;
-    }
-}

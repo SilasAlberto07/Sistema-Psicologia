@@ -52,6 +52,8 @@
     padding: 20px 22px;
     transition: border-color 0.2s;
     margin-top: 16px;
+    container-type: inline-size;
+    container-name: paciente-sessao-card;
 }
 
 .paciente-sessao-card:hover {
@@ -63,44 +65,55 @@
 }
 
 .paciente-header h2 {
-    font-size: 16px;
+    font-size: clamp(13px, 2.4cqw, 16px);
     font-weight: 500;
     color: #3d3a28;
     margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .paciente-header small {
-    font-size: 11px;
+    font-size: clamp(9px, 1.6cqw, 11px);
     color: #a0a090;
 }
 
 .tabela-wrapper {
     width: 100%;
-    overflow-x: auto;
     border-radius: 12px;
     border: 1px solid #ede8e0;
+    container-type: inline-size;
+    container-name: tabela-sessoes;
 }
 
 .tabela-sessoes {
     width: 100%;
-    min-width: 720px; /* garante espaço mínimo pra tudo ficar numa linha só */
     border-collapse: collapse;
 }
 
-/* Coluna de Ação nunca quebra os botões em mais de uma linha */
+/* Coluna de Ação: botões escalam com o container e quebram
+   dentro da própria célula em vez de forçar scroll horizontal */
 .tabela-sessoes td:last-child {
-    white-space: nowrap;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    white-space: normal;
 }
 
 .tabela-sessoes td:last-child button {
     display: inline-block;
-    margin: 2px 3px;
+    margin: 0;
     white-space: nowrap;
+    padding: clamp(4px, 1cqw, 7px) clamp(6px, 1.6cqw, 12px);
+    font-size: clamp(10px, 1.4cqw, 12px);
 }
 
 .tabela-sessoes th {
-    padding: 8px 10px;
-    font-size: 11px;
+    padding: clamp(6px, 1.4cqw, 8px) clamp(6px, 1.6cqw, 10px);
+    font-size: clamp(9px, 1.4cqw, 11px);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -111,9 +124,9 @@
 }
 
 .tabela-sessoes td {
-    padding: 9px 10px;
+    padding: clamp(6px, 1.6cqw, 9px) clamp(6px, 1.6cqw, 10px);
     text-align: center;
-    font-size: 13px;
+    font-size: clamp(10px, 1.6cqw, 13px);
     color: #4a4a38;
     border-bottom: 1px solid #f5f2ec;
     vertical-align: middle;
@@ -124,14 +137,14 @@
 }
 
 .status {
-    height: 30px;
-    padding: 0 12px;
+    height: clamp(24px, 3.6cqw, 30px);
+    padding: 0 clamp(6px, 1.6cqw, 12px);
     border: 1px solid #ddd8ce;
     border-radius: 20px;
     background-color: #faf8f4;
     color: #5a5a48;
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
+    font-size: clamp(10px, 1.4cqw, 12px);
     cursor: pointer;
     outline: none;
     transition: border-color 0.15s;
@@ -142,13 +155,13 @@
 }
 
 .input-atendido {
-    height: 30px;
-    padding: 0 10px;
+    height: clamp(24px, 3.6cqw, 30px);
+    padding: 0 clamp(5px, 1.4cqw, 10px);
     border: 1px solid #ddd8ce;
     border-radius: 20px;
     background-color: #faf8f4;
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
+    font-size: clamp(10px, 1.4cqw, 12px);
     color: #3d3a28;
     outline: none;
     cursor: pointer;
@@ -162,28 +175,28 @@
 
 .input-data,
 .input-horario {
-    height: 30px;
-    padding: 0 10px;
+    height: clamp(24px, 3.6cqw, 30px);
+    padding: 0 clamp(5px, 1.4cqw, 10px);
     border: 1px solid #ddd8ce;
     border-radius: 20px;
     background-color: #faf8f4;
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
+    font-size: clamp(10px, 1.4cqw, 12px);
     color: #3d3a28;
     outline: none;
     transition: border-color 0.2s;
 }
 
 .input-duracao {
-    width: 120px;
-    height: 30px;
-    padding: 0 8px;
+    width: clamp(85px, 13cqw, 120px);
+    height: clamp(24px, 3.6cqw, 30px);
+    padding: 0 clamp(5px, 1cqw, 8px);
     text-align: center;
     border: 1px solid #ddd8ce;
     border-radius: 20px;
     background-color: #faf8f4;
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
+    font-size: clamp(10px, 1.4cqw, 12px);
     color: #3d3a28;
     outline: none;
     transition: border-color 0.2s;
@@ -250,19 +263,19 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 10px;
+    padding: clamp(3px, 0.8cqw, 4px) clamp(6px, 1.6cqw, 10px);
     border-radius: 20px;
     background-color: #eaf0e3;
     color: #5c7a48;
-    font-size: 11px;
+    font-size: clamp(9px, 1.4cqw, 11px);
     font-weight: 600;
     white-space: nowrap;
 }
 
 .tipo-consulta{
-    font-size: 12px;
+    font-size: clamp(10px, 1.4cqw, 12px);
     font-weight: 500;
-    padding: 3px 10px;
+    padding: clamp(2px, 0.6cqw, 3px) clamp(6px, 1.6cqw, 10px);
     border-radius: 999px;
 }
 

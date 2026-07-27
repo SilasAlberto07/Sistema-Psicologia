@@ -92,6 +92,22 @@ body {
     letter-spacing: 0.02em;
 }
 
+/* selo discreto de confidencialidade, canto superior direito da folha */
+.tag-confidencial {
+    position: absolute;
+    top: 40px;
+    right: 64px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #a8a8a8;
+    border: 1px solid #d8d8d8;
+    padding: 3px 9px;
+    border-radius: 3px;
+}
+
 /* ==========================
    IDENTIFICAÇÃO DO PACIENTE
    (grade de 2 colunas, rótulo pequeno / valor em destaque)
@@ -231,6 +247,60 @@ body {
 .tabela-impressa tbody tr {
     break-inside: avoid;
     page-break-inside: avoid;
+}
+
+/* ==========================
+   SESSÕES — bloco individual
+   (usado no prontuário no lugar de tabela, para
+   comportar textos longos como o Relato da Sessão)
+========================== */
+.sessao-bloco {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e2e2e2;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.sessao-bloco:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.sessao-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.sessao-numero {
+    display: inline-block;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #ffffff;
+    background: #2a2a2a;
+    padding: 4px 11px;
+    border-radius: 3px;
+}
+
+.sessao-data {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    font-weight: 600;
+    color: #555;
+    letter-spacing: 0.02em;
+}
+
+.sem-registro {
+    text-align: center;
+    font-size: 11pt;
+    color: #999;
+    padding: 24px 0;
 }
 
 /* ==========================
