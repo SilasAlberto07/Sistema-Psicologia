@@ -620,16 +620,18 @@ document.addEventListener("click", async function (event) {
     const id = event.target.dataset.id;
     const origem = event.target.dataset.origem === "casal" ? "casal" : "individual";
 
-    // sessão de paciente individual: comportamento igual ao de sempre
+    // a linha da 1ª Consulta nunca tem data-index (só as sessões numeradas têm)
+    const ehConsulta = event.target.dataset.index === undefined;
+
+    // sessão de paciente individual
     if (origem === "individual") {
-        window.location.href = `evolucao.html?id=${id}`;
+        window.location.href = `evolucao.html?id=${id}${ehConsulta ? "&tipo=consulta" : ""}`;
         return;
     }
 
-    // 1ª Consulta do casal: essa linha não tem seleção de "atendido"
-    // (é tratada como consulta conjunta), então mantém o comportamento atual
-    if (event.target.dataset.index === undefined) {
-        window.location.href = `evolucao.html?id=${id}&origem=casal`;
+    // 1ª Consulta do casal: registro conjunto, sem seleção de "atendido"
+    if (ehConsulta) {
+        window.location.href = `evolucao.html?id=${id}&origem=casal&tipo=consulta`;
         return;
     }
 

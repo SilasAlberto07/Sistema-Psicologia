@@ -2,6 +2,7 @@ const params = new URLSearchParams(window.location.search);
 const idPaciente = params.get("id");
 const pessoaParam = params.get("pessoa"); // "p1" | "p2" | null
 const nomeParam = params.get("nome");
+const tipoParam = params.get("tipo");     // "consulta" quando é o registro da 1ª Consulta
 
 function formatarDataBR(data) {
     if (!data) return "-";
@@ -69,30 +70,50 @@ async function iniciarImpressaoProntuario() {
             camposExtraCasal = item("Cônjuge / Parceiro(a): ", nomeParceiro);
         }
 
-        // só imprime as evoluções marcadas para essa pessoa
-        evolucoesParaImprimir = evolucoesParaImprimir.filter(e => e.pessoa === pessoaParam);
+        // imprime as evoluções dessa pessoa + a 1ª Consulta (compartilhada entre os dois)
+        evolucoesParaImprimir = evolucoesParaImprimir.filter(e =>
+            e.pessoa === pessoaParam || e.tipo === "consulta" || (!e.pessoa && !e.tipo)
+        );
 
     } else if (ehCasal) {
 
-        // registro conjunto (ex.: 1ª consulta) — mostra os dois nomes e tudo que não tem pessoa marcada
+        // registro conjunto (ex.: 1ª consulta) — mostra os dois nomes e
+        // SOMENTE as evoluções que não têm pessoa marcada (não mistura
+        // com as sessões individuais de p1/p2)
         nomeExibicao = `${paciente.p1NomeCompleto || "?"} e ${paciente.p2NomeCompleto || "?"}`;
         telefoneExibicao = paciente.telefoneSelecionado || paciente.p1Telefone || paciente.p2Telefone;
+
+        evolucoesParaImprimir = evolucoesParaImprimir.filter(e => e.tipo === "consulta" || (!e.pessoa && !e.tipo));
 
     } else {
         nomeExibicao = paciente.nomeCompleto;
         telefoneExibicao = paciente.telefone;
+
+        if (tipoParam === "consulta") {
+            // veio da linha da 1ª Consulta: mostra só ela, nada das sessões numeradas
+            evolucoesParaImprimir = evolucoesParaImprimir.filter(e => e.tipo === "consulta");
+        }
+        // senão (veio de uma sessão normal): mostra tudo, incluindo a 1ª consulta compartilhada
     }
 
     const evolucoes = evolucoesParaImprimir;
 
     let sessoesHTML = "";
+    let contador = 0;
 
-    evolucoes.forEach((registro, index) => {
+    evolucoes.forEach((registro) => {
+
+        const ehConsulta = registro.tipo === "consulta" || (!registro.pessoa && !registro.tipo && ehCasal);
+
+        const rotuloHTML = ehConsulta
+            ? `<span class="sessao-numero" style="background:#5c7a48;">📋 1ª Consulta</span>`
+            : `<span class="sessao-numero">Sessão ${String(++contador).padStart(2, "0")}</span>`;
+
         sessoesHTML += `
         <div class="sessao-bloco">
 
             <div class="sessao-cabecalho">
-                <span class="sessao-numero">Sessão ${String(index + 1).padStart(2, "0")}</span>
+                ${rotuloHTML}
                 <span class="sessao-data">${registro.data || "-"}</span>
             </div>
 
@@ -102,7 +123,7 @@ async function iniciarImpressaoProntuario() {
             </div>
 
             <div class="campo-impresso">
-                <strong>Evolução do Paciente</strong>
+                <strong>Evolução da Sessão</strong>
                 <span>${registro.texto && String(registro.texto).trim() ? registro.texto : "-"}</span>
             </div>
 

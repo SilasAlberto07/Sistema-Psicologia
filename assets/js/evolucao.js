@@ -4,6 +4,7 @@ const idPaciente = params.get("id");
 const origemParam = params.get("origem"); // "casal" ou null
 const pessoaParam = params.get("pessoa"); // "p1" | "p2" | null
 const nomeParam = params.get("nome");     // nome já pronto, vindo da tela de sessões
+const tipoParam = params.get("tipo");     // "consulta" quando aberto pela linha da 1ª Consulta
 
 const nomePaciente = document.getElementById("nomePaciente");
 const historico = document.getElementById("historico");
@@ -41,6 +42,11 @@ let ehCasal = false;
 let pessoaAtual = null; // "p1" | "p2" | null — só existe quando for sessão individual do casal
 let nomeAtual = "";
 let editandoIndex = null; // sempre se refere ao índice REAL em registro.evolucoes
+
+// true quando essa tela foi aberta pelo botão "Prontuário" da linha da
+// 1ª Consulta de um paciente INDIVIDUAL (o equivalente, para casal, é
+// "ehCasal && !pessoaAtual")
+let modoConsultaIndividual = false;
 
 let draftKey = `draft_evolucao_${idPaciente}`;
 
@@ -92,6 +98,7 @@ async function iniciarEvolucao() {
     } else {
         nomeAtual = registro.nomeCompleto;
         nomePaciente.innerText = nomeAtual;
+        modoConsultaIndividual = tipoParam === "consulta";
     }
 
     if (!Array.isArray(registro.evolucoes)) {
@@ -134,10 +141,26 @@ function evolucoesVisiveis() {
     return registro.evolucoes
         .map((item, indiceReal) => ({ item, indiceReal }))
         .filter(({ item }) => {
+            const ehRegistroConsulta = item.tipo === "consulta" || (!item.pessoa && !item.tipo && ehCasal);
+
             if (ehCasal && pessoaAtual) {
-                return item.pessoa === pessoaAtual;
+                // prontuário individual do casal: as sessões dessa pessoa
+                // + a 1ª Consulta, que é compartilhada entre os dois
+                return item.pessoa === pessoaAtual || ehRegistroConsulta;
             }
-            return true; // paciente individual, ou casal em modo conjunto
+            if (ehCasal && !pessoaAtual) {
+                // registro conjunto (aberto pela linha da 1ª Consulta): só ela mesma
+                return ehRegistroConsulta;
+            }
+
+            // paciente individual
+            if (modoConsultaIndividual) {
+                // aberto pela linha da 1ª Consulta: mostra só ela, nada das sessões
+                return item.tipo === "consulta";
+            }
+
+            // aberto por qualquer sessão normal: mostra tudo (sessões + a 1ª consulta compartilhada)
+            return true;
         });
 }
 
@@ -151,12 +174,20 @@ function renderHistorico() {
         return;
     }
 
+    let contador = 0; // conta só as sessões normais — a 1ª Consulta não entra nessa numeração
+
     visiveis.forEach(({ item, indiceReal }, posicao) => {
         const aberta = posicao === visiveis.length - 1 ? "open" : "";
+        const ehConsulta = item.tipo === "consulta" || (!item.pessoa && !item.tipo && ehCasal);
+
+        const rotuloHTML = ehConsulta
+            ? `<span style="background:#eaf0e3;color:#5c7a48;padding:3px 12px;border-radius:20px;font-weight:600;">📋 1ª Consulta</span>`
+            : `<span>Sessão ${String(++contador).padStart(2, "0")}</span>`;
+
         historico.innerHTML += `
             <details class="card-evolucao" ${aberta}>
                 <summary>
-                    <span>Sessão ${String(posicao + 1).padStart(2, "0")}</span>
+                    ${rotuloHTML}
                     <small>${item.data}</small>
                 </summary>
                 <div class="conteudo-evolucao">
@@ -213,6 +244,8 @@ btnSalvar.addEventListener("click", async () => {
         registro.evolucoes[indice].plano = plano;
         registro.evolucoes[indice].dataSessao = dataSessaoValor;
         registro.evolucoes[indice].data = formatarDataSessaoBR(dataSessaoValor);
+        // o campo "tipo" (1ª Consulta ou não) não é alterado aqui — permanece
+        // como já estava, já que essa marcação é definida só na criação
 
         await salvarRegistro();
 
@@ -263,6 +296,12 @@ btnSalvar.addEventListener("click", async () => {
 
         if (ehCasal && pessoaAtual) {
             novoRegistro.pessoa = pessoaAtual;
+        }
+
+        // reconhece automaticamente que é a 1ª Consulta quando o botão
+        // "Prontuário" foi acionado a partir daquela linha específica
+        if (tipoParam === "consulta") {
+            novoRegistro.tipo = "consulta";
         }
 
         registro.evolucoes.push(novoRegistro);
@@ -342,22 +381,27 @@ historico.addEventListener("click", (e) => {
     }
 });
 
-// monta a query string com o contexto de casal, quando aplicável,
-// para os links de prontuário (abrir e imprimir) saberem de quem é
-function contextoCasalQuery() {
-    if (!ehCasal) return "";
-    if (pessoaAtual) {
-        return `&origem=casal&pessoa=${pessoaAtual}&nome=${encodeURIComponent(nomeAtual)}`;
+// monta a query string com o contexto atual (casal/pessoa e/ou modo consulta),
+// para os links de prontuário (abrir e imprimir) saberem exatamente o que mostrar
+function contextoQuery() {
+    let query = "";
+
+    if (ehCasal) {
+        query += pessoaAtual
+            ? `&origem=casal&pessoa=${pessoaAtual}&nome=${encodeURIComponent(nomeAtual)}`
+            : `&origem=casal`;
     }
-    return `&origem=casal`;
+
+    if (modoConsultaIndividual) {
+        query += `&tipo=consulta`;
+    }
+
+    return query;
 }
 
-// ================= Abrir Prontuário =================
+// ================= Abrir Prontuário (visualizar, sem imprimir) =================
 btnAbrirProntuario.addEventListener("click", () => {
-    window.open(
-        `imprimir-prontuario.html?id=${idPaciente}${contextoCasalQuery()}&visualizar=true`,
-        "_blank"
-    );
+    window.open(`imprimir-prontuario.html?id=${idPaciente}${contextoQuery()}&visualizar=true`, "_blank");
 });
 
 // ================= IMPRIMIR PRONTUÁRIO =================
@@ -371,7 +415,7 @@ btnImprimir.addEventListener("click", () => {
         return;
     }
 
-    window.open(`imprimir-prontuario.html?id=${idPaciente}${contextoCasalQuery()}`, "_blank");
+    window.open(`imprimir-prontuario.html?id=${idPaciente}${contextoQuery()}`, "_blank");
 });
 
 // ================= VOLTAR =================
