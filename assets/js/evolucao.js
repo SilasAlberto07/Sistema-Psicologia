@@ -354,7 +354,10 @@ function contextoCasalQuery() {
 
 // ================= Abrir Prontuário =================
 btnAbrirProntuario.addEventListener("click", () => {
-    window.open(`prontuario.html?id=${idPaciente}${contextoCasalQuery()}`, "_blank");
+    window.open(
+        `imprimir-prontuario.html?id=${idPaciente}${contextoCasalQuery()}&visualizar=true`,
+        "_blank"
+    );
 });
 
 // ================= IMPRIMIR PRONTUÁRIO =================

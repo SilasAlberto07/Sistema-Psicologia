@@ -157,8 +157,14 @@ async function iniciarImpressaoProntuario() {
         <div class="timestamp-impressao">${carimboGeracao()}</div>
     </div>
 `;
-
-    window.print();
 }
 
-iniciarImpressaoProntuario();
+iniciarImpressaoProntuario().then(() => {
+
+    const visualizar = params.get("visualizar");
+
+    if (visualizar !== "true") {
+        window.print();
+    }
+
+});
