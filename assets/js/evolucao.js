@@ -1,6 +1,9 @@
 // ================= PACIENTE / CASAL =================
 const params = new URLSearchParams(window.location.search);
 const idPaciente = params.get("id");
+const origemParam = params.get("origem"); // "casal" ou null
+const pessoaParam = params.get("pessoa"); // "p1" | "p2" | null
+const nomeParam = params.get("nome");     // nome já pronto, vindo da tela de sessões
 
 const nomePaciente = document.getElementById("nomePaciente");
 const historico = document.getElementById("historico");
@@ -31,13 +34,15 @@ const btnVoltar = document.querySelector(".btn-voltar");
 const btnImprimir = document.querySelector(".btn-imprimir-tudo");
 const btnAbrirProntuario = document.querySelector(".btn-abrir");
 
-const draftKey = `draft_evolucao_${idPaciente}`;
-
 let pacientes = [];
 let casaisLista = [];
 let registro = null;   // paciente individual OU casal, o que for encontrado
 let ehCasal = false;
-let editandoIndex = null;
+let pessoaAtual = null; // "p1" | "p2" | null — só existe quando for sessão individual do casal
+let nomeAtual = "";
+let editandoIndex = null; // sempre se refere ao índice REAL em registro.evolucoes
+
+let draftKey = `draft_evolucao_${idPaciente}`;
 
 // grava de volta no storage certo (pacientes ou casais), dependendo de quem é o registro
 async function salvarRegistro() {
@@ -71,9 +76,23 @@ async function iniciarEvolucao() {
         return;
     }
 
-    nomePaciente.innerText = ehCasal
-        ? `${registro.p1NomeCompleto || "?"} e ${registro.p2NomeCompleto || "?"}`
-        : registro.nomeCompleto;
+    // define de quem é esse prontuário quando o registro é de um casal
+    if (ehCasal && (pessoaParam === "p1" || pessoaParam === "p2")) {
+        pessoaAtual = pessoaParam;
+        nomeAtual = pessoaAtual === "p1"
+            ? (registro.p1NomeCompleto || nomeParam || "Pessoa 1")
+            : (registro.p2NomeCompleto || nomeParam || "Pessoa 2");
+
+        nomePaciente.innerText = nomeAtual;
+        draftKey = `draft_evolucao_${idPaciente}_${pessoaAtual}`;
+    } else if (ehCasal) {
+        // sem pessoa definida (ex.: 1ª Consulta, que é conjunta) — mostra o histórico dos dois
+        nomeAtual = `${registro.p1NomeCompleto || "?"} e ${registro.p2NomeCompleto || "?"}`;
+        nomePaciente.innerText = `${nomeAtual} (registro conjunto)`;
+    } else {
+        nomeAtual = registro.nomeCompleto;
+        nomePaciente.innerText = nomeAtual;
+    }
 
     if (!Array.isArray(registro.evolucoes)) {
         registro.evolucoes = [];
@@ -108,20 +127,36 @@ planoAcao.addEventListener("input", salvarRascunho);
 relatoSessao.addEventListener("input", salvarRascunho);
 dataSessao.addEventListener("input", salvarRascunho);
 
+// retorna só as evoluções que pertencem à pessoa atual (quando for sessão
+// individual de casal), mas preserva o índice REAL de registro.evolucoes,
+// necessário para editar/excluir o item certo.
+function evolucoesVisiveis() {
+    return registro.evolucoes
+        .map((item, indiceReal) => ({ item, indiceReal }))
+        .filter(({ item }) => {
+            if (ehCasal && pessoaAtual) {
+                return item.pessoa === pessoaAtual;
+            }
+            return true; // paciente individual, ou casal em modo conjunto
+        });
+}
+
 function renderHistorico() {
     historico.innerHTML = "";
 
-    if (registro.evolucoes.length === 0) {
+    const visiveis = evolucoesVisiveis();
+
+    if (visiveis.length === 0) {
         historico.innerHTML = "<p>Nenhum registro de evolução.</p>";
         return;
     }
 
-    registro.evolucoes.forEach((item, index) => {
-        const aberta = index === registro.evolucoes.length - 1 ? "open" : "";
+    visiveis.forEach(({ item, indiceReal }, posicao) => {
+        const aberta = posicao === visiveis.length - 1 ? "open" : "";
         historico.innerHTML += `
             <details class="card-evolucao" ${aberta}>
                 <summary>
-                    <span>Sessão ${String(index + 1).padStart(2, "0")}</span>
+                    <span>Sessão ${String(posicao + 1).padStart(2, "0")}</span>
                     <small>${item.data}</small>
                 </summary>
                 <div class="conteudo-evolucao">
@@ -130,11 +165,11 @@ function renderHistorico() {
                     ${item.plano ? `<p><strong>Plano de ação:</strong> ${item.plano}</p>` : ""}
                 </div>
                 <div class="acoes-evolucao">
-                    <button class="btn-editar-evolucao" data-index="${index}">
+                    <button class="btn-editar-evolucao" data-index="${indiceReal}">
                         <i class="ti ti-pencil"></i> Editar
                     </button>
 
-                    <button class="btn-excluir-evolucao" data-index="${index}">
+                    <button class="btn-excluir-evolucao" data-index="${indiceReal}">
                         <i class="ti ti-trash"></i> Excluir
                     </button>
                 </div>
@@ -191,9 +226,12 @@ btnSalvar.addEventListener("click", async () => {
         // atualiza a lista
         renderHistorico();
 
-        // volta para a sessão que acabou de editar
+        // volta para a sessão que acabou de editar — precisa achar a POSIÇÃO
+        // dela na lista filtrada, já que o índice real pode não bater com a
+        // ordem exibida quando há sessões de p1 e p2 intercaladas
+        const posicaoExibida = evolucoesVisiveis().findIndex(v => v.indiceReal === indice);
         const cards = document.querySelectorAll(".card-evolucao");
-        const card = cards[indice];
+        const card = cards[posicaoExibida];
 
         if (card) {
             card.open = true;
@@ -215,13 +253,19 @@ btnSalvar.addEventListener("click", async () => {
     } else {
 
         // cria um registro novo
-        registro.evolucoes.push({
+        const novoRegistro = {
             data: formatarDataSessaoBR(dataSessaoValor),
             dataSessao: dataSessaoValor,
             relato: relato,
             texto: conteudo,
             plano: plano
-        });
+        };
+
+        if (ehCasal && pessoaAtual) {
+            novoRegistro.pessoa = pessoaAtual;
+        }
+
+        registro.evolucoes.push(novoRegistro);
 
         await salvarRegistro();
         localStorage.removeItem(draftKey);
@@ -298,15 +342,25 @@ historico.addEventListener("click", (e) => {
     }
 });
 
+// monta a query string com o contexto de casal, quando aplicável,
+// para os links de prontuário (abrir e imprimir) saberem de quem é
+function contextoCasalQuery() {
+    if (!ehCasal) return "";
+    if (pessoaAtual) {
+        return `&origem=casal&pessoa=${pessoaAtual}&nome=${encodeURIComponent(nomeAtual)}`;
+    }
+    return `&origem=casal`;
+}
+
 // ================= Abrir Prontuário =================
 btnAbrirProntuario.addEventListener("click", () => {
-    window.open(`prontuario.html?id=${idPaciente}`, "_blank");
+    window.open(`prontuario.html?id=${idPaciente}${contextoCasalQuery()}`, "_blank");
 });
 
 // ================= IMPRIMIR PRONTUÁRIO =================
 btnImprimir.addEventListener("click", () => {
 
-    if (!registro.evolucoes || registro.evolucoes.length === 0) {
+    if (evolucoesVisiveis().length === 0) {
         mostrarMensagem(
             "Não há evoluções registradas para imprimir!",
             "warning"
@@ -314,7 +368,7 @@ btnImprimir.addEventListener("click", () => {
         return;
     }
 
-    window.open(`imprimir-prontuario.html?id=${idPaciente}`, "_blank");
+    window.open(`imprimir-prontuario.html?id=${idPaciente}${contextoCasalQuery()}`, "_blank");
 });
 
 // ================= VOLTAR =================
