@@ -91,51 +91,6 @@ async function iniciarVisualizacaoProntuario() {
         ? "Ficha de Prontuário Psicológica — Casal"
         : "Ficha de Prontuário Psicológica";
 
-    container.innerHTML = `
-        <div class="prontuario">
 
-            <img class="marca-dagua" src="../assets/img/logo-marca-dagua.png" alt="">
-
-            <div class="cabecalho-print">
-                <div class="clinica-nome">Cláudia Bethânia — Psicóloga Clínica</div>
-                <div class="subtitulo-clinica">CRP 18/9851</div>
-                <h1>${tituloFicha}</h1>
-
-            </div>
-
-            <div class="identificacao-grid">
-                ${identificacaoHTML}
-            </div>
-
-            <h2 class="titulo-secao">Evolução das Sessões</h2>
-
-            <table class="tabela-impressa">
-                <thead>
-                    <tr>
-                        <th style="width:60px">Sessão</th>
-                        <th style="width:100px">Data/Hora</th>
-                        <th>Evolução da sessão</th>
-                        <th>Plano de ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${linhasHTML || `<tr><td colspan="4" class="centro">Nenhum registro de evolução</td></tr>`}
-                </tbody>
-            </table>
-
-            <div class="assinatura">
-                <div class="linha-assinatura"></div>
-                <h3>Dra. Cláudia Bethânia</h3>
-                <p>Psicóloga Clínica — CRP: 18/9851</p>
-            </div>
-
-            <div class="rodape-contato">
-                maclaudiabethaniapsicologa@gmail.com · (66) 99689-4144 · @psiclaudiabethania_
-            </div>
-
-            <div class="timestamp-impressao">${carimboGeracao()}</div>
-        </div>
-    `;
 }
-
 iniciarVisualizacaoProntuario();

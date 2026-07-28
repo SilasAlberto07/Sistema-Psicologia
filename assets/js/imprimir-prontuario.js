@@ -102,7 +102,7 @@ async function iniciarImpressaoProntuario() {
             </div>
 
             <div class="campo-impresso">
-                <strong>Evolução / Impressão Clínica</strong>
+                <strong>Evolução do Paciente</strong>
                 <span>${registro.texto && String(registro.texto).trim() ? registro.texto : "-"}</span>
             </div>
 
