@@ -24,17 +24,12 @@
 
                 <div class="form-section">
 
-                    <div class="busca-documento">
-                        <i class="ti ti-search"></i>
-                        <input type="text" id="buscaPacienteDoc" placeholder="Buscar paciente ou casal pelo nome...">
-                    </div>
-
                     <div class="linha">
                         <div class="form-group w-100">
                             <label>Paciente</label>
-                            <select id="selectPaciente">
-                                <option value="">Selecione um paciente...</option>
-                            </select>
+                            <input type="text" id="inputPaciente" list="listaPacientes" autocomplete="off"
+                                placeholder="Digite o nome do paciente ou casal...">
+                            <datalist id="listaPacientes"></datalist>
                         </div>
                         <div class="form-group w-50">
                             <label>Tipo de documento</label>
