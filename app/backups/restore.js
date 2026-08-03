@@ -7,7 +7,7 @@
  * testado!).
  *
  * Uso:
- *   node src/restore.js <caminho-do-backup.bak> <pasta-de-saida>
+ *   node app/backups/restore.js <caminho-do-backup.bak> <pasta-de-saida>
  *
  * Requer a variável de ambiente BACKUP_PASSWORD (mesma senha usada
  * para gerar o backup).
@@ -25,7 +25,7 @@ async function main() {
   const password = process.env.BACKUP_PASSWORD;
 
   if (!backupPath || !outputDir) {
-    console.error('Uso: node src/restore.js <backup.bak> <pasta-de-saida>');
+    console.error('Uso: node app/backups/restore.js <backup.bak> <pasta-de-saida>');
     process.exit(1);
   }
   if (!password) {

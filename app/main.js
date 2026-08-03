@@ -1,6 +1,6 @@
 const path = require('path');
-const { startBackupScheduler } = require('./src/backups/scheduler');
-const { runBackup } = require('./src/backups/backupManager');
+const { startBackupScheduler } = require('./backups/scheduler');
+const { runBackup } = require('./backups/backupManager');
 
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const http = require('http');
@@ -126,7 +126,7 @@ function iniciarServidor() {
     return new Promise((resolve) => {
         server = http.createServer((req, res) => {
             return handler(req, res, {
-                public: __dirname,
+                public: path.join(__dirname, '..', 'public'),
                 cleanUrls: false
             });
         });
@@ -141,7 +141,7 @@ async function criarJanela() {
     const porta = await iniciarServidor();
 
     mainWindow = new BrowserWindow({
-        icon: path.join(__dirname, 'build', 'PsiLogo.ico'),
+        icon: path.join(__dirname, '..', 'build', 'PsiLogo.ico'),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
