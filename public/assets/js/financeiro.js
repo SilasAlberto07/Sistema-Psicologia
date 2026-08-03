@@ -434,9 +434,15 @@ salvarModal.addEventListener("click", async () => {
 // ATUALIZAR CARDS
 // ==========================================
 // "Receitas" e "Despesas" mostram o que já entrou/saiu de fato
-// (soma dos pagamentos recebidos), não o valor total contratado.
+// (soma dos pagamentos recebidos). Quando um mês é selecionado no
+// filtro do topo, só entram os pagamentos cuja DATA (a que você
+// escolhe na tela "Receber") cai dentro daquele mês — é isso que
+// faz a data do pagamento valer pra alguma coisa: ela decide em
+// qual relatório mensal aquele valor entra.
 
 function atualizarCards() {
+
+    const mesSelecionado = filtroMes.value; // "" = todos os meses
 
     let receitas = 0;
     let despesas = 0;
@@ -448,16 +454,24 @@ function atualizarCards() {
             return;
         }
 
-        const pago = valorPagoDe(item);
-        const restante = valorRestanteDe(item);
+        const pagamentosDoPeriodo = mesSelecionado
+            ? pagamentosDe(item).filter(p => obterMes(p.dataISO) === mesSelecionado)
+            : pagamentosDe(item);
+
+        const pagoNoPeriodo = pagamentosDoPeriodo.reduce(
+            (soma, p) => soma + Number(p.valor || 0), 0
+        );
 
         if (item.tipo === "Receita") {
-            receitas += pago;
+            receitas += pagoNoPeriodo;
         } else {
-            despesas += pago;
+            despesas += pagoNoPeriodo;
         }
 
-        if (restante > 0) {
+        // pendências continuam sendo um retrato do momento atual
+        // (não filtra por mês): mostra todo saldo em aberto, não
+        // importa quando o lançamento foi criado
+        if (valorRestanteDe(item) > 0) {
             qtdPendentes++;
         }
 
@@ -585,6 +599,7 @@ pesquisa.addEventListener("input", () => {
 // ==========================================
 
 filtroMes.addEventListener("change", () => {
+    atualizarCards();
     carregarTabela();
 });
 
