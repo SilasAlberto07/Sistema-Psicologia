@@ -1,3 +1,6 @@
+// controla qual aba está ativa: "individual" ou "casal"
+let abaAtualSessoes = "individual";
+
 // =========================
 // CONFLITO DE HORÁRIO — agora verifica pacientes E casais
 // =========================
@@ -283,18 +286,32 @@ async function renderSessoes() {
 
     container.innerHTML = "";
 
-    if (pacientesFiltrados.length === 0 && casaisFiltrados.length === 0) {
+    // ===== aplica a aba ativa: só mostra o tipo selecionado =====
+    const listaIndividuaisNaAba = abaAtualSessoes === "individual" ? pacientesFiltrados : [];
+    const listaCasaisNaAba = abaAtualSessoes === "casal" ? casaisFiltrados : [];
+
+    if (listaIndividuaisNaAba.length === 0 && listaCasaisNaAba.length === 0) {
+        const semResultadoBusca = termoBusca !== "";
+
+        const titulo = semResultadoBusca
+            ? "Nenhum paciente encontrado"
+            : (abaAtualSessoes === "casal" ? "Nenhum casal cadastrado" : "Nenhum paciente individual cadastrado");
+
+        const texto = semResultadoBusca
+            ? "Verifique se o nome digitado está correto."
+            : "Cadastre um paciente e defina a quantidade de sessões.";
+
         container.innerHTML = `
             <div class="placeholder-sessoes">
-                <h3>Nenhum paciente encontrado</h3>
-                <p>Verifique se o nome digitado está correto.</p>
+                <h3>${titulo}</h3>
+                <p>${texto}</p>
             </div>
         `;
         return;
     }
 
     // ===== cards de pacientes individuais (comportamento igual ao original) =====
-    pacientesFiltrados.forEach(paciente => {
+    listaIndividuaisNaAba.forEach(paciente => {
 
         let sessoes = paciente.sessoes || [];
 
@@ -342,7 +359,7 @@ async function renderSessoes() {
     });
 
     // ===== cards de casais (coluna extra "Atendido(a)") =====
-    casaisFiltrados.forEach(casal => {
+    listaCasaisNaAba.forEach(casal => {
 
         let sessoes = casal.sessoes || [];
 
@@ -697,6 +714,22 @@ document.addEventListener("click", async (e) => {
             "success"
         );
     }
+});
+
+// =========================
+// ABAS — Individual / Casal
+// =========================
+document.querySelectorAll(".tab-tipo").forEach((botao) => {
+    botao.addEventListener("click", () => {
+        if (botao.dataset.tipo === abaAtualSessoes) return;
+
+        abaAtualSessoes = botao.dataset.tipo;
+
+        document.querySelectorAll(".tab-tipo").forEach((b) => b.classList.remove("ativa"));
+        botao.classList.add("ativa");
+
+        renderSessoes();
+    });
 });
 
 async function iniciarSessoes() {

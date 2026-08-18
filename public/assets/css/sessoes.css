@@ -290,3 +290,42 @@
     background: #eaf4ff;
     color: #2d6ca2;
 }
+/* ═══════════════════════════════════════════════
+   ABAS — Individual / Casal
+═══════════════════════════════════════════════ */
+.tabs-tipo {
+    display: flex;
+    gap: 6px;
+    margin: 4px 0 16px;
+    border-bottom: 1px solid #ede8e0;
+}
+
+.tab-tipo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #9a9a88;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    margin-bottom: -1px;
+}
+
+.tab-tipo i {
+    font-size: 15px;
+}
+
+.tab-tipo:hover {
+    color: #5a5a48;
+}
+
+.tab-tipo.ativa {
+    color: #6b8256;
+    border-bottom-color: #8a9e78;
+}

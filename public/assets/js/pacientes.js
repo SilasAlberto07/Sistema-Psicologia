@@ -6,6 +6,9 @@ let casais = [];    // registros de casal (storage: "casais")
 // controla o estado atual de ordenação da tabela
 let ordenacaoAtual = { campo: null, direcao: 1 }; // direcao: 1 = ascendente, -1 = descendente
 
+// controla qual aba está ativa: "individual" ou "casal"
+let abaAtual = "individual";
+
 async function carregarPacientes() {
     pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
     casais = JSON.parse(await window.storage.getItem("casais")) || [];
@@ -59,7 +62,7 @@ function gerarOpcoesTelefone(registro, ehCasal) {
 function renderizarTabela() {
     tabelaPacientes.innerHTML = "";
 
-    let registros = obterRegistrosUnificados();
+    let registros = obterRegistrosUnificados().filter(r => r._tipo === abaAtual);
 
     if (ordenacaoAtual.campo) {
         const campo = ordenacaoAtual.campo;
@@ -96,11 +99,16 @@ function renderizarTabela() {
     }
 
     if (registros.length === 0) {
+        const mensagemVazio = abaAtual === "casal"
+            ? "Nenhum casal cadastrado"
+            : "Nenhum paciente individual cadastrado";
+
         tabelaPacientes.innerHTML = `
             <tr>
-                <td colspan="7">Nenhum paciente cadastrado</td>
+                <td colspan="7">${mensagemVazio}</td>
             </tr>
         `;
+        aplicarFiltroBusca();
         return;
     }
 
@@ -145,6 +153,8 @@ function renderizarTabela() {
             </tr>
         `;
     });
+
+    aplicarFiltroBusca();
 }
 
 // clique nos cabeçalhos ordenáveis (ID, Nome, Data de Cadastro)
@@ -330,13 +340,13 @@ document.addEventListener("change", async (e) => {
 //pesquisar
 const inputSearch = document.querySelector(".search-box");
 
-inputSearch.addEventListener("input", function () {
-    const filtro = this.value.toLowerCase();
+function aplicarFiltroBusca() {
+    const filtro = (inputSearch.value || "").toLowerCase();
     const linhas = document.querySelectorAll("#tabela-pacientes tr");
 
     linhas.forEach((linha) => {
-        const nome = linha.children[1]?.textContent.toLowerCase();
-        const id = linha.children[0]?.textContent.toLowerCase();
+        const nome = linha.children[1]?.textContent.toLowerCase() || "";
+        const id = linha.children[0]?.textContent.toLowerCase() || "";
 
         if (nome.includes(filtro) || id.includes(filtro)) {
             linha.style.display = "";
@@ -344,8 +354,25 @@ inputSearch.addEventListener("input", function () {
             linha.style.display = "none";
         }
     });
+}
+
+inputSearch.addEventListener("input", aplicarFiltroBusca);
+
+// ===============================
+// ABAS — Individual / Casal
+// ===============================
+document.querySelectorAll(".tab-tipo").forEach((botao) => {
+    botao.addEventListener("click", () => {
+        if (botao.dataset.tipo === abaAtual) return;
+
+        abaAtual = botao.dataset.tipo;
+
+        document.querySelectorAll(".tab-tipo").forEach((b) => b.classList.remove("ativa"));
+        botao.classList.add("ativa");
+
+        // troca de aba não deve manter ordenação de coluna que não faz sentido no outro tipo
+        renderizarTabela();
+    });
 });
-
-
 
 carregarPacientes();
