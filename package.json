@@ -2,7 +2,7 @@
   "name": "sistema-psicologia",
   "version": "1.4.4",
   "description": "",
-  "main": "main.js",
+  "main": "app/main.js",
   "scripts": {
     "start": "electron .",
     "dist": "dotenv -- electron-builder --publish always",
