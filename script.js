@@ -172,28 +172,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const agendaHojeEl = document.getElementById("agendaHoje");
         if (agendaHoje.length === 0) {
+            // Antes havia um "return" aqui, o que interrompia a função inteira
+            // e impedia o cálculo do "Resumo da Semana" logo abaixo sempre que
+            // não houvesse sessões marcadas para hoje. Trocado por if/else.
             agendaHojeEl.innerHTML = "<p>Nenhuma sessão agendada para hoje.</p>";
-            return;
+        } else {
+            agendaHojeEl.innerHTML = agendaHoje.map(item => {
+                const status = item.status.toLowerCase().trim();
+                const mapa = {
+                    agendada: ["sessao-agendada", "badge-agendada", "Agendada"],
+                    realizada: ["sessao-realizada", "badge-realizada", "Realizada"],
+                    cancelada: ["sessao-cancelada", "badge-cancelada", "Cancelada"],
+                    andamento: ["sessao-andamento", "badge-andamento", "Em Andamento"],
+                };
+                const [classe, badge, textoBadge] = mapa[status] || ["", "", status];
+                return `
+                    <div class="item-agenda ${classe}">
+                        <strong>${item.horario}</strong>
+                        <div class="item-agenda-info">
+                            <div class="item-agenda-name">${item.nomeExibicao}</div>
+                        </div>
+                        <span class="item-agenda-badge ${badge}">${textoBadge}</span>
+                    </div>`;
+            }).join("");
         }
-
-        agendaHojeEl.innerHTML = agendaHoje.map(item => {
-            const status = item.status.toLowerCase().trim();
-            const mapa = {
-                agendada: ["sessao-agendada", "badge-agendada", "Agendada"],
-                realizada: ["sessao-realizada", "badge-realizada", "Realizada"],
-                cancelada: ["sessao-cancelada", "badge-cancelada", "Cancelada"],
-                andamento: ["sessao-andamento", "badge-andamento", "Em Andamento"],
-            };
-            const [classe, badge, textoBadge] = mapa[status] || ["", "", status];
-            return `
-                <div class="item-agenda ${classe}">
-                    <strong>${item.horario}</strong>
-                    <div class="item-agenda-info">
-                        <div class="item-agenda-name">${item.nomeExibicao}</div>
-                    </div>
-                    <span class="item-agenda-badge ${badge}">${textoBadge}</span>
-                </div>`;
-        }).join("");
 
         // RESUMO DA SEMANA
         let realizadas = 0, agendadas = 0, andamento = 0, canceladas = 0;
@@ -221,8 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("resumoAndamento").textContent = andamento;
         document.getElementById("resumoCanceladas").textContent = canceladas;
     }
-    
-    
+
+
     // RODA NA ABERTURA E A CADA 1 SEGUNDO
     async function iniciarHome() {
         await atualizarHome();
