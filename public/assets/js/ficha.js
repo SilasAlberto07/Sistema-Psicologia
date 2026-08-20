@@ -93,6 +93,7 @@ function renderizarFichaCasal() {
         <p><strong>ID:</strong> ${casal.id}</p>
         <p><strong>Tipo de Relacionamento:</strong> ${casal.tipoRelacionamento ?? "-"}</p>
         <p><strong>Início do Relacionamento:</strong> ${formatarDataBR(casal.inicioRelacionamento) || "-"}</p>
+        <p><strong>Tempo Juntos:</strong> ${casal.tempoJuntos ?? "-"}</p>
 
         <hr>
 
@@ -106,6 +107,7 @@ function renderizarFichaCasal() {
         <p><strong>Profissão:</strong> ${casal.p1Profissao ?? "-"}</p>
         <p><strong>Telefone:</strong> ${casal.p1Telefone ?? "-"}</p>
         <p><strong>Email:</strong> ${casal.p1Email ?? "-"}</p>
+        <p><strong>Contato de Confiança:</strong> ${casal.p1ContatoConf ?? "-"}</p>
 
         <hr>
 
@@ -119,6 +121,7 @@ function renderizarFichaCasal() {
         <p><strong>Profissão:</strong> ${casal.p2Profissao ?? "-"}</p>
         <p><strong>Telefone:</strong> ${casal.p2Telefone ?? "-"}</p>
         <p><strong>Email:</strong> ${casal.p2Email ?? "-"}</p>
+        <p><strong>Contato de Confiança:</strong> ${casal.p2ContatoConf ?? "-"}</p>
 
         <hr>
 
