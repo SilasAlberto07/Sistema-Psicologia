@@ -6,8 +6,10 @@
   "scripts": {
     "start": "electron .",
     "dist": "dotenv -- electron-builder --publish always",
+    "dist:mac": "electron-builder --mac",
     "release": "npm version patch && git push origin main --follow-tags && npm run dist",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "rebuild": "electron-rebuild -f -w better-sqlite3"
   },
   "build": {
     "appId": "com.claudiabethania.sistemapsicologia",
@@ -15,6 +17,14 @@
     "win": {
       "target": "nsis",
       "icon": "build/PsiLogo.ico"
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "icon": "build/PsiLogo.icns",
+      "category": "public.app-category.medical",
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
     },
     "nsis": {
       "oneClick": false,
@@ -24,6 +34,9 @@
       "**/*",
       "!node_modules/electron-builder",
       "!node_modules/electron"
+    ],
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*"
     ],
     "publish": {
       "provider": "github",

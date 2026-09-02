@@ -140,8 +140,10 @@ async function criarJanela() {
     iniciarBanco();
     const porta = await iniciarServidor();
 
+    const nomeIcone = process.platform === 'win32' ? 'PsiLogo.ico' : 'PsiLogo.icns';
+
     mainWindow = new BrowserWindow({
-        icon: path.join(__dirname, '..', 'build', 'PsiLogo.ico'),
+        icon: path.join(__dirname, '..', 'build', nomeIcone),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
