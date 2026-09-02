@@ -27,6 +27,59 @@ function gerarIdCasal(lista) {
     return "CAS" + String(maior + 1).padStart(4, "0");
 }
 
+// ===============================
+// CALCULAR TEMPO JUNTOS (automático a partir de "Início do Relacionamento")
+// ===============================
+function calcularTempoJuntos(dataInicioStr) {
+
+    if (!dataInicioStr) return "";
+
+    const inicio = new Date(dataInicioStr + "T00:00:00");
+    const hoje = new Date();
+
+    if (isNaN(inicio.getTime()) || inicio > hoje) return "";
+
+    let anos = hoje.getFullYear() - inicio.getFullYear();
+    let meses = hoje.getMonth() - inicio.getMonth();
+    let dias = hoje.getDate() - inicio.getDate();
+
+    if (dias < 0) {
+        meses--;
+    }
+
+    if (meses < 0) {
+        anos--;
+        meses += 12;
+    }
+
+    // Se já completou pelo menos 1 ano,
+    // mostra SOMENTE os anos.
+    if (anos > 0) {
+        return `${anos} ${anos === 1 ? "ano" : "anos"}`;
+    }
+
+    // Menos de 1 ano: mostra os meses
+    if (meses > 0) {
+        return `${meses} ${meses === 1 ? "mês" : "meses"}`;
+    }
+
+    // Menos de 1 mês: mostra os dias
+    if (dias <= 0) {
+        return "Hoje";
+    }
+
+    return `${dias} ${dias === 1 ? "dia" : "dias"}`;
+}
+
+function atualizarTempoJuntos() {
+    form.tempoJuntos.value = calcularTempoJuntos(
+        form.inicioRelacionamento.value
+    );
+}
+
+form.inicioRelacionamento.addEventListener("input", atualizarTempoJuntos);
+form.inicioRelacionamento.addEventListener("change", atualizarTempoJuntos);
+
 async function iniciarFormulario() {
 
     casais = JSON.parse(await window.storage.getItem("casais")) || [];
@@ -56,6 +109,7 @@ async function iniciarFormulario() {
         form.p1Profissao.value = casalEdit.p1Profissao || "";
         form.p1Telefone.value = casalEdit.p1Telefone || "";
         form.p1Email.value = casalEdit.p1Email || "";
+        form.p1ContatoConf.value = casalEdit.p1ContatoConf || "";
 
         form.p2NomeCompleto.value = casalEdit.p2NomeCompleto || "";
         form.p2Cpf.value = casalEdit.p2Cpf || "";
@@ -66,6 +120,7 @@ async function iniciarFormulario() {
         form.p2Profissao.value = casalEdit.p2Profissao || "";
         form.p2Telefone.value = casalEdit.p2Telefone || "";
         form.p2Email.value = casalEdit.p2Email || "";
+        form.p2ContatoConf.value = casalEdit.p2ContatoConf || "";
 
         form.cep.value = casalEdit.cep || "";
         form.endereco.value = casalEdit.endereco || "";
@@ -76,6 +131,9 @@ async function iniciarFormulario() {
 
         form.queixaPrincipal.value = casalEdit.queixaPrincipal || "";
     }
+
+    // calcula o tempo juntos com base na data carregada (novo ou edição)
+    atualizarTempoJuntos();
 }
 
 // ===============================
@@ -135,6 +193,8 @@ btnLimpar.addEventListener("click", () => {
     form.tipoRelacionamento.value = "Namoro";
     form.inicioRelacionamento.value = "";
 
+    form.tempoJuntos.value = "";
+
     form.p1NomeCompleto.value = "";
     form.p1Cpf.value = "";
     form.p1Rg.value = "";
@@ -144,6 +204,7 @@ btnLimpar.addEventListener("click", () => {
     form.p1Profissao.value = "";
     form.p1Telefone.value = "";
     form.p1Email.value = "";
+    form.p1ContatoConf.value = "";
 
     form.p2NomeCompleto.value = "";
     form.p2Cpf.value = "";
@@ -154,6 +215,7 @@ btnLimpar.addEventListener("click", () => {
     form.p2Profissao.value = "";
     form.p2Telefone.value = "";
     form.p2Email.value = "";
+    form.p2ContatoConf.value = "";
 
     form.cep.value = "";
     form.endereco.value = "";

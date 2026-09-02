@@ -1,6 +1,25 @@
 // controla qual aba está ativa: "individual" ou "casal"
 let abaAtualSessoes = "individual";
 
+// controla quais cards de paciente/casal estão abertos (expandidos)
+// guarda chaves no formato "individual-ID" ou "casal-ID"
+let cardsAbertosSessoes = new Set();
+
+// =========================
+// CONTADORES — total / realizadas / agendadas de um registro
+// (considera a 1ª Consulta + todas as sessões normais)
+// =========================
+function calcularContadoresSessao(registro) {
+
+    const todos = [registro.consulta, ...(registro.sessoes || [])].filter(Boolean);
+
+    const total = todos.length;
+    const realizadas = todos.filter(s => s.status === "realizada").length;
+    const agendadas = todos.filter(s => s.status === "agendada" || s.status === "andamento").length;
+
+    return { total, realizadas, agendadas };
+}
+
 // =========================
 // CONFLITO DE HORÁRIO — agora verifica pacientes E casais
 // =========================
@@ -321,10 +340,14 @@ async function renderSessoes() {
             sessoesHTML += montarLinhaSessao(paciente, sessao, i, "individual");
         });
 
+        const chaveCard = `individual-${paciente.id}`;
+        const aberto = cardsAbertosSessoes.has(chaveCard);
+        const { total, realizadas, agendadas } = calcularContadoresSessao(paciente);
+
         container.innerHTML += `
             <div class="paciente-sessao-card">
 
-                <div class="paciente-header">
+                <div class="paciente-header" data-card-key="${chaveCard}">
                     <div class="titulo-paciente">
                         <h2>
                             ${paciente.nomeCompleto}
@@ -332,27 +355,37 @@ async function renderSessoes() {
                                 ${paciente.tipoConsulta || "-"}
                             </span>
                         </h2>
+                        <small>📅 Início: ${paciente.dataCadastro ?? "-"}</small>
                     </div>
 
-                    <small>📅 Início: ${paciente.dataCadastro ?? "-"}</small>
-                </div>
-                <div class="tabela-wrapper">
-                    <table class="tabela-sessoes">
-                        <thead>
-                            <tr>
-                                <th>Sessão</th>
-                                <th>Data</th>
-                                <th>Horário</th>
-                                <th>Duração</th>
-                                <th>Status</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
+                    <div class="contadores-sessao">
+                        <span class="contador-badge total">${total} sessõ${total === 1 ? "" : "es"}</span>
+                        <span class="contador-badge realizada">${realizadas} realizada${realizadas === 1 ? "" : "s"}</span>
+                        <span class="contador-badge agendada">${agendadas} agendada${agendadas === 1 ? "" : "s"}</span>
+                    </div>
 
-                        <tbody>
-                            ${sessoesHTML}
-                        </tbody>
-                    </table>
+                    <i class="ti ti-chevron-down seta-expandir-sessao ${aberto ? "aberta" : ""}"></i>
+                </div>
+
+                <div class="corpo-sessoes" style="display:${aberto ? "block" : "none"}">
+                    <div class="tabela-wrapper">
+                        <table class="tabela-sessoes">
+                            <thead>
+                                <tr>
+                                    <th>Sessão</th>
+                                    <th>Data</th>
+                                    <th>Horário</th>
+                                    <th>Duração</th>
+                                    <th>Status</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                ${sessoesHTML}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         `;
@@ -369,10 +402,14 @@ async function renderSessoes() {
             sessoesHTML += montarLinhaSessao(casal, sessao, i, "casal");
         });
 
+        const chaveCard = `casal-${casal.id}`;
+        const aberto = cardsAbertosSessoes.has(chaveCard);
+        const { total, realizadas, agendadas } = calcularContadoresSessao(casal);
+
         container.innerHTML += `
             <div class="paciente-sessao-card">
 
-                <div class="paciente-header">
+                <div class="paciente-header" data-card-key="${chaveCard}">
                     <div class="titulo-paciente">
                         <h2>
                             <i class="ti ti-users-group" style="color:#7a8e69"></i>
@@ -381,28 +418,38 @@ async function renderSessoes() {
                                 ${casal.tipoConsulta || "-"}
                             </span>
                         </h2>
+                        <small>📅 Início: ${casal.dataCadastro ?? "-"}</small>
                     </div>
 
-                    <small>📅 Início: ${casal.dataCadastro ?? "-"}</small>
-                </div>
-                <div class="tabela-wrapper">
-                    <table class="tabela-sessoes">
-                        <thead>
-                            <tr>
-                                <th>Sessão</th>
-                                <th>Atendido(a)</th>
-                                <th>Data</th>
-                                <th>Horário</th>
-                                <th>Duração</th>
-                                <th>Status</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
+                    <div class="contadores-sessao">
+                        <span class="contador-badge total">${total} sessõ${total === 1 ? "" : "es"}</span>
+                        <span class="contador-badge realizada">${realizadas} realizada${realizadas === 1 ? "" : "s"}</span>
+                        <span class="contador-badge agendada">${agendadas} agendada${agendadas === 1 ? "" : "s"}</span>
+                    </div>
 
-                        <tbody>
-                            ${sessoesHTML}
-                        </tbody>
-                    </table>
+                    <i class="ti ti-chevron-down seta-expandir-sessao ${aberto ? "aberta" : ""}"></i>
+                </div>
+
+                <div class="corpo-sessoes" style="display:${aberto ? "block" : "none"}">
+                    <div class="tabela-wrapper">
+                        <table class="tabela-sessoes">
+                            <thead>
+                                <tr>
+                                    <th>Sessão</th>
+                                    <th>Atendido(a)</th>
+                                    <th>Data</th>
+                                    <th>Horário</th>
+                                    <th>Duração</th>
+                                    <th>Status</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                ${sessoesHTML}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         `;
@@ -714,6 +761,30 @@ document.addEventListener("click", async (e) => {
             "success"
         );
     }
+});
+
+// =========================
+// EXPANDIR / RECOLHER CARD DO PACIENTE (mostra a tabela só quando clicado)
+// =========================
+document.addEventListener("click", (e) => {
+
+    const header = e.target.closest(".paciente-header");
+    if (!header) return;
+
+    const chaveCard = header.dataset.cardKey;
+    if (!chaveCard) return;
+
+    const jaEstavaAberto = cardsAbertosSessoes.has(chaveCard);
+
+    // fecha todos os cards abertos (comportamento tipo "sanfona")
+    cardsAbertosSessoes.clear();
+
+    // se o clicado já estava aberto, deixa fechado; senão, abre só ele
+    if (!jaEstavaAberto) {
+        cardsAbertosSessoes.add(chaveCard);
+    }
+
+    renderSessoes();
 });
 
 // =========================
