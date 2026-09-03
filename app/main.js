@@ -136,12 +136,15 @@ function iniciarServidor() {
     });
 }
 
-async function criarJanela() {
-    iniciarBanco();
-    const porta = await iniciarServidor();
+// guarda a porta do servidor já em execução, para o Mac poder reabrir
+// uma janela nova (evento "activate") sem precisar recriar servidor/banco
+let portaAtual = null;
+
+function abrirJanela(porta) {
+    const nomeIcone = process.platform === 'win32' ? 'PsiLogo.ico' : 'PsiLogo.icns';
 
     mainWindow = new BrowserWindow({
-        icon: path.join(__dirname, '..', 'build', 'PsiLogo.ico'),
+        icon: path.join(__dirname, '..', 'build', nomeIcone),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -170,6 +173,12 @@ async function criarJanela() {
     mainWindow.once("ready-to-show", () => {
         mainWindow.show();
     });
+}
+
+async function criarJanela() {
+    iniciarBanco();
+    portaAtual = await iniciarServidor();
+    abrirJanela(portaAtual);
 }
 
 // ================================
@@ -262,7 +271,27 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
+    // No Mac, fechar a janela NÃO deve derrubar servidor/banco — o app
+    // continua vivo no Dock (comportamento padrão) e pode reabrir uma
+    // janela nova depois, através do evento "activate" logo abaixo.
+    if (process.platform !== 'darwin') {
+        if (server) server.close();
+        if (db) db.close();
+        app.quit();
+    }
+});
+
+// Mac: clicou no ícone do Dock e não tem nenhuma janela aberta → reabre
+// uma janela nova, reaproveitando o servidor/banco que já estão rodando.
+app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0 && portaAtual) {
+        abrirJanela(portaAtual);
+    }
+});
+
+// Fecha servidor e banco só quando o app está realmente sendo encerrado
+// de vez (Cmd+Q, ou "Sair" no menu do Dock) — não apenas ao fechar a janela.
+app.on('before-quit', () => {
     if (server) server.close();
     if (db) db.close();
-    if (process.platform !== 'darwin') app.quit();
 });
