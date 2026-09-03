@@ -143,6 +143,8 @@ let portaAtual = null;
 function abrirJanela(porta) {
     const nomeIcone = process.platform === 'win32' ? 'PsiLogo.ico' : 'PsiLogo.icns';
 
+    const nomeIcone = process.platform === 'win32' ? 'PsiLogo.ico' : 'PsiLogo.icns';
+
     mainWindow = new BrowserWindow({
         icon: path.join(__dirname, '..', 'build', nomeIcone),
         webPreferences: {
