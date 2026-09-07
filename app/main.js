@@ -136,9 +136,12 @@ function iniciarServidor() {
     });
 }
 
-async function criarJanela() {
-    iniciarBanco();
-    const porta = await iniciarServidor();
+// guarda a porta do servidor já em execução, para o Mac poder reabrir
+// uma janela nova (evento "activate") sem precisar recriar servidor/banco
+let portaAtual = null;
+
+function abrirJanela(porta) {
+    log.info(`[janela] abrirJanela() chamada (porta ${porta})`);
 
     const nomeIcone = process.platform === 'win32' ? 'PsiLogo.ico' : 'PsiLogo.icns';
 
@@ -164,14 +167,49 @@ async function criarJanela() {
         };
     });
 
-    mainWindow.loadURL(`http://127.0.0.1:${porta}/login.html`);
+    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+        log.error(`[janela] Falha ao carregar a página: ${errorCode} - ${errorDescription}`);
+    });
+
+    mainWindow.webContents.on('did-finish-load', () => {
+        log.info('[janela] Página carregada com sucesso (did-finish-load)');
+    });
+
+    mainWindow.webContents.on('render-process-gone', (event, details) => {
+        log.error('[janela] Processo de renderização morreu:', details);
+    });
+
+    mainWindow.on('unresponsive', () => {
+        log.error('[janela] Janela ficou SEM RESPONDER (unresponsive)');
+    });
+
+    mainWindow.on('responsive', () => {
+        log.info('[janela] Janela voltou a responder (responsive)');
+    });
+
+    mainWindow.on('closed', () => {
+        log.info('[janela] Evento closed disparado');
+        mainWindow = null;
+    });
+
+    log.info('[janela] Chamando loadURL...');
+    mainWindow.loadURL(`http://127.0.0.1:${porta}/login.html`).catch((err) => {
+        log.error('[janela] loadURL rejeitou a Promise:', err);
+    });
     // mainWindow.webContents.openDevTools();
 
     mainWindow.maximize();
 
     mainWindow.once("ready-to-show", () => {
+        log.info('[janela] ready-to-show disparado, chamando show()');
         mainWindow.show();
     });
+}
+
+async function criarJanela() {
+    iniciarBanco();
+    portaAtual = await iniciarServidor();
+    abrirJanela(portaAtual);
 }
 
 // ================================
@@ -264,7 +302,33 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
+    log.info('[app] window-all-closed disparado. Plataforma:', process.platform);
+    // No Mac, fechar a janela NÃO deve derrubar servidor/banco — o app
+    // continua vivo no Dock (comportamento padrão) e pode reabrir uma
+    // janela nova depois, através do evento "activate" logo abaixo.
+    if (process.platform !== 'darwin') {
+        if (server) server.close();
+        if (db) db.close();
+        app.quit();
+    }
+});
+
+// Mac: clicou no ícone do Dock e não tem nenhuma janela aberta → reabre
+// uma janela nova, reaproveitando o servidor/banco que já estão rodando.
+app.on('activate', () => {
+    const janelasAbertas = BrowserWindow.getAllWindows().length;
+    log.info(`[app] activate disparado. Janelas abertas: ${janelasAbertas}. portaAtual: ${portaAtual}`);
+    if (janelasAbertas === 0 && portaAtual) {
+        abrirJanela(portaAtual);
+    } else if (janelasAbertas === 0 && !portaAtual) {
+        log.error('[app] activate disparou mas portaAtual está vazio — servidor pode não ter iniciado corretamente.');
+    }
+});
+
+// Fecha servidor e banco só quando o app está realmente sendo encerrado
+// de vez (Cmd+Q, ou "Sair" no menu do Dock) — não apenas ao fechar a janela.
+app.on('before-quit', () => {
+    log.info('[app] before-quit disparado');
     if (server) server.close();
     if (db) db.close();
-    if (process.platform !== 'darwin') app.quit();
 });
