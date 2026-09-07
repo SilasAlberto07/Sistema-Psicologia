@@ -141,11 +141,7 @@ function iniciarServidor() {
 let portaAtual = null;
 
 function abrirJanela(porta) {
-<<<<<<< HEAD
     log.info(`[janela] abrirJanela() chamada (porta ${porta})`);
-=======
-    const nomeIcone = process.platform === 'win32' ? 'PsiLogo.ico' : 'PsiLogo.icns';
->>>>>>> 68997da4b7864c874dcc2798bbedf5b91f76de3a
 
     const nomeIcone = process.platform === 'win32' ? 'PsiLogo.ico' : 'PsiLogo.icns';
 
@@ -306,10 +302,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-<<<<<<< HEAD
     log.info('[app] window-all-closed disparado. Plataforma:', process.platform);
-=======
->>>>>>> 68997da4b7864c874dcc2798bbedf5b91f76de3a
     // No Mac, fechar a janela NÃO deve derrubar servidor/banco — o app
     // continua vivo no Dock (comportamento padrão) e pode reabrir uma
     // janela nova depois, através do evento "activate" logo abaixo.
@@ -323,27 +316,19 @@ app.on('window-all-closed', () => {
 // Mac: clicou no ícone do Dock e não tem nenhuma janela aberta → reabre
 // uma janela nova, reaproveitando o servidor/banco que já estão rodando.
 app.on('activate', () => {
-<<<<<<< HEAD
     const janelasAbertas = BrowserWindow.getAllWindows().length;
     log.info(`[app] activate disparado. Janelas abertas: ${janelasAbertas}. portaAtual: ${portaAtual}`);
     if (janelasAbertas === 0 && portaAtual) {
         abrirJanela(portaAtual);
     } else if (janelasAbertas === 0 && !portaAtual) {
         log.error('[app] activate disparou mas portaAtual está vazio — servidor pode não ter iniciado corretamente.');
-=======
-    if (BrowserWindow.getAllWindows().length === 0 && portaAtual) {
-        abrirJanela(portaAtual);
->>>>>>> 68997da4b7864c874dcc2798bbedf5b91f76de3a
     }
 });
 
 // Fecha servidor e banco só quando o app está realmente sendo encerrado
 // de vez (Cmd+Q, ou "Sair" no menu do Dock) — não apenas ao fechar a janela.
 app.on('before-quit', () => {
-<<<<<<< HEAD
     log.info('[app] before-quit disparado');
-=======
->>>>>>> 68997da4b7864c874dcc2798bbedf5b91f76de3a
     if (server) server.close();
     if (db) db.close();
 });
