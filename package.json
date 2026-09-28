@@ -1,6 +1,6 @@
 {
   "name": "sistema-psicologia",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "",
   "main": "app/main.js",
   "scripts": {
@@ -19,7 +19,10 @@
       "icon": "build/PsiLogo.ico"
     },
     "mac": {
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "icon": "build/PsiLogo.icns",
       "category": "public.app-category.medical",
       "identity": null,
