@@ -9,6 +9,7 @@ const fs = require('fs');
 const Database = require('better-sqlite3');
 const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
+const { criarSincronizacao } = require('./sync/sincronizacao');
 
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
@@ -39,6 +40,9 @@ let db;
 // Guardados aqui para serem reutilizados pelo backup disparado a cada salvamento
 let caminhoBancoAtual;
 let pastaBackupAtual;
+
+// Sincronização entre computadores (Windows ↔ Mac) pela pasta do Google Drive
+let sync = null;
 let timerBackupDebounce = null;
 
 /**
@@ -92,27 +96,117 @@ function iniciarBanco() {
         backupDir: pastaBackupAtual,
         cronExpr: '0 */6 * * *',
     });
+
+    iniciarSincronizacao(pastaDados);
 }
+
+// ================================
+// SINCRONIZAÇÃO ENTRE COMPUTADORES
+// ================================
+function avisarTelas(canal, dados) {
+    BrowserWindow.getAllWindows().forEach((janela) => {
+        if (!janela.isDestroyed()) janela.webContents.send(canal, dados);
+    });
+}
+
+function iniciarSincronizacao(pastaDados) {
+    try {
+        sync = criarSincronizacao({
+            db,
+            log,
+            pastaDadosApp: pastaDados,
+            versaoApp: app.getVersion(),
+            senha: process.env.BACKUP_PASSWORD,
+            // antes da 1ª junção com outro computador, faz um backup completo
+            fazerBackup: () => runBackup({
+                dbPath: caminhoBancoAtual,
+                dataDir: null,
+                backupDir: pastaBackupAtual,
+                password: process.env.BACKUP_PASSWORD,
+            }),
+            aoAtualizarDados: (info) => avisarTelas('sync-dados-atualizados', info),
+        });
+    } catch (err) {
+        // se algo der errado aqui, o sistema continua funcionando normalmente, só sem sincronizar
+        log.error('[sync] Não foi possível iniciar a sincronização:', err);
+        sync = null;
+    }
+}
+
+ipcMain.handle('sync-status', () => (sync ? sync.status() : { indisponivel: true }));
+
+ipcMain.handle('sync-sincronizar-agora', async () => (sync ? sync.sincronizarAgora() : { indisponivel: true }));
+
+ipcMain.handle('sync-usar-pasta-sugerida', async () => {
+    if (!sync) return { indisponivel: true };
+    const sugerida = sync.pastaSugerida();
+    if (!sugerida) return sync.status();
+    sync.definirPasta(sugerida);
+    return sync.sincronizarAgora();
+});
+
+ipcMain.handle('sync-escolher-pasta', async (event) => {
+    if (!sync) return { indisponivel: true };
+    const janela = BrowserWindow.fromWebContents(event.sender) || janelaPai();
+    const resultado = await dialog.showOpenDialog(janela, {
+        title: 'Escolha a pasta de sincronização (dentro do Google Drive)',
+        defaultPath: sync.pastaSugerida() || app.getPath('home'),
+        properties: ['openDirectory', 'createDirectory'],
+    });
+    if (resultado.canceled || !resultado.filePaths.length) return sync.status();
+    sync.definirPasta(resultado.filePaths[0]);
+    return sync.sincronizarAgora();
+});
+
+ipcMain.handle('sync-desativar', () => {
+    if (!sync) return { indisponivel: true };
+    sync.definirPasta(null);
+    return sync.status();
+});
+
+// Quando uma tela fecha, esquecemos o que ela tinha lido
+app.on('web-contents-created', (event, contents) => {
+    const idTela = contents.id;
+    contents.once('destroyed', () => {
+        if (sync) sync.esquecerTela(idTela);
+    });
+});
 
 // ================================
 // IPC — comunicação tela <-> banco
 // ================================
 ipcMain.handle('storage-get', (event, chave) => {
+    // guarda o que esta tela leu (a sincronização usa isso para saber
+    // exatamente o que a pessoa mudou quando ela mandar salvar)
+    if (sync && sync.ehSincronizada(chave)) {
+        sync.registrarLeitura(event.sender.id, chave);
+    }
     const linha = db.prepare('SELECT valor FROM armazenamento WHERE chave = ?').get(chave);
     return linha ? linha.valor : null;
 });
 
 ipcMain.handle('storage-set', (event, chave, valor) => {
-    db.prepare(`
-        INSERT INTO armazenamento (chave, valor) VALUES (?, ?)
-        ON CONFLICT(chave) DO UPDATE SET valor = excluded.valor
-    `).run(chave, valor);
+    if (sync && sync.ehSincronizada(chave)) {
+        // pacientes/casais/financeiro: junta com o que já está salvo
+        // (inclusive o que chegou do outro computador) em vez de sobrescrever
+        sync.gravar(event.sender.id, chave, valor);
+    } else {
+        db.prepare(`
+            INSERT INTO armazenamento (chave, valor) VALUES (?, ?)
+            ON CONFLICT(chave) DO UPDATE SET valor = excluded.valor
+        `).run(chave, valor);
+    }
 
     agendarBackupAposSalvar();
     return true;
 });
 
 ipcMain.handle('storage-remove', (event, chave) => {
+    if (sync && sync.ehSincronizada(chave)) {
+        // apagar a lista inteira apagaria também no outro computador — bloqueado por segurança
+        log.warn(`[sync] storage-remove ignorado para a chave sincronizada "${chave}".`);
+        return false;
+    }
     db.prepare('DELETE FROM armazenamento WHERE chave = ?').run(chave);
 
     agendarBackupAposSalvar();
@@ -404,9 +498,10 @@ autoUpdater.on('error', (err) => {
 ipcMain.handle('verificar-atualizacao', () => verificarAtualizacao(true));
 ipcMain.handle('versao-app', () => app.getVersion());
 
-app.whenReady().then(() => {
-    criarJanela();
+app.whenReady().then(async () => {
+    await criarJanela();
     verificarAtualizacao(false);
+    if (sync) sync.iniciar();
 });
 
 app.on('window-all-closed', () => {
@@ -415,11 +510,23 @@ app.on('window-all-closed', () => {
     // continua vivo no Dock (comportamento padrão) e pode reabrir uma
     // janela nova depois, através do evento "activate" logo abaixo.
     if (process.platform !== 'darwin') {
-        if (server) server.close();
-        if (db) db.close();
-        app.quit();
+        encerrar();
     }
 });
+
+// Antes de fechar: envia as últimas alterações para o outro computador
+let encerrando = false;
+async function encerrar() {
+    if (encerrando) return;
+    encerrando = true;
+    if (sync) {
+        sync.parar();
+        await sync.enviarAoFechar();
+    }
+    if (server) server.close();
+    if (db && db.open) db.close();
+    app.quit();
+}
 
 // Mac: clicou no ícone do Dock e não tem nenhuma janela aberta → reabre
 // uma janela nova, reaproveitando o servidor/banco que já estão rodando.
@@ -435,8 +542,14 @@ app.on('activate', () => {
 
 // Fecha servidor e banco só quando o app está realmente sendo encerrado
 // de vez (Cmd+Q, ou "Sair" no menu do Dock) — não apenas ao fechar a janela.
-app.on('before-quit', () => {
+app.on('before-quit', (event) => {
     log.info('[app] before-quit disparado');
+    if (!encerrando) {
+        // ainda não enviou as últimas alterações (ex.: Cmd+Q no Mac, ou instalar atualização)
+        event.preventDefault();
+        encerrar();
+        return;
+    }
     if (server) server.close();
-    if (db) db.close();
+    if (db && db.open) db.close();
 });

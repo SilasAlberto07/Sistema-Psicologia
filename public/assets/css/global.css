@@ -288,4 +288,47 @@ body {
     display: flex;
     flex-direction: column;
 
-}
+}
+
+/* Aviso de sincronização (novidades do outro computador) */
+.aviso-sincronizacao {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 460px;
+    padding: 12px 14px;
+    background-color: #ffffff;
+    border: 1px solid #d8e6c8;
+    border-left: 4px solid #8a9e78;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    font-size: 13px;
+    color: #3d3a28;
+}
+
+.aviso-sincronizacao i {
+    font-size: 18px;
+    color: #8a9e78;
+}
+
+.aviso-sincronizacao button {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    background-color: #8a9e78;
+    color: #ffffff;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.aviso-sincronizacao button.fechar {
+    background: transparent;
+    color: #9a9a88;
+    font-size: 18px;
+    padding: 0 4px;
+}

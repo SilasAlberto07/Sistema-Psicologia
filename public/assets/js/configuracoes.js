@@ -110,3 +110,115 @@ btnSalvarSenha.addEventListener("click", trocarSenha);
         if (e.key === "Enter") trocarSenha();
     });
 });
+
+
+// ================================
+// CONFIGURAÇÕES — Sincronização entre computadores
+// ================================
+const syncEls = {
+    bolinha: document.getElementById("syncBolinha"),
+    texto: document.getElementById("syncStatusTexto"),
+    detalhes: document.getElementById("syncDetalhes"),
+    este: document.getElementById("syncEste"),
+    pasta: document.getElementById("syncPasta"),
+    outros: document.getElementById("syncOutros"),
+    ultima: document.getElementById("syncUltima"),
+    erro: document.getElementById("syncErro"),
+    btnGoogle: document.getElementById("btnSyncGoogleDrive"),
+    btnEscolher: document.getElementById("btnSyncEscolher"),
+    btnAgora: document.getElementById("btnSyncAgora"),
+    btnDesativar: document.getElementById("btnSyncDesativar"),
+};
+
+function tempoAtras(iso) {
+    if (!iso) return "nunca";
+    const segundos = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
+    if (segundos < 60) return "agora há pouco";
+    const minutos = Math.round(segundos / 60);
+    if (minutos < 60) return `há ${minutos} min`;
+    const horas = Math.round(minutos / 60);
+    if (horas < 24) return `há ${horas} h`;
+    return new Date(iso).toLocaleString("pt-BR");
+}
+
+function mostrarStatusSync(st) {
+    if (!st || st.indisponivel) {
+        syncEls.bolinha.className = "sync-bolinha erro";
+        syncEls.texto.textContent = "Sincronização indisponível neste computador.";
+        document.getElementById("syncBotoes").style.display = "none";
+        return;
+    }
+
+    syncEls.erro.style.display = st.ultimoErro ? "block" : "none";
+    syncEls.erro.textContent = st.ultimoErro || "";
+
+    if (!st.ativa) {
+        syncEls.bolinha.className = "sync-bolinha";
+        syncEls.texto.textContent = "Desativada";
+        syncEls.detalhes.style.display = "none";
+        syncEls.btnGoogle.style.display = st.pastaSugerida ? "" : "none";
+        syncEls.btnEscolher.style.display = "";
+        syncEls.btnAgora.style.display = "none";
+        syncEls.btnDesativar.style.display = "none";
+        return;
+    }
+
+    syncEls.bolinha.className = "sync-bolinha " +
+        (st.ultimoErro ? "erro" : st.sincronizando ? "trabalhando" : "ativa");
+    syncEls.texto.textContent = st.ultimoErro ? "Ativa, com problema"
+        : st.sincronizando ? "Sincronizando..." : "Ativa";
+
+    syncEls.detalhes.style.display = "";
+    syncEls.este.textContent = st.esteComputador;
+    syncEls.pasta.textContent = st.pasta;
+    syncEls.outros.innerHTML = st.outrosComputadores.length
+        ? st.outrosComputadores.map(o =>
+            `${o.nome} <span style="color:#9a9a88">(atualizado ${tempoAtras(o.atualizadoEm)})</span>`).join("<br>")
+        : '<span style="color:#9a9a88">Nenhum ainda. Ative a sincronização no outro computador usando a mesma pasta.</span>';
+    syncEls.ultima.textContent = tempoAtras(st.ultimaRecepcao);
+
+    syncEls.btnGoogle.style.display = "none";
+    syncEls.btnEscolher.style.display = "none";
+    syncEls.btnAgora.style.display = "";
+    syncEls.btnDesativar.style.display = "";
+}
+
+async function executarSync(acao, botao) {
+    if (!window.sincronizacao) return;
+    const original = botao.innerHTML;
+    botao.disabled = true;
+    botao.innerHTML = '<i class="ti ti-loader-2"></i> Aguarde...';
+    try {
+        mostrarStatusSync(await acao());
+    } catch (e) {
+        mostrarMensagem("Não foi possível concluir a sincronização.", "error");
+    } finally {
+        botao.disabled = false;
+        botao.innerHTML = original;
+    }
+}
+
+if (window.sincronizacao) {
+    window.sincronizacao.status().then(mostrarStatusSync);
+    setInterval(() => window.sincronizacao.status().then(mostrarStatusSync), 5000);
+
+    syncEls.btnGoogle.addEventListener("click", () =>
+        executarSync(() => window.sincronizacao.usarPastaSugerida(), syncEls.btnGoogle));
+
+    syncEls.btnEscolher.addEventListener("click", () =>
+        executarSync(() => window.sincronizacao.escolherPasta(), syncEls.btnEscolher));
+
+    syncEls.btnAgora.addEventListener("click", () =>
+        executarSync(() => window.sincronizacao.sincronizarAgora(), syncEls.btnAgora));
+
+    syncEls.btnDesativar.addEventListener("click", async () => {
+        const resposta = await mostrarConfirmacao(
+            "Desativar a sincronização? Os dados deste computador continuam aqui, mas deixam de ser enviados e recebidos."
+        );
+        if (resposta.isConfirmed) {
+            executarSync(() => window.sincronizacao.desativar(), syncEls.btnDesativar);
+        }
+    });
+} else {
+    mostrarStatusSync(null);
+}

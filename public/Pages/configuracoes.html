@@ -48,6 +48,60 @@
                     </div>
                 </section>
 
+                <!-- SINCRONIZAÇÃO -->
+                <section class="config-card">
+                    <div class="config-card-icone">
+                        <i class="ti ti-arrows-exchange"></i>
+                    </div>
+
+                    <div class="config-card-corpo">
+                        <h2>Sincronização entre computadores</h2>
+                        <p>
+                            Mantém os dados iguais no Windows e no Mac usando uma pasta do Google Drive.
+                            As duas pessoas podem usar o sistema ao mesmo tempo: as novidades
+                            aparecem no outro computador em cerca de 1 minuto.
+                        </p>
+
+                        <div class="sync-status" id="syncStatus">
+                            <span class="sync-bolinha" id="syncBolinha"></span>
+                            <span id="syncStatusTexto">Carregando...</span>
+                        </div>
+
+                        <dl class="sync-detalhes" id="syncDetalhes" style="display:none">
+                            <dt>Este computador</dt>
+                            <dd id="syncEste">—</dd>
+                            <dt>Pasta</dt>
+                            <dd id="syncPasta" class="sync-pasta">—</dd>
+                            <dt>Outros computadores</dt>
+                            <dd id="syncOutros">—</dd>
+                            <dt>Última verificação</dt>
+                            <dd id="syncUltima">—</dd>
+                        </dl>
+
+                        <div class="config-erro sync-erro" id="syncErro"></div>
+
+                        <div class="botoes" id="syncBotoes">
+                            <button class="btn-salvar" id="btnSyncGoogleDrive" style="display:none">
+                                <i class="ti ti-brand-google-drive"></i> Usar o Google Drive deste computador
+                            </button>
+                            <button class="btn-voltar" id="btnSyncEscolher">
+                                <i class="ti ti-folder"></i> Escolher pasta...
+                            </button>
+                            <button class="btn-salvar" id="btnSyncAgora" style="display:none">
+                                <i class="ti ti-refresh"></i> Sincronizar agora
+                            </button>
+                            <button class="btn-voltar" id="btnSyncDesativar" style="display:none">
+                                <i class="ti ti-plug-connected-x"></i> Desativar
+                            </button>
+                        </div>
+
+                        <p class="sync-dica">
+                            Escolha uma pasta dentro do <strong>Meu Drive</strong> do Google Drive, e a
+                            <strong>mesma pasta</strong> nos dois computadores. Os dados vão criptografados.
+                        </p>
+                    </div>
+                </section>
+
                 <!-- SENHA -->
                 <section class="config-card">
                     <div class="config-card-icone">
