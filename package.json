@@ -1,6 +1,6 @@
 {
   "name": "sistema-psicologia",
-  "version": "1.4.10",
+  "version": "1.4.11",
   "description": "",
   "main": "app/main.js",
   "scripts": {
