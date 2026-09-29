@@ -282,6 +282,22 @@
     font-size: clamp(13px, 4cqw, 17px) !important;
 }
 
+/* nome do mês abaixo do título do resumo */
+.resumo-mes {
+    display: block;
+    margin-top: 4px;
+    font-size: clamp(11px, 3.4cqw, 13px);
+    color: #9a9a88;
+}
+
+/* aviso de sessões que ainda não têm data */
+.resumo-sem-data {
+    margin-top: 10px;
+    font-size: clamp(10px, 3.2cqw, 12px);
+    color: #9a9a88;
+    line-height: 1.4;
+}
+
 .resumo-item {
     display: flex;
     justify-content: space-between;

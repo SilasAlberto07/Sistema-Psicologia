@@ -1,25 +1,41 @@
 // ===============================
-// Junta as sessões de pacientes individuais + casais em uma lista só,
-// já com o nome certo pra exibir (no caso do casal, o nome de quem
-// foi atendido naquela sessão específica).
+// Junta TUDO que aparece na página Sessões em uma lista só:
+// a "1ª Consulta" + as sessões normais, de pacientes individuais e casais.
+// Quem está na Lixeira fica de fora.
+// (no caso do casal, o nome exibido é de quem foi atendido naquela sessão)
 // ===============================
 function obterSessoesUnificadas(pacientes, casais) {
     const sessoesUnificadas = [];
 
+    function adicionar(sessao, nomeExibicao, isCasal) {
+        if (!sessao) return;
+        sessoesUnificadas.push({
+            nomeExibicao,
+            data: sessao.data,
+            hora: sessao.hora,
+            status: sessao.status,
+            duracao: sessao.duracao,
+            isCasal,
+        });
+    }
+
     pacientes.forEach(paciente => {
+        if (paciente.excluido) return;
+
+        adicionar(paciente.consulta, paciente.nomeCompleto, false);
+
         (paciente.sessoes || []).forEach(sessao => {
-            sessoesUnificadas.push({
-                nomeExibicao: paciente.nomeCompleto,
-                data: sessao.data,
-                hora: sessao.hora,
-                status: sessao.status,
-                duracao: sessao.duracao,
-                isCasal: false,
-            });
+            adicionar(sessao, paciente.nomeCompleto, false);
         });
     });
 
     casais.forEach(casal => {
+        if (casal.excluido) return;
+
+        const nomeCasal = `${casal.p1NomeCompleto || "?"} e ${casal.p2NomeCompleto || "?"}`;
+
+        adicionar(casal.consulta, `${nomeCasal} (Casal)`, true);
+
         (casal.sessoes || []).forEach(sessao => {
             let nomeAtendido;
 
@@ -29,17 +45,10 @@ function obterSessoesUnificadas(pacientes, casais) {
                 nomeAtendido = casal.p2NomeCompleto || "Pessoa 2";
             } else {
                 // ainda não escolheram quem vai nessa sessão
-                nomeAtendido = `${casal.p1NomeCompleto || "?"} e ${casal.p2NomeCompleto || "?"}`;
+                nomeAtendido = nomeCasal;
             }
 
-            sessoesUnificadas.push({
-                nomeExibicao: `${nomeAtendido} (Casal)`,
-                data: sessao.data,
-                hora: sessao.hora,
-                status: sessao.status,
-                duracao: sessao.duracao,
-                isCasal: true,
-            });
+            adicionar(sessao, `${nomeAtendido} (Casal)`, true);
         });
     });
 
@@ -57,7 +66,7 @@ async function atualizarStatusAutomatico() {
         if (!sessao.data || !sessao.hora) return null;
         if (sessao.status === "cancelada") return null;
 
-        const duracao = Number(sessao.duracao) || 50;
+        const duracao = Number(sessao.duracao) || 60; // mesmo padrão da página Sessões
         const inicio = new Date(`${sessao.data}T${sessao.hora}`);
         const fim = new Date(inicio);
         fim.setMinutes(fim.getMinutes() + duracao);
@@ -68,7 +77,8 @@ async function atualizarStatusAutomatico() {
     }
 
     pacientes.forEach(paciente => {
-        (paciente.sessoes || []).forEach(sessao => {
+        [paciente.consulta, ...(paciente.sessoes || [])].forEach(sessao => {
+            if (!sessao) return;
             const novoStatus = calcularNovoStatus(sessao);
             if (novoStatus && sessao.status !== novoStatus) {
                 sessao.status = novoStatus;
@@ -78,7 +88,8 @@ async function atualizarStatusAutomatico() {
     });
 
     casais.forEach(casal => {
-        (casal.sessoes || []).forEach(sessao => {
+        [casal.consulta, ...(casal.sessoes || [])].forEach(sessao => {
+            if (!sessao) return;
             const novoStatus = calcularNovoStatus(sessao);
             if (novoStatus && sessao.status !== novoStatus) {
                 sessao.status = novoStatus;
@@ -122,10 +133,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // TOTAL DE PACIENTES
         document.getElementById("totalPacientes").textContent =
-            `${pacientes.length} cadastrados`;
+            pacientes.filter(p => !p.excluido).length;
 
         // TOTAL DE CASAIS
-        document.getElementById("totalCasais").textContent = casais.length;
+        document.getElementById("totalCasais").textContent =
+            casais.filter(c => !c.excluido).length;
 
         // junta tudo (pacientes + casais) numa lista só de sessões
         const todasSessoes = obterSessoesUnificadas(pacientes, casais);
@@ -168,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .filter(s => s.data === hojeFormatado)
             .map(s => ({ nomeExibicao: s.nomeExibicao, horario: s.hora, status: s.status }));
 
-        agendaHoje.sort((a, b) => a.horario.localeCompare(b.horario));
+        agendaHoje.sort((a, b) => (a.horario || "").localeCompare(b.horario || ""));
 
         const agendaHojeEl = document.getElementById("agendaHoje");
         if (agendaHoje.length === 0) {
@@ -178,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
             agendaHojeEl.innerHTML = "<p>Nenhuma sessão agendada para hoje.</p>";
         } else {
             agendaHojeEl.innerHTML = agendaHoje.map(item => {
-                const status = item.status.toLowerCase().trim();
+                const status = (item.status || "").toLowerCase().trim();
                 const mapa = {
                     agendada: ["sessao-agendada", "badge-agendada", "Agendada"],
                     realizada: ["sessao-realizada", "badge-realizada", "Realizada"],
@@ -188,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const [classe, badge, textoBadge] = mapa[status] || ["", "", status];
                 return `
                     <div class="item-agenda ${classe}">
-                        <strong>${item.horario}</strong>
+                        <strong>${item.horario || "--:--"}</strong>
                         <div class="item-agenda-info">
                             <div class="item-agenda-name">${item.nomeExibicao}</div>
                         </div>
@@ -197,31 +209,44 @@ document.addEventListener("DOMContentLoaded", () => {
             }).join("");
         }
 
-        // RESUMO DA SEMANA
-        let realizadas = 0, agendadas = 0, andamento = 0, canceladas = 0;
-        const primeiroDiaSemana = new Date(agora);
-        const diff = primeiroDiaSemana.getDay() === 0 ? -6 : 1 - primeiroDiaSemana.getDay();
-        primeiroDiaSemana.setDate(primeiroDiaSemana.getDate() + diff);
-        primeiroDiaSemana.setHours(0, 0, 0, 0);
-        const ultimoDiaSemana = new Date(primeiroDiaSemana);
-        ultimoDiaSemana.setDate(ultimoDiaSemana.getDate() + 6);
-        ultimoDiaSemana.setHours(23, 59, 59, 999);
+        // RESUMO DO MÊS — mesmas sessões e status da página Sessões,
+        // contando tudo que tem data dentro do mês atual
+        let realizadas = 0, agendadas = 0, andamento = 0, canceladas = 0, semData = 0;
+        const mesAtual = hojeFormatado.slice(0, 7); // "AAAA-MM"
 
         todasSessoes.forEach(sessao => {
-            if (!sessao.data) return;
-            const dataSessao = new Date(sessao.data + "T00:00:00");
-            if (dataSessao < primeiroDiaSemana || dataSessao > ultimoDiaSemana) return;
             const status = (sessao.status || "").trim().toLowerCase();
+
+            if (!sessao.data) {
+                // sessão ainda sem data marcada: não dá para saber de que mês é
+                if (status === "agendada") semData++;
+                return;
+            }
+            if (!sessao.data.startsWith(mesAtual)) return;
+
             if (status === "realizada") realizadas++;
-            if (status === "agendada") agendadas++;
-            if (status === "andamento") andamento++;
-            if (status === "cancelada") canceladas++;
+            else if (status === "agendada") agendadas++;
+            else if (status === "andamento") andamento++;
+            else if (status === "cancelada") canceladas++;
         });
 
+        const nomeMes = agora.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+        document.getElementById("resumoMesNome").textContent =
+            nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1); // "Setembro de 2026"
         document.getElementById("resumoRealizadas").textContent = realizadas;
         document.getElementById("resumoAgendadas").textContent = agendadas;
         document.getElementById("resumoAndamento").textContent = andamento;
         document.getElementById("resumoCanceladas").textContent = canceladas;
+
+        const avisoSemData = document.getElementById("resumoSemData");
+        if (semData > 0) {
+            avisoSemData.textContent = semData === 1
+                ? "+ 1 sessão agendada ainda sem data definida."
+                : `+ ${semData} sessões agendadas ainda sem data definida.`;
+            avisoSemData.style.display = "block";
+        } else {
+            avisoSemData.style.display = "none";
+        }
     }
 
 
