@@ -8,5 +8,6 @@ contextBridge.exposeInMainWorld('storage', {
 
 contextBridge.exposeInMainWorld('atualizacao', {
     verificar: () => ipcRenderer.invoke('verificar-atualizacao'),
-    versao: () => ipcRenderer.invoke('versao-app')
+    versao: () => ipcRenderer.invoke('versao-app'),
+    plataforma: process.platform
 });

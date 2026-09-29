@@ -273,6 +273,18 @@ async function verificarAtualizacao(manual = false) {
         return;
     }
 
+    // Mac: sem assinatura da Apple o macOS não deixa o app se atualizar sozinho,
+    // então lá a atualização é manual (abrir o instalador .pkg novo).
+    if (process.platform === 'darwin') {
+        log.info('[update] Verificação ignorada no Mac: atualização é manual.');
+        if (manual) {
+            await avisar('info', 'Atualizações',
+                'No Mac, as atualizações são instaladas manualmente.',
+                `Versão instalada: ${app.getVersion()}. Para atualizar, feche o programa e abra o instalador .pkg da nova versão.`);
+        }
+        return;
+    }
+
     if (atualizacaoBaixada) {
         await perguntarSeInstala();
         return;

@@ -17,6 +17,16 @@ if (window.atualizacao) {
     btnVerificar.disabled = true;
 }
 
+// No Mac a atualização é manual (o macOS exige assinatura paga da Apple
+// para o app se atualizar sozinho), então escondemos o botão lá.
+if (window.atualizacao && window.atualizacao.plataforma === "darwin") {
+    document.getElementById("texto-atualizacao").textContent =
+        "No Mac, as atualizações são instaladas manualmente: " +
+        "feche o programa e abra o instalador .pkg da nova versão. " +
+        "Ele substitui a versão antiga e seus dados continuam salvos.";
+    document.getElementById("botoes-atualizacao").style.display = "none";
+}
+
 btnVerificar.addEventListener("click", async () => {
     if (!window.atualizacao || btnVerificar.classList.contains("verificando")) return;
 

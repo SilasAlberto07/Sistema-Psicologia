@@ -20,12 +20,11 @@
     },
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        "pkg"
       ],
       "icon": "build/PsiLogo.icns",
       "category": "public.app-category.medical",
-      "identity": null,
+      "identity": "-",
       "hardenedRuntime": false,
       "gatekeeperAssess": false
     },
@@ -33,6 +32,13 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "artifactName": "Sistema-Psicologia-Setup-${version}.${ext}"
+    },
+    "pkg": {
+      "installLocation": "/Applications",
+      "isRelocatable": false,
+      "allowAnywhere": false,
+      "allowCurrentUserHome": false,
+      "artifactName": "Sistema-Psicologia-${version}-${arch}.${ext}"
     },
     "files": [
       "**/*",

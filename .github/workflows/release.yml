@@ -1,8 +1,15 @@
-# Gera o instalador do Windows e publica no GitHub Releases
-# sempre que uma tag de versão (v1.4.10, v1.5.0...) é enviada.
+# Gera os instaladores e publica no GitHub Releases
+# sempre que uma tag de versão (v1.4.11, v1.5.0...) é enviada.
 #
 # Uso no seu PC:  npm run release
 #   (sobe a versão, cria a tag e dá push — o resto acontece aqui)
+#
+#   Windows → Sistema-Psicologia-Setup-X.exe  (+ latest.yml → atualização automática)
+#   Mac     → Sistema-Psicologia-X-arm64.pkg  (Macs com chip Apple: M1, M2, M3, M4...)
+#             Sistema-Psicologia-X-x64.pkg    (Macs com processador Intel)
+#
+# Se o build do Mac falhar, o Windows é publicado mesmo assim
+# (a atualização automática do Windows nunca fica travada por causa do Mac).
 
 name: Publicar versão
 
@@ -15,6 +22,9 @@ permissions:
   contents: write   # necessário para criar o release
 
 jobs:
+  # ---------------------------------------------------------------
+  # WINDOWS
+  # ---------------------------------------------------------------
   windows:
     runs-on: windows-latest
 
@@ -59,29 +69,113 @@ jobs:
       - name: Conferir os arquivos gerados
         shell: bash
         run: |
+          VERSAO="${GITHUB_REF_NAME#v}"
           ls -la dist
-          test -f "dist/Sistema-Psicologia-Setup-${GITHUB_REF_NAME#v}.exe"
-          test -f "dist/Sistema-Psicologia-Setup-${GITHUB_REF_NAME#v}.exe.blockmap"
+          test -f "dist/Sistema-Psicologia-Setup-$VERSAO.exe"
+          test -f "dist/Sistema-Psicologia-Setup-$VERSAO.exe.blockmap"
           test -f dist/latest.yml
-          cat dist/latest.yml
+          mkdir -p saida
+          cp "dist/Sistema-Psicologia-Setup-$VERSAO.exe" \
+             "dist/Sistema-Psicologia-Setup-$VERSAO.exe.blockmap" \
+             dist/latest.yml saida/
 
-      - name: Publicar o release (tudo de uma vez, sem duplicar)
-        shell: bash
+      - name: Guardar os arquivos para a publicação
+        uses: actions/upload-artifact@v4
+        with:
+          name: instalador-windows
+          path: saida/*
+          if-no-files-found: error
+          retention-days: 3
+
+  # ---------------------------------------------------------------
+  # MAC (instalação manual — .pkg)
+  # ---------------------------------------------------------------
+  mac:
+    runs-on: macos-latest
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Criar o .env do app (só a senha do backup)
         env:
-          GH_TOKEN: ${{ github.token }}
+          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+        run: |
+          if [ -z "$BACKUP_PASSWORD" ]; then
+            echo "::error::O secret BACKUP_PASSWORD não está configurado no GitHub."
+            exit 1
+          fi
+          printf 'BACKUP_PASSWORD=%s\n' "$BACKUP_PASSWORD" > .env
+
+      - name: Gerar os instaladores (.pkg) para Apple Silicon e Intel
+        run: npx electron-builder --mac pkg --arm64 --x64 --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Conferir os arquivos gerados
         run: |
           VERSAO="${GITHUB_REF_NAME#v}"
-          ARQUIVOS=(
-            "dist/Sistema-Psicologia-Setup-$VERSAO.exe"
-            "dist/Sistema-Psicologia-Setup-$VERSAO.exe.blockmap"
-            "dist/latest.yml"
-          )
+          ls -la dist
+          test -f "dist/Sistema-Psicologia-$VERSAO-arm64.pkg"
+          test -f "dist/Sistema-Psicologia-$VERSAO-x64.pkg"
+          mkdir -p saida
+          cp dist/Sistema-Psicologia-$VERSAO-*.pkg saida/
+
+      - name: Guardar os arquivos para a publicação
+        uses: actions/upload-artifact@v4
+        with:
+          name: instalador-mac
+          path: saida/*
+          if-no-files-found: error
+          retention-days: 3
+
+  # ---------------------------------------------------------------
+  # PUBLICAR — um único release com tudo (sem duplicar)
+  # ---------------------------------------------------------------
+  publicar:
+    needs: [windows, mac]
+    # Publica se o Windows deu certo, mesmo que o Mac tenha falhado
+    if: ${{ !cancelled() && needs.windows.result == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pegar o instalador do Windows
+        uses: actions/download-artifact@v4
+        with:
+          name: instalador-windows
+          path: arquivos
+
+      - name: Pegar os instaladores do Mac
+        if: ${{ needs.mac.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: instalador-mac
+          path: arquivos
+
+      - name: Publicar o release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          ls -la arquivos
+          if [ "${{ needs.mac.result }}" != "success" ]; then
+            echo "::warning::O build do Mac falhou — publicando só o Windows."
+          fi
           if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
             echo "Release já existe — substituindo os arquivos."
-            gh release upload "$GITHUB_REF_NAME" "${ARQUIVOS[@]}" --clobber
+            gh release upload "$GITHUB_REF_NAME" arquivos/* --clobber
             gh release edit "$GITHUB_REF_NAME" --draft=false --prerelease=false --latest
           else
-            gh release create "$GITHUB_REF_NAME" "${ARQUIVOS[@]}" \
+            gh release create "$GITHUB_REF_NAME" arquivos/* \
               --title "$GITHUB_REF_NAME" \
               --generate-notes \
               --latest
