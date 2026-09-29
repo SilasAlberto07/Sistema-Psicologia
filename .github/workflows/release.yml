@@ -1,0 +1,88 @@
+# Gera o instalador do Windows e publica no GitHub Releases
+# sempre que uma tag de versão (v1.4.10, v1.5.0...) é enviada.
+#
+# Uso no seu PC:  npm run release
+#   (sobe a versão, cria a tag e dá push — o resto acontece aqui)
+
+name: Publicar versão
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # necessário para criar o release
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Conferir se a tag bate com a versão do package.json
+        shell: bash
+        run: |
+          VERSAO=$(node -p "require('./package.json').version")
+          if [ "v$VERSAO" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::A tag $GITHUB_REF_NAME não bate com a versão do package.json (v$VERSAO)."
+            exit 1
+          fi
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Criar o .env do app (só a senha do backup)
+        shell: bash
+        env:
+          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+        run: |
+          if [ -z "$BACKUP_PASSWORD" ]; then
+            echo "::error::O secret BACKUP_PASSWORD não está configurado no GitHub (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          printf 'BACKUP_PASSWORD=%s\n' "$BACKUP_PASSWORD" > .env
+
+      - name: Gerar o instalador
+        run: npx electron-builder --win --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Conferir os arquivos gerados
+        shell: bash
+        run: |
+          ls -la dist
+          test -f "dist/Sistema-Psicologia-Setup-${GITHUB_REF_NAME#v}.exe"
+          test -f "dist/Sistema-Psicologia-Setup-${GITHUB_REF_NAME#v}.exe.blockmap"
+          test -f dist/latest.yml
+          cat dist/latest.yml
+
+      - name: Publicar o release (tudo de uma vez, sem duplicar)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSAO="${GITHUB_REF_NAME#v}"
+          ARQUIVOS=(
+            "dist/Sistema-Psicologia-Setup-$VERSAO.exe"
+            "dist/Sistema-Psicologia-Setup-$VERSAO.exe.blockmap"
+            "dist/latest.yml"
+          )
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            echo "Release já existe — substituindo os arquivos."
+            gh release upload "$GITHUB_REF_NAME" "${ARQUIVOS[@]}" --clobber
+            gh release edit "$GITHUB_REF_NAME" --draft=false --prerelease=false --latest
+          else
+            gh release create "$GITHUB_REF_NAME" "${ARQUIVOS[@]}" \
+              --title "$GITHUB_REF_NAME" \
+              --generate-notes \
+              --latest
+          fi

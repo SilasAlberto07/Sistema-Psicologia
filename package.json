@@ -5,9 +5,9 @@
   "main": "app/main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "dotenv -- electron-builder --publish always",
+    "dist": "electron-builder --win --publish never",
     "dist:mac": "electron-builder --mac",
-    "release": "npm version patch && git push origin main --follow-tags && npm run dist",
+    "release": "npm version patch && git push origin main --follow-tags",
     "postinstall": "electron-builder install-app-deps",
     "rebuild": "electron-rebuild -f -w better-sqlite3"
   },
@@ -31,12 +31,15 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Sistema-Psicologia-Setup-${version}.${ext}"
     },
     "files": [
       "**/*",
       "!node_modules/electron-builder",
-      "!node_modules/electron"
+      "!node_modules/electron",
+      "!.github${/*}",
+      "!dist${/*}"
     ],
     "asarUnpack": [
       "node_modules/better-sqlite3/**/*"

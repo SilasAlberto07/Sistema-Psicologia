@@ -1,0 +1,140 @@
+/* ═══════════════════════════════════════════════
+   CONFIGURAÇÕES — configuracoes.html
+═══════════════════════════════════════════════ */
+
+.config-conteudo {
+    max-width: 640px;
+}
+
+.config-subtitulo {
+    color: #9a9a88;
+    margin-bottom: 24px;
+}
+
+.config-card {
+    display: flex;
+    gap: 22px;
+    align-items: flex-start;
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+}
+
+.config-card-icone {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #eaf0e3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.config-card-icone i {
+    font-size: 26px;
+    color: #7a8e69;
+}
+
+.config-card-corpo {
+    flex: 1;
+}
+
+.config-card-corpo h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: #3d5a28;
+    margin-bottom: 8px;
+}
+
+.config-card-corpo p {
+    font-size: 13px;
+    color: #7a7a68;
+    line-height: 1.5;
+}
+
+.config-versao {
+    margin-top: 14px;
+    display: inline-block;
+    background-color: #f5f0e8;
+    border: 1px solid #ede8e0;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #6a6a58;
+}
+
+.config-versao strong {
+    color: #3d5a28;
+}
+
+.config-card .botoes {
+    margin-top: 18px;
+}
+
+/* Botão enquanto está verificando */
+#btnVerificarAtualizacao.verificando {
+    opacity: 0.7;
+    cursor: default;
+}
+
+#btnVerificarAtualizacao.verificando i {
+    animation: config-girar 1s linear infinite;
+}
+
+#btnVerificarAtualizacao:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@keyframes config-girar {
+    to { transform: rotate(360deg); }
+}
+
+/* Formulário de senha */
+.config-form {
+    margin-top: 16px;
+    max-width: 340px;
+}
+
+.config-form .form-group {
+    margin-bottom: 14px;
+}
+
+.config-erro {
+    display: none;
+    color: #ba3c3c;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.config-form label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #4a4a38;
+    margin-bottom: 6px;
+}
+
+.config-form input {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    background-color: #faf8f4;
+    border: 1px solid #ddd8ce;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #3d3a28;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.config-form input:focus {
+    border-color: #8a9e78;
+    box-shadow: 0 0 0 3px rgba(138, 158, 120, 0.18);
+    background-color: #ffffff;
+}

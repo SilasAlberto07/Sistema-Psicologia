@@ -215,47 +215,27 @@ async function criarJanela() {
 // ================================
 // ATUALIZAÇÃO AUTOMÁTICA (GitHub Releases)
 // ================================
-autoUpdater.on('checking-for-update', () => {
-    log.info('[update] Checando por atualização...');
-});
+// Estado da atualização — evita baixar duas vezes, perguntar duas vezes etc.
+let verificacaoManual = false;   // true quando o usuário clicou em "Verificar atualizações"
+let baixandoAtualizacao = false; // download em andamento
+let atualizacaoBaixada = false;  // já baixou, só falta instalar
 
-autoUpdater.on('update-available', (info) => {
-    log.info('[update] Atualização encontrada:', info.version);
+function janelaPai() {
+    return mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined;
+}
 
-    dialog.showMessageBox(mainWindow, {
-        type: 'info',
-        title: 'Atualização disponível',
-        message: `Uma nova versão (${info.version}) está disponível.`,
-        detail: 'Deseja baixar agora?',
-        buttons: ['Baixar agora', 'Depois'],
-        defaultId: 0,
-        cancelId: 1
-    }).then((result) => {
-        if (result.response === 0) {
-            criarJanelaProgresso();
-            autoUpdater.downloadUpdate();
-        }
+function avisar(tipo, titulo, mensagem, detalhe) {
+    return dialog.showMessageBox(janelaPai(), {
+        type: tipo,
+        title: titulo,
+        message: mensagem,
+        detail: detalhe,
+        buttons: ['OK']
     });
-});
+}
 
-autoUpdater.on('update-not-available', (info) => {
-    log.info('[update] Nenhuma atualização disponível. Versão atual já é a mais recente.', info);
-});
-
-autoUpdater.on('download-progress', (progress) => {
-    log.info(`[update] Baixando... ${Math.round(progress.percent)}%`);
-    if (janelaProgresso) {
-        janelaProgresso.webContents.send('progresso-download', Math.round(progress.percent));
-    }
-});
-
-autoUpdater.on('update-downloaded', () => {
-    log.info('[update] Atualização baixada, perguntando ao usuário...');
-    if (janelaProgresso) {
-        janelaProgresso.close();
-        janelaProgresso = null;
-    }
-    dialog.showMessageBox(mainWindow, {
+function perguntarSeInstala() {
+    return dialog.showMessageBox(janelaPai(), {
         type: 'info',
         title: 'Atualização pronta',
         message: 'A atualização foi baixada com sucesso.',
@@ -268,6 +248,102 @@ autoUpdater.on('update-downloaded', () => {
             autoUpdater.quitAndInstall();
         }
     });
+}
+
+function fecharJanelaProgresso() {
+    if (janelaProgresso && !janelaProgresso.isDestroyed()) {
+        janelaProgresso.close();
+    }
+    janelaProgresso = null;
+}
+
+/**
+ * Procura atualização no GitHub.
+ * manual = true → mostra aviso mesmo quando não há nada novo ou quando dá erro.
+ * manual = false (ao abrir o programa) → só aparece algo se tiver versão nova.
+ */
+async function verificarAtualizacao(manual = false) {
+    if (!app.isPackaged) {
+        log.info('[update] Verificação ignorada: app rodando em modo desenvolvimento (npm start).');
+        if (manual) {
+            await avisar('info', 'Atualizações',
+                'A verificação de atualização só funciona no programa instalado.',
+                'Você está rodando pelo "npm start" (modo desenvolvimento).');
+        }
+        return;
+    }
+
+    if (atualizacaoBaixada) {
+        await perguntarSeInstala();
+        return;
+    }
+
+    if (baixandoAtualizacao) {
+        if (manual) {
+            await avisar('info', 'Atualizações', 'A atualização já está sendo baixada.',
+                'Aguarde o download terminar.');
+        }
+        return;
+    }
+
+    verificacaoManual = manual;
+    try {
+        await autoUpdater.checkForUpdates();
+    } catch (err) {
+        // O erro também dispara o evento 'error' abaixo, que mostra o aviso.
+        log.error('[update] Falha ao verificar atualização:', err);
+    }
+}
+
+autoUpdater.on('checking-for-update', () => {
+    log.info('[update] Checando por atualização...');
+});
+
+autoUpdater.on('update-available', (info) => {
+    log.info('[update] Atualização encontrada:', info.version);
+    verificacaoManual = false;
+
+    dialog.showMessageBox(janelaPai(), {
+        type: 'info',
+        title: 'Atualização disponível',
+        message: `Uma nova versão (${info.version}) está disponível.`,
+        detail: `Você está usando a versão ${app.getVersion()}. Deseja baixar agora?`,
+        buttons: ['Baixar agora', 'Depois'],
+        defaultId: 0,
+        cancelId: 1
+    }).then((result) => {
+        if (result.response === 0 && !baixandoAtualizacao) {
+            baixandoAtualizacao = true;
+            criarJanelaProgresso();
+            autoUpdater.downloadUpdate().catch((err) => {
+                log.error('[update] Falha no download:', err);
+            });
+        }
+    });
+});
+
+autoUpdater.on('update-not-available', (info) => {
+    log.info('[update] Nenhuma atualização disponível. Versão atual já é a mais recente.', info);
+    if (verificacaoManual) {
+        verificacaoManual = false;
+        avisar('info', 'Atualizações', 'Você já está usando a versão mais recente.',
+            `Versão instalada: ${app.getVersion()}`);
+    }
+});
+
+autoUpdater.on('download-progress', (progress) => {
+    log.info(`[update] Baixando... ${Math.round(progress.percent)}%`);
+    if (janelaProgresso && !janelaProgresso.isDestroyed()) {
+        janelaProgresso.webContents.send('progresso-download', Math.round(progress.percent));
+    }
+});
+
+autoUpdater.on('update-downloaded', () => {
+    log.info('[update] Atualização baixada, perguntando ao usuário...');
+    baixandoAtualizacao = false;
+    atualizacaoBaixada = true;
+    fecharJanelaProgresso();
+    perguntarSeInstala();
 });
 
 /**
@@ -281,7 +357,7 @@ function criarJanelaProgresso() {
         minimizable: false,
         maximizable: false,
         title: 'Baixando atualização',
-        parent: mainWindow,
+        parent: janelaPai(),
         webPreferences: {
             contextIsolation: true,
             preload: path.join(__dirname, 'preload-progresso.js')
@@ -294,11 +370,31 @@ function criarJanelaProgresso() {
 
 autoUpdater.on('error', (err) => {
     log.error('[update] Erro no auto-updater:', err);
+
+    // Erro durante o download: fecha a barrinha e avisa sempre.
+    if (baixandoAtualizacao) {
+        baixandoAtualizacao = false;
+        fecharJanelaProgresso();
+        avisar('error', 'Atualização', 'Não foi possível baixar a atualização.',
+            'Verifique a internet e tente de novo pelo botão "Verificar atualizações".');
+        return;
+    }
+
+    // Erro ao verificar: só avisa se foi o usuário que pediu.
+    if (verificacaoManual) {
+        verificacaoManual = false;
+        avisar('error', 'Atualização', 'Não foi possível verificar se há atualizações.',
+            'Verifique a conexão com a internet e tente novamente.');
+    }
 });
+
+// Botão "Verificar atualizações" do menu
+ipcMain.handle('verificar-atualizacao', () => verificarAtualizacao(true));
+ipcMain.handle('versao-app', () => app.getVersion());
 
 app.whenReady().then(() => {
     criarJanela();
-    autoUpdater.checkForUpdates();
+    verificarAtualizacao(false);
 });
 
 app.on('window-all-closed', () => {
@@ -331,4 +427,4 @@ app.on('before-quit', () => {
     log.info('[app] before-quit disparado');
     if (server) server.close();
     if (db) db.close();
-});
+});
