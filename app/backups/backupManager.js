@@ -131,14 +131,45 @@ function createZip({ dbSnapshotPath, dataDir, zipOutputPath }) {
 // ------------------------------------------------------------------
 // Rotação: mantém só os N backups mais recentes
 // ------------------------------------------------------------------
-function rotateBackups(backupDir, keepLast = 10) {
+// ------------------------------------------------------------------
+// Limpeza de backups antigos
+//   Guarda:
+//     - os `keepLast` backups mais recentes (padrão: 20), e
+//     - o backup mais recente de CADA DIA dos últimos `keepDays` dias
+//       (padrão: 30), para sempre existir um ponto de volta de dias atrás.
+//   Só mexe em arquivos criados pelo próprio sistema ("backup-....bak");
+//   cópias que você guardar na mesma pasta com outro nome nunca são apagadas.
+// ------------------------------------------------------------------
+function escolherBackupsParaApagar(arquivos, { keepLast = 20, keepDays = 30, agora = Date.now() } = {}) {
+  const ordenados = [...arquivos].sort((a, b) => b.time - a.time); // mais novo primeiro
+  const manter = new Set();
+
+  // 1) os mais recentes
+  ordenados.slice(0, keepLast).forEach((f) => manter.add(f.name));
+
+  // 2) o mais recente de cada dia (data local do computador) dentro do período
+  const limite = agora - keepDays * 24 * 60 * 60 * 1000;
+  const diasVistos = new Set();
+  for (const f of ordenados) {
+    if (f.time < limite) break;
+    const d = new Date(f.time);
+    const dia = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+    if (!diasVistos.has(dia)) {
+      diasVistos.add(dia);
+      manter.add(f.name);
+    }
+  }
+
+  return ordenados.filter((f) => !manter.has(f.name));
+}
+
+function rotateBackups(backupDir, keepLast = 20, keepDays = 30) {
   const files = fs
     .readdirSync(backupDir)
-    .filter((f) => f.endsWith('.bak'))
-    .map((f) => ({ name: f, time: fs.statSync(path.join(backupDir, f)).mtimeMs }))
-    .sort((a, b) => b.time - a.time);
+    .filter((f) => f.startsWith('backup-') && f.endsWith('.bak'))
+    .map((f) => ({ name: f, time: fs.statSync(path.join(backupDir, f)).mtimeMs }));
 
-  const toDelete = files.slice(keepLast);
+  const toDelete = escolherBackupsParaApagar(files, { keepLast, keepDays });
   for (const file of toDelete) {
     fs.unlinkSync(path.join(backupDir, file.name));
   }
@@ -153,7 +184,8 @@ function rotateBackups(backupDir, keepLast = 10) {
  * @param {string} opts.dataDir       Pasta de dados/anexos a incluir (opcional)
  * @param {string} opts.backupDir     Pasta sincronizada com o Google Drive
  * @param {string} opts.password      Senha/chave de criptografia
- * @param {number} [opts.keepLast=10] Quantos backups manter
+ * @param {number} [opts.keepLast=20] Quantos backups recentes manter
+ * @param {number} [opts.keepDays=30] Por quantos dias manter 1 backup por dia
  */
 // ------------------------------------------------------------------
 // Trava simples: impede que dois backups rodem ao mesmo tempo
@@ -162,7 +194,7 @@ function rotateBackups(backupDir, keepLast = 10) {
 // ------------------------------------------------------------------
 let backupEmAndamento = false;
 
-async function runBackup({ dbPath, dataDir, backupDir, password, keepLast = 10 }) {
+async function runBackup({ dbPath, dataDir, backupDir, password, keepLast = 20, keepDays = 30 }) {
   if (backupEmAndamento) {
     console.log('[backup] Ignorado: já existe um backup em andamento.');
     return null;
@@ -186,7 +218,7 @@ async function runBackup({ dbPath, dataDir, backupDir, password, keepLast = 10 }
     snapshotDatabase(dbPath, snapshotPath);
     await createZip({ dbSnapshotPath: snapshotPath, dataDir, zipOutputPath: zipPath });
     await encryptFile(zipPath, finalPath, password);
-    rotateBackups(backupDir, keepLast);
+    rotateBackups(backupDir, keepLast, keepDays);
 
     console.log(`[backup] OK -> ${finalPath}`);
     return finalPath;
@@ -197,4 +229,4 @@ async function runBackup({ dbPath, dataDir, backupDir, password, keepLast = 10 }
   }
 }
 
-module.exports = { runBackup, encryptFile, decryptFile };
+module.exports = { runBackup, encryptFile, decryptFile, escolherBackupsParaApagar };
