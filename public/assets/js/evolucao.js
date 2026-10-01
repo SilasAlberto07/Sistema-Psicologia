@@ -549,7 +549,11 @@ estiloSwal.innerHTML = `.swal2-container { z-index: 999999 !important; }`;
 document.head.appendChild(estiloSwal);
 
 function gerarPromptEvolucao() {
-    const aviso = "Preencha as perguntas baseado com o relato do paciente citado abaixo, a responda deve ser de acordo com o código de ética CFP e a abordagem da TCC::\n\n";
+    // prontuário de casal (sessão conjunta ou de um dos dois) usa o prompt de terapia de casal;
+    // paciente individual continua com o prompt da TCC
+    const aviso = ehCasal
+        ? "Preencha as perguntas baseado com o relato do paciente citado abaixo, a responda deve ser de acordo com o código de ética CFP e a abordagem de terapia de casal:\n\n"
+        : "Preencha as perguntas baseado com o relato do paciente citado abaixo, a responda deve ser de acordo com o código de ética CFP e a abordagem da TCC::\n\n";
 
     const campos = mapaCamposEvolucao.map(([label]) => `${label}:`).join("\n");
 
