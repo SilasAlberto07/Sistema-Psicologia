@@ -484,3 +484,23 @@
 .agenda-aviso b {
     color: #5a7a48;
 }
+/* Resumo Geral — cores extras */
+.resumo-label.total {
+    color: #5a5a48;
+}
+
+.resumo-label.alta {
+    color: #5c7a48;
+}
+
+/* a linha "Pacientes com alta" leva para a página Altas */
+.resumo-item-link {
+    text-decoration: none;
+    color: inherit;
+    border-radius: 6px;
+    transition: background-color 0.15s;
+}
+
+.resumo-item-link:hover {
+    background-color: #f6f8f2;
+}

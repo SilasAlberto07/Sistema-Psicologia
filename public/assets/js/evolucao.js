@@ -31,7 +31,7 @@ function formatarDataSessaoBR(valorInput) {
 }
 
 const btnSalvar = document.querySelector(".btn-salvar");
-const btnVoltar = document.querySelector(".btn-voltar");
+const btnVoltar = document.querySelector(".botoes .btn-voltar");
 const btnImprimir = document.querySelector(".btn-imprimir-tudo");
 const btnAbrirProntuario = document.querySelector(".btn-abrir");
 
@@ -419,7 +419,27 @@ btnImprimir.addEventListener("click", () => {
 });
 
 // ================= VOLTAR =================
-btnVoltar.addEventListener("click", () => history.back());
+// Quando o prontuário foi aberto pela tela de Sessões, volta para lá já
+// no mesmo paciente (a tela de Sessões guardou onde a pessoa estava).
+const veioDeSessoes = params.get("voltar") === "sessoes";
+
+function voltarTelaAnterior() {
+    if (veioDeSessoes) {
+        window.location.href = "sessoes.html";
+    } else {
+        history.back();
+    }
+}
+
+btnVoltar.addEventListener("click", voltarTelaAnterior);
+
+const btnVoltarTopo = document.getElementById("btnVoltarTopo");
+if (btnVoltarTopo) {
+    btnVoltarTopo.addEventListener("click", voltarTelaAnterior);
+    if (veioDeSessoes) {
+        btnVoltarTopo.querySelector("span").textContent = "Voltar para Sessões";
+    }
+}
 
 
 iniciarEvolucao();

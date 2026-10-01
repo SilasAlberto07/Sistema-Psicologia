@@ -33,6 +33,7 @@ async function horarioJaOcupado(idAtual, data, hora) {
     for (let registro of todos) {
 
         if (registro.id == idAtual) continue;
+        if (registro.alta || registro.excluido) continue; // quem teve alta ou está na lixeira não ocupa horário
 
         const nomeExibicao = registro.nomeCompleto
             || `${registro.p1NomeCompleto || "?"} e ${registro.p2NomeCompleto || "?"}`;
@@ -291,17 +292,21 @@ async function renderSessoes() {
     const campoBusca = document.getElementById("pesquisaPaciente");
     const termoBusca = (campoBusca?.value || "").trim().toLowerCase();
 
+    // quem já recebeu alta sai da tela de Sessões (fica na página "Altas")
+    const pacientesAtivos = pacientes.filter(p => !p.alta);
+    const casaisAtivos = casais.filter(c => !c.alta);
+
     const pacientesFiltrados = termoBusca
-        ? pacientes.filter(p => (p.nomeCompleto || "").toLowerCase().includes(termoBusca))
-        : pacientes;
+        ? pacientesAtivos.filter(p => (p.nomeCompleto || "").toLowerCase().includes(termoBusca))
+        : pacientesAtivos;
 
     const casaisFiltrados = termoBusca
-        ? casais.filter(c =>
+        ? casaisAtivos.filter(c =>
             (c.p1NomeCompleto || "").toLowerCase().includes(termoBusca) ||
             (c.p2NomeCompleto || "").toLowerCase().includes(termoBusca) ||
             (c.nomeCasal || "").toLowerCase().includes(termoBusca)
         )
-        : casais;
+        : casaisAtivos;
 
     container.innerHTML = "";
 
@@ -455,7 +460,6 @@ async function renderSessoes() {
         `;
     });
 }
-renderSessoes();
 
 // =========================
 // STATUS AUTOMÁTICO
@@ -689,13 +693,15 @@ document.addEventListener("click", async function (event) {
 
     // sessão de paciente individual
     if (origem === "individual") {
-        window.location.href = `evolucao.html?id=${id}${ehConsulta ? "&tipo=consulta" : ""}`;
+        guardarEstadoSessoes(`individual-${id}`);
+        window.location.href = `evolucao.html?id=${id}${ehConsulta ? "&tipo=consulta" : ""}&voltar=sessoes`;
         return;
     }
 
     // 1ª Consulta do casal: registro conjunto, sem seleção de "atendido"
     if (ehConsulta) {
-        window.location.href = `evolucao.html?id=${id}&origem=casal&tipo=consulta`;
+        guardarEstadoSessoes(`casal-${id}`);
+        window.location.href = `evolucao.html?id=${id}&origem=casal&tipo=consulta&voltar=sessoes`;
         return;
     }
 
@@ -719,9 +725,72 @@ document.addEventListener("click", async function (event) {
         ? (casal?.p1NomeCompleto || "Pessoa 1")
         : (casal?.p2NomeCompleto || "Pessoa 2");
 
+    guardarEstadoSessoes(`casal-${id}`);
     window.location.href =
-        `evolucao.html?id=${id}&origem=casal&pessoa=${atendido}&nome=${encodeURIComponent(nomePessoa)}`;
+        `evolucao.html?id=${id}&origem=casal&pessoa=${atendido}&nome=${encodeURIComponent(nomePessoa)}&voltar=sessoes`;
 });
+
+// =========================
+// VOLTAR DO PRONTUÁRIO NO MESMO PACIENTE
+// Antes de abrir o prontuário, guarda onde a pessoa estava (aba, pesquisa,
+// qual paciente estava aberto e a posição da tela). Ao voltar, a tela de
+// Sessões reabre exatamente nesse paciente, sem precisar procurar de novo.
+// =========================
+const CHAVE_ESTADO_SESSOES = "estadoTelaSessoes";
+
+function guardarEstadoSessoes(chaveCard) {
+    try {
+        sessionStorage.setItem(CHAVE_ESTADO_SESSOES, JSON.stringify({
+            aba: abaAtualSessoes,
+            busca: document.getElementById("pesquisaPaciente")?.value || "",
+            cardAberto: chaveCard,
+            scrollY: window.scrollY,
+            guardadoEm: Date.now()
+        }));
+    } catch (e) { /* se não conseguir guardar, só não restaura */ }
+}
+
+// lê o estado guardado (e já apaga, para não reabrir sozinho depois)
+function lerEstadoSessoes() {
+    try {
+        const estado = JSON.parse(sessionStorage.getItem(CHAVE_ESTADO_SESSOES) || "null");
+        sessionStorage.removeItem(CHAVE_ESTADO_SESSOES);
+        // só vale se a pessoa voltou do prontuário nas últimas 12 horas
+        if (!estado || Date.now() - (estado.guardadoEm || 0) > 12 * 60 * 60 * 1000) return null;
+        return estado;
+    } catch (e) {
+        return null;
+    }
+}
+
+function aplicarEstadoSessoesAntesDeRenderizar(estado) {
+    if (!estado) return;
+
+    if (estado.aba === "individual" || estado.aba === "casal") {
+        abaAtualSessoes = estado.aba;
+        document.querySelectorAll(".tab-tipo").forEach((b) => {
+            b.classList.toggle("ativa", b.dataset.tipo === abaAtualSessoes);
+        });
+    }
+
+    const campoBusca = document.getElementById("pesquisaPaciente");
+    if (campoBusca) campoBusca.value = estado.busca || "";
+
+    cardsAbertosSessoes.clear();
+    if (estado.cardAberto) cardsAbertosSessoes.add(estado.cardAberto);
+}
+
+function rolarAtePacienteAberto(estado) {
+    if (!estado || !estado.cardAberto) return;
+
+    const header = document.querySelector(`.paciente-header[data-card-key="${estado.cardAberto}"]`);
+    const card = header ? header.closest(".paciente-sessao-card") : null;
+    if (!card) return;
+
+    card.scrollIntoView({ behavior: "auto", block: "start" });
+    card.classList.add("card-voltou");
+    setTimeout(() => card.classList.remove("card-voltou"), 2500);
+}
 
 // =========================
 // EXCLUIR SESSÃO
@@ -804,8 +873,13 @@ document.querySelectorAll(".tab-tipo").forEach((botao) => {
 });
 
 async function iniciarSessoes() {
+    const estadoAnterior = lerEstadoSessoes();
+    aplicarEstadoSessoesAntesDeRenderizar(estadoAnterior);
+
     await atualizarStatusAutomatico();
     await renderSessoes();
+
+    rolarAtePacienteAberto(estadoAnterior);
 }
 
 iniciarSessoes();

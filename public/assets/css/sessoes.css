@@ -401,3 +401,9 @@
     color: #6b8256;
     border-bottom-color: #8a9e78;
 }
+
+/* destaque rápido no paciente quando a pessoa volta do prontuário */
+.paciente-sessao-card.card-voltou {
+    box-shadow: 0 0 0 3px rgba(138, 158, 120, 0.55);
+    transition: box-shadow 0.6s ease;
+}

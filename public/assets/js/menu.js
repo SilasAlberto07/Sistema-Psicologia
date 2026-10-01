@@ -52,7 +52,7 @@ if (window.sincronizacao) {
             ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName);
 
         // telas só de consulta: atualiza sozinha (se ninguém estiver digitando)
-        const atualizaSozinha = ["index.html", "pacientes.html", "agenda.html", "lixeira.html", "configuracoes.html"];
+        const atualizaSozinha = ["index.html", "pacientes.html", "agenda.html", "lixeira.html", "configuracoes.html", "altas.html"];
         if (atualizaSozinha.includes(pagina) && !campoEmUso && !(info && info.renumerados && info.renumerados.length)) {
             window.location.reload();
             return;

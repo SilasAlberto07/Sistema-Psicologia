@@ -194,3 +194,8 @@ hr {
     white-space: pre-wrap;
     word-break: break-word;
 }
+/* botão "Voltar" no topo do prontuário */
+.btn-voltar-topo {
+    align-self: flex-start;
+    margin-bottom: 14px;
+}

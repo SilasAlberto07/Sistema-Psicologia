@@ -43,13 +43,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const datas = new Set();
 
         pacientes.forEach(p => {
+            // de quem recebeu alta, só aparece o que já foi realizado
+            const sessaoValida = (s) => !p.alta || s.status === "realizada";
             // 1ª Consulta também conta como dia com sessão
-            if (p.consulta && p.consulta.data) {
+            if (p.consulta && p.consulta.data && sessaoValida(p.consulta)) {
                 datas.add(p.consulta.data);
             }
 
             (p.sessoes || []).forEach(s => {
-                if (s.data) {
+                if (s.data && sessaoValida(s)) {
                     datas.add(s.data);
                 }
             });
@@ -160,9 +162,11 @@ document.addEventListener("DOMContentLoaded", () => {
         let sessoes = [];
 
         pacientes.forEach(p => {
+            // de quem recebeu alta, só aparece o que já foi realizado
+            const sessaoValida = (s) => !p.alta || s.status === "realizada";
 
             // 1ª Consulta também aparece na agenda do dia
-            if (p.consulta && p.consulta.data && p.consulta.hora) {
+            if (p.consulta && p.consulta.data && p.consulta.hora && sessaoValida(p.consulta)) {
                 sessoes.push({
                     paciente: p.nomeCompleto,
                     data: p.consulta.data,
@@ -172,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             (p.sessoes || []).forEach(s => {
-                if (s.data && s.hora) {
+                if (s.data && s.hora && sessaoValida(s)) {
                     sessoes.push({
                         paciente: p.nomeCompleto,
                         data: s.data,

@@ -7,8 +7,11 @@
 function obterSessoesUnificadas(pacientes, casais) {
     const sessoesUnificadas = [];
 
-    function adicionar(sessao, nomeExibicao, isCasal) {
+    function adicionar(sessao, nomeExibicao, isCasal, teveAlta) {
         if (!sessao) return;
+        // de quem já recebeu alta, só conta o que realmente aconteceu
+        // (sessões que ficaram "agendadas" não aparecem mais como próximas)
+        if (teveAlta && sessao.status !== "realizada" && sessao.status !== "cancelada") return;
         sessoesUnificadas.push({
             nomeExibicao,
             data: sessao.data,
@@ -22,10 +25,10 @@ function obterSessoesUnificadas(pacientes, casais) {
     pacientes.forEach(paciente => {
         if (paciente.excluido) return;
 
-        adicionar(paciente.consulta, paciente.nomeCompleto, false);
+        adicionar(paciente.consulta, paciente.nomeCompleto, false, paciente.alta);
 
         (paciente.sessoes || []).forEach(sessao => {
-            adicionar(sessao, paciente.nomeCompleto, false);
+            adicionar(sessao, paciente.nomeCompleto, false, paciente.alta);
         });
     });
 
@@ -34,7 +37,7 @@ function obterSessoesUnificadas(pacientes, casais) {
 
         const nomeCasal = `${casal.p1NomeCompleto || "?"} e ${casal.p2NomeCompleto || "?"}`;
 
-        adicionar(casal.consulta, `${nomeCasal} (Casal)`, true);
+        adicionar(casal.consulta, `${nomeCasal} (Casal)`, true, casal.alta);
 
         (casal.sessoes || []).forEach(sessao => {
             let nomeAtendido;
@@ -48,7 +51,7 @@ function obterSessoesUnificadas(pacientes, casais) {
                 nomeAtendido = nomeCasal;
             }
 
-            adicionar(sessao, `${nomeAtendido} (Casal)`, true);
+            adicionar(sessao, `${nomeAtendido} (Casal)`, true, casal.alta);
         });
     });
 
@@ -133,11 +136,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // TOTAL DE PACIENTES
         document.getElementById("totalPacientes").textContent =
-            pacientes.filter(p => !p.excluido).length;
+            pacientes.filter(p => !p.excluido && !p.alta).length;
 
         // TOTAL DE CASAIS
         document.getElementById("totalCasais").textContent =
-            casais.filter(c => !c.excluido).length;
+            casais.filter(c => !c.excluido && !c.alta).length;
 
         // junta tudo (pacientes + casais) numa lista só de sessões
         const todasSessoes = obterSessoesUnificadas(pacientes, casais);
@@ -209,44 +212,33 @@ document.addEventListener("DOMContentLoaded", () => {
             }).join("");
         }
 
-        // RESUMO DO MÊS — mesmas sessões e status da página Sessões,
-        // contando tudo que tem data dentro do mês atual
-        let realizadas = 0, agendadas = 0, andamento = 0, canceladas = 0, semData = 0;
-        const mesAtual = hojeFormatado.slice(0, 7); // "AAAA-MM"
+        // RESUMO GERAL — mesma conta dos contadores da tela de Sessões:
+        // 1ª Consulta + sessões de todos os pacientes e casais em atendimento
+        // (fora quem está na Lixeira e quem já recebeu alta).
+        // "Agendadas" junta agendadas + em andamento, igual à tela de Sessões.
+        let totalGeral = 0, realizadas = 0, agendadas = 0, canceladas = 0;
 
-        todasSessoes.forEach(sessao => {
-            const status = (sessao.status || "").trim().toLowerCase();
+        [...pacientes, ...casais]
+            .filter(r => !r.excluido && !r.alta)
+            .forEach(registro => {
+                [registro.consulta, ...(registro.sessoes || [])]
+                    .filter(Boolean)
+                    .forEach(sessao => {
+                        const status = (sessao.status || "").trim().toLowerCase();
+                        totalGeral++;
+                        if (status === "realizada") realizadas++;
+                        else if (status === "agendada" || status === "andamento") agendadas++;
+                        else if (status === "cancelada") canceladas++;
+                    });
+            });
 
-            if (!sessao.data) {
-                // sessão ainda sem data marcada: não dá para saber de que mês é
-                if (status === "agendada") semData++;
-                return;
-            }
-            if (!sessao.data.startsWith(mesAtual)) return;
+        const totalAltas = [...pacientes, ...casais].filter(r => r.alta && !r.excluido).length;
 
-            if (status === "realizada") realizadas++;
-            else if (status === "agendada") agendadas++;
-            else if (status === "andamento") andamento++;
-            else if (status === "cancelada") canceladas++;
-        });
-
-        const nomeMes = agora.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
-        document.getElementById("resumoMesNome").textContent =
-            nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1); // "Setembro de 2026"
+        document.getElementById("resumoTotal").textContent = totalGeral;
         document.getElementById("resumoRealizadas").textContent = realizadas;
         document.getElementById("resumoAgendadas").textContent = agendadas;
-        document.getElementById("resumoAndamento").textContent = andamento;
         document.getElementById("resumoCanceladas").textContent = canceladas;
-
-        const avisoSemData = document.getElementById("resumoSemData");
-        if (semData > 0) {
-            avisoSemData.textContent = semData === 1
-                ? "+ 1 sessão agendada ainda sem data definida."
-                : `+ ${semData} sessões agendadas ainda sem data definida.`;
-            avisoSemData.style.display = "block";
-        } else {
-            avisoSemData.style.display = "none";
-        }
+        document.getElementById("resumoAltas").textContent = totalAltas;
     }
 
 
