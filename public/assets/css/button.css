@@ -426,6 +426,26 @@
 /* ═══════════════════════════════════════════════
    ALTA DE PACIENTE (pacientes.html / altas.html)
 ═══════════════════════════════════════════════ */
+<<<<<<< HEAD
+=======
+.btnAlta,
+.btnRelatorio,
+.btnReativar {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 11px;
+    height: 30px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid;
+    transition: background-color 0.15s;
+}
+
+>>>>>>> 0fdbc2605ffabc1499787e118ae59d49af9a9477
 /* verde-oliva — "alta" é uma conquista */
 .btnAlta {
     background-color: #eef3e8;

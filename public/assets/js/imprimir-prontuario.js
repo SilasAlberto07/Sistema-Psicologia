@@ -3,6 +3,7 @@ const idPaciente = params.get("id");
 const pessoaParam = params.get("pessoa"); // "p1" | "p2" | null
 const nomeParam = params.get("nome");
 const tipoParam = params.get("tipo");     // "consulta" quando é o registro da 1ª Consulta
+const modoRelatorioAlta = params.get("relatorio") === "alta"; // aberto pela página "Altas"
 
 function formatarDataBR(data) {
     if (!data) return "-";
@@ -58,7 +59,19 @@ async function iniciarImpressaoProntuario() {
     let camposExtraCasal = "";
     let evolucoesParaImprimir = paciente.evolucoes || [];
 
-    if (ehCasal && (pessoaParam === "p1" || pessoaParam === "p2")) {
+    if (modoRelatorioAlta) {
+
+        // RELATÓRIO DE ALTA: o tratamento inteiro, com todos os registros
+        if (ehCasal) {
+            nomeExibicao = `${paciente.p1NomeCompleto || "?"} e ${paciente.p2NomeCompleto || "?"}`;
+            const telefones = [paciente.p1Telefone, paciente.p2Telefone].filter(Boolean);
+            telefoneExibicao = telefones.join(" / ");
+        } else {
+            nomeExibicao = paciente.nomeCompleto;
+            telefoneExibicao = paciente.telefone;
+        }
+
+    } else if (ehCasal && (pessoaParam === "p1" || pessoaParam === "p2")) {
 
         const outraPessoa = pessoaParam === "p1" ? "p2" : "p1";
 
@@ -105,9 +118,15 @@ async function iniciarImpressaoProntuario() {
 
         const ehConsulta = registro.tipo === "consulta" || (!registro.pessoa && !registro.tipo && ehCasal);
 
-        const rotuloHTML = ehConsulta
+        let rotuloHTML = ehConsulta
             ? `<span class="sessao-numero" style="background:#5c7a48;">📋 1ª Consulta</span>`
             : `<span class="sessao-numero">Sessão ${String(++contador).padStart(2, "0")}</span>`;
+
+        // no relatório de alta do casal, mostra de quem é cada sessão individual
+        if (modoRelatorioAlta && ehCasal && (registro.pessoa === "p1" || registro.pessoa === "p2")) {
+            const nomePessoa = paciente[`${registro.pessoa}NomeCompleto`] || (registro.pessoa === "p1" ? "Pessoa 1" : "Pessoa 2");
+            rotuloHTML += ` <span class="sessao-data">— ${nomePessoa}</span>`;
+        }
 
         sessoesHTML += `
         <div class="sessao-bloco">
@@ -136,6 +155,27 @@ async function iniciarImpressaoProntuario() {
     `;
     });
 
+    // ----- resumo do tratamento (só no relatório de alta) -----
+    let resumoAltaHTML = "";
+    if (modoRelatorioAlta) {
+        const todasSessoes = [paciente.consulta, ...(paciente.sessoes || [])].filter(Boolean);
+        const realizadas = todasSessoes.filter(s => s.status === "realizada").length;
+        const canceladas = todasSessoes.filter(s => s.status === "cancelada").length;
+
+        resumoAltaHTML = `
+        <h2 class="titulo-secao">Resumo do Tratamento</h2>
+        <div class="identificacao-grid">
+            ${item("Início do atendimento: ", paciente.dataCadastro || formatarDataBR(paciente.consulta && paciente.consulta.data))}
+            ${item("Data da alta: ", paciente.altaEm ? formatarDataBR(paciente.altaEm) : "")}
+            ${item("Sessões realizadas: ", String(realizadas))}
+            ${item("Sessões canceladas: ", String(canceladas))}
+            ${item("Modalidade: ", paciente.tipoConsulta && paciente.tipoConsulta !== "-" ? paciente.tipoConsulta : "")}
+            ${item("Registros no prontuário: ", String(evolucoes.length))}
+            ${item("Motivo / observações da alta: ", paciente.altaObs, true)}
+        </div>
+        `;
+    }
+
     container.innerHTML = `
     <div class="prontuario">
 
@@ -146,7 +186,7 @@ async function iniciarImpressaoProntuario() {
         <div class="cabecalho-print">
             <div class="clinica-nome">Cláudia Bethânia — Psicóloga Clínica</div>
             <div class="subtitulo-clinica">CRP 18/9851</div>
-            <h1>Ficha de Prontuário Psicológica</h1>
+            <h1>${modoRelatorioAlta ? "Relatório de Alta" : "Ficha de Prontuário Psicológica"}</h1>
             
         </div>
 
@@ -161,7 +201,9 @@ async function iniciarImpressaoProntuario() {
             ${camposExtraCasal}
         </div>
 
-        <h2 class="titulo-secao">Registro de Sessões</h2>
+        ${resumoAltaHTML}
+
+        <h2 class="titulo-secao">${modoRelatorioAlta ? "O que foi trabalhado nas sessões" : "Registro de Sessões"}</h2>
 
         ${sessoesHTML || `<p class="sem-registro">Nenhum registro de sessão até o momento.</p>`}
 
@@ -186,6 +228,18 @@ iniciarImpressaoProntuario().then(() => {
 
     if (visualizar !== "true") {
         window.print();
+    } else if (modoRelatorioAlta) {
+        // barra com o botão de imprimir / salvar PDF (não sai na impressão)
+        document.title = "Relatório de Alta";
+        const barra = document.createElement("div");
+        barra.className = "barra-acoes-tela";
+        barra.innerHTML = `
+            <button type="button" id="btnImprimirRelatorio">🖨️ Imprimir / Salvar PDF</button>
+            <button type="button" id="btnFecharRelatorio" class="secundario">Fechar</button>
+        `;
+        document.body.prepend(barra);
+        document.getElementById("btnImprimirRelatorio").addEventListener("click", () => window.print());
+        document.getElementById("btnFecharRelatorio").addEventListener("click", () => window.close());
     }
 
 });

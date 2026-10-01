@@ -428,3 +428,43 @@ body {
         display: none !important;
     }
 }
+/* ==========================
+   BARRA DE AÇÕES NA TELA
+   (relatório de alta aberto para leitura — some na impressão)
+========================== */
+.barra-acoes-tela {
+    max-width: 780px;
+    margin: -28px auto 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.barra-acoes-tela button {
+    height: 38px;
+    padding: 0 18px;
+    border-radius: 8px;
+    border: 1px solid #8a9e78;
+    background: #8a9e78;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.barra-acoes-tela button:hover {
+    background: #7a8e68;
+}
+
+.barra-acoes-tela button.secundario {
+    background: #ffffff;
+    color: #6a6a58;
+    border-color: #ddd8ce;
+}
+
+@media print {
+    .barra-acoes-tela {
+        display: none !important;
+    }
+}

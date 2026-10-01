@@ -135,15 +135,24 @@
 
                 </div>
 
-                <!-- Resumo -->
+                <!-- Resumo geral (mesma contagem da tela de Sessões) -->
                 <div class="home-resumo">
 
                     <div class="home-resumo-header">
                         <h2>
                             <i class="ti ti-chart-bar" style="color:#8a9e78;font-size:16px"></i>
-                            Resumo do Mês
+                            Resumo Geral
                         </h2>
-                        <span class="resumo-mes" id="resumoMesNome"></span>
+                        <span class="resumo-mes" id="resumoSubtitulo">Pacientes em atendimento</span>
+                    </div>
+
+                    <div class="resumo-item">
+                        <span class="resumo-label total">
+                            <i class="ti ti-list-numbers"></i>
+                            Total de sessões
+                        </span>
+
+                        <strong id="resumoTotal">0</strong>
                     </div>
 
                     <div class="resumo-item">
@@ -165,15 +174,6 @@
                     </div>
 
                     <div class="resumo-item">
-                        <span class="resumo-label andamento">
-                            <i class="ti ti-player-play"></i>
-                            Em andamento
-                        </span>
-
-                        <strong id="resumoAndamento">0</strong>
-                    </div>
-
-                    <div class="resumo-item">
                         <span class="resumo-label cancelada">
                             <i class="ti ti-x"></i>
                             Canceladas
@@ -182,7 +182,14 @@
                         <strong id="resumoCanceladas">0</strong>
                     </div>
 
-                    <p class="resumo-sem-data" id="resumoSemData" style="display:none"></p>
+                    <a class="resumo-item resumo-item-link" href="Pages/altas.html" title="Ver pacientes com alta">
+                        <span class="resumo-label alta">
+                            <i class="ti ti-user-check"></i>
+                            Pacientes com alta
+                        </span>
+
+                        <strong id="resumoAltas">0</strong>
+                    </a>
 
                 </div>
 

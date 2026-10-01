@@ -31,7 +31,7 @@ function formatarDataSessaoBR(valorInput) {
 }
 
 const btnSalvar = document.querySelector(".btn-salvar");
-const btnVoltar = document.querySelector(".btn-voltar");
+const btnVoltar = document.querySelector(".botoes .btn-voltar");
 const btnImprimir = document.querySelector(".btn-imprimir-tudo");
 const btnAbrirProntuario = document.querySelector(".btn-abrir");
 
@@ -419,7 +419,27 @@ btnImprimir.addEventListener("click", () => {
 });
 
 // ================= VOLTAR =================
-btnVoltar.addEventListener("click", () => history.back());
+// Quando o prontuário foi aberto pela tela de Sessões, volta para lá já
+// no mesmo paciente (a tela de Sessões guardou onde a pessoa estava).
+const veioDeSessoes = params.get("voltar") === "sessoes";
+
+function voltarTelaAnterior() {
+    if (veioDeSessoes) {
+        window.location.href = "sessoes.html";
+    } else {
+        history.back();
+    }
+}
+
+btnVoltar.addEventListener("click", voltarTelaAnterior);
+
+const btnVoltarTopo = document.getElementById("btnVoltarTopo");
+if (btnVoltarTopo) {
+    btnVoltarTopo.addEventListener("click", voltarTelaAnterior);
+    if (veioDeSessoes) {
+        btnVoltarTopo.querySelector("span").textContent = "Voltar para Sessões";
+    }
+}
 
 
 iniciarEvolucao();
@@ -529,7 +549,11 @@ estiloSwal.innerHTML = `.swal2-container { z-index: 999999 !important; }`;
 document.head.appendChild(estiloSwal);
 
 function gerarPromptEvolucao() {
-    const aviso = "Preencha as perguntas baseado com o relato do paciente citado abaixo, a responda deve ser de acordo com o código de ética CFP e a abordagem da TCC::\n\n";
+    // prontuário de casal (sessão conjunta ou de um dos dois) usa o prompt de terapia de casal;
+    // paciente individual continua com o prompt da TCC
+    const aviso = ehCasal
+        ? "Preencha as perguntas baseado com o relato do paciente citado abaixo, a responda deve ser de acordo com o código de ética CFP e a abordagem de terapia de casal:\n\n"
+        : "Preencha as perguntas baseado com o relato do paciente citado abaixo, a responda deve ser de acordo com o código de ética CFP e a abordagem da TCC::\n\n";
 
     const campos = mapaCamposEvolucao.map(([label]) => `${label}:`).join("\n");
 

@@ -35,27 +35,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================
        BUSCAR SESSÕES
+       Junta pacientes individuais E casais (antes a agenda só lia os
+       individuais, por isso os agendamentos de casal não apareciam).
+       Fica de fora quem está na Lixeira; de quem recebeu alta, só
+       aparece o que já foi realizado.
     ========================= */
 
-    async function getDatasComSessao() {
+    async function obterTodasSessoes() {
         const pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
+        const casais = JSON.parse(await window.storage.getItem("casais")) || [];
 
-        const datas = new Set();
+        const sessoes = [];
+
+        function adicionar(registro, sessao, nome, tipo) {
+            if (!sessao || !sessao.data) return;
+            if (registro.alta && sessao.status !== "realizada") return;
+            sessoes.push({
+                paciente: nome,
+                data: sessao.data,
+                horario: (sessao.hora || "").trim(),
+                status: sessao.status,
+                tipo
+            });
+        }
 
         pacientes.forEach(p => {
-            // 1ª Consulta também conta como dia com sessão
-            if (p.consulta && p.consulta.data) {
-                datas.add(p.consulta.data);
-            }
+            if (p.excluido) return;
+            adicionar(p, p.consulta, p.nomeCompleto || "-", "consulta");
+            (p.sessoes || []).forEach(s => adicionar(p, s, p.nomeCompleto || "-", "sessao"));
+        });
 
-            (p.sessoes || []).forEach(s => {
-                if (s.data) {
-                    datas.add(s.data);
-                }
+        casais.forEach(c => {
+            if (c.excluido) return;
+            const nomeCasal = c.nomeCasal || `${c.p1NomeCompleto || "?"} e ${c.p2NomeCompleto || "?"}`;
+
+            adicionar(c, c.consulta, `${nomeCasal} (Casal)`, "consulta");
+
+            (c.sessoes || []).forEach(s => {
+                let nome = nomeCasal;
+                if (s.atendido === "p1") nome = c.p1NomeCompleto || "Pessoa 1";
+                if (s.atendido === "p2") nome = c.p2NomeCompleto || "Pessoa 2";
+                adicionar(c, s, `${nome} (Casal)`, "sessao");
             });
         });
 
-        return datas;
+        return sessoes;
+    }
+
+    async function getDatasComSessao() {
+        const sessoes = await obterTodasSessoes();
+        return new Set(sessoes.map(s => s.data));
     }
 
     /* =========================
@@ -155,54 +184,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
         agendaEl.innerHTML = "";
 
-        const pacientes = JSON.parse(await window.storage.getItem("pacientes")) || [];
-
-        let sessoes = [];
-
-        pacientes.forEach(p => {
-
-            // 1ª Consulta também aparece na agenda do dia
-            if (p.consulta && p.consulta.data && p.consulta.hora) {
-                sessoes.push({
-                    paciente: p.nomeCompleto,
-                    data: p.consulta.data,
-                    horario: p.consulta.hora,
-                    tipo: "consulta"
-                });
-            }
-
-            (p.sessoes || []).forEach(s => {
-                if (s.data && s.hora) {
-                    sessoes.push({
-                        paciente: p.nomeCompleto,
-                        data: s.data,
-                        horario: s.hora,
-                        tipo: "sessao"
-                    });
-                }
-            });
-        });
+        const sessoes = await obterTodasSessoes();
 
         const sessoesDoDia = sessoes.filter(s => s.data === data);
 
         dataSelecionadaEl.textContent = formatarDataBR(data);
         qtdPacientesEl.textContent = sessoesDoDia.length;
 
+        // grade de 15 em 15 min + qualquer horário marcado fora dela (ex.: 14:10, 06:30, 21:00)
         const horarios = gerarHorarios("07:00", "20:00", 15);
+        sessoesDoDia.forEach(s => {
+            if (s.horario && !horarios.includes(s.horario)) horarios.push(s.horario);
+        });
+        horarios.sort();
+
+        // sessão com data mas sem horário definido: aparece no topo
+        const semHorario = sessoesDoDia.filter(s => !s.horario);
+        if (semHorario.length) horarios.unshift("");
 
         horarios.forEach(horario => {
 
-            const sessao = sessoesDoDia.find(s => s.horario === horario);
+            const sessoesNoHorario = horario
+                ? sessoesDoDia.filter(s => s.horario === horario)
+                : semHorario;
 
             const div = document.createElement("div");
             div.classList.add("horario-item");
 
-            if (sessao) {
+            if (sessoesNoHorario.length) {
                 div.classList.add("ocupado-bg");
-                const rotulo = sessao.tipo === "consulta"
-                    ? `${sessao.paciente} <span class="badge-consulta-mini">1ª Consulta</span>`
-                    : sessao.paciente;
-                div.innerHTML = `<span>${horario}</span><span>${rotulo}</span>`;
+                const rotulo = sessoesNoHorario.map(sessao => {
+                    let texto = sessao.paciente;
+                    if (sessao.tipo === "consulta") texto += ` <span class="badge-consulta-mini">1ª Consulta</span>`;
+                    if (sessao.status === "cancelada") texto += ` <span class="badge-consulta-mini">Cancelada</span>`;
+                    return texto;
+                }).join("<br>");
+                div.innerHTML = `<span>${horario || "Sem horário"}</span><span>${rotulo}</span>`;
             } else {
                 div.classList.add("livre-bg");
                 div.innerHTML = `<span>${horario}</span><span>Livre</span>`;
