@@ -64,6 +64,7 @@
 .tabela td:last-child .btnAnamnese,
 .tabela td:last-child .btnOpen,
 .tabela td:last-child .btnDelete,
+.tabela td:last-child .btnAlta,
 .tabela td:last-child button {
     display: inline-block;
     margin: 0;

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Anamnese de Casal</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/anamnese.css">
+    <link rel="stylesheet" href="../assets/css/anamnese-casal.css">
+    <link rel="stylesheet" href="../assets/css/button.css">
+    <link rel="stylesheet" href="../assets/css/modal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+
+<body>
+
+    <div class="container-menu">
+
+        <div id="menu"></div>
+
+        <main class="page-container">
+            <div class="anamnese-container">
+
+                <h1><i class="ti ti-users-group" style="color:#8a9e78"></i> Anamnese de Casal — TCC</h1>
+                <h3>Casal: <span id="nomeCasal"></span></h3>
+                <p class="aviso-tipo" id="avisoRascunho"></p>
+
+                <button type="button" class="btn-modal" id="btnGerarPromptIA">
+                    <i class="ti ti-robot"></i> Gerar Prompt para IA
+                </button>
+
+                <button type="button" class="btn-modal" id="btnAbrirModalColar" style="margin-bottom:16px">
+                    <i class="ti ti-clipboard-text"></i> Preencher com Texto Colado
+                </button>
+
+                <div class="modal-colar oculto" id="modalPromptIA">
+                    <div class="modal-colar-box">
+                        <div class="modal-colar-header">
+                            <h2><i class="ti ti-robot"></i> Prompt Pronto para IA</h2>
+                            <button type="button" id="fecharModalPromptIA"><i class="ti ti-x"></i></button>
+                        </div>
+                        <div class="modal-colar-body">
+                            <p style="color:#9a9a88; font-size:13px; margin-bottom:10px;">
+                                Este é o modelo de perguntas (só as perguntas de texto; as caixinhas de marcar e
+                                as notas de 0 a 10 são preenchidas direto na ficha). Clique em "Copiar Prompt",
+                                cole em um chat de IA, e cole a resposta no botão "Preencher com Texto Colado".
+                            </p>
+                            <textarea id="textoPromptIA" rows="14" readonly></textarea>
+
+                            <label for="relatoIA" style="font-size:13px; font-weight:500; color:#3d3a28; margin:14px 0 6px; display:block;">
+                                Relato do casal (preencha manualmente, é específico de cada caso):
+                            </label>
+                            <textarea id="relatoIA" rows="6" placeholder="Cole ou digite aqui o relato do casal..."></textarea>
+                        </div>
+                        <div class="modal-colar-footer">
+                            <button type="button" class="btn-cancelar" id="cancelarModalPromptIA">Fechar</button>
+                            <button type="button" class="btn-preencher" id="btnCopiarPromptIA">
+                                <i class="ti ti-copy"></i> Copiar Prompt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-colar oculto" id="modalColar">
+                    <div class="modal-colar-box">
+                        <div class="modal-colar-header">
+                            <h2><i class="ti ti-clipboard-text"></i> Colar Anamnese Pronta</h2>
+                            <button type="button" id="fecharModalColar"><i class="ti ti-x"></i></button>
+                        </div>
+                        <div class="modal-colar-body">
+                            <p style="color:#9a9a88; font-size:13px; margin-bottom:10px;">
+                                Cole abaixo o texto mantendo os mesmos títulos das perguntas, cada um no começo
+                                de uma linha e seguido de dois-pontos (ex.: "Como vocês se conheceram?:"). O
+                                sistema localiza cada título e preenche o campo correspondente.
+                            </p>
+                            <textarea id="textoColado" rows="1" placeholder="Cole aqui a anamnese..."></textarea>
+                        </div>
+                        <div class="modal-colar-footer">
+                            <button type="button" class="btn-cancelar" id="cancelarModalColar">Cancelar</button>
+                            <button type="button" class="btn-preencher" id="btnPreencherAutomatico">
+                                <i class="ti ti-wand"></i> Preencher Automaticamente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <nav class="indice-anamnese" id="indiceAnamnese" aria-label="Seções da anamnese"></nav>
+
+                <form id="formAnamneseCasal">
+
+                    <div id="secoesAnamnese"></div>
+
+                    <div class="botoes">
+                        <button type="submit" class="btn-salvar"><i class="ti ti-device-floppy"></i> Salvar Anamnese</button>
+                        <button type="button" class="btn-abrir-anamnese" id="btnAbrirAnamnese"><i class="ti ti-eye"></i> Abrir Anamnese</button>
+                        <button type="button" class="btn-imprimir-tudo" id="btnImprimir"><i class="ti ti-printer"></i> Imprimir Anamnese</button>
+                        <button type="button" class="btn-voltar" id="btnVoltar"><i class="ti ti-arrow-left"></i> Voltar</button>
+                    </div>
+                </form>
+
+            </div>
+        </main>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../assets/js/alert.js"></script>
+    <script src="../assets/js/menu.js"></script>
+    <script src="../assets/js/anamnese-casal-campos.js"></script>
+    <script src="../assets/js/anamnese-casal.js"></script>
+</body>
+
+</html>

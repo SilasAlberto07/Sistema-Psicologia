@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../assets/css/impressao.css">
+    <title>Contrato de Prestação de Serviços de Psicoterapia</title>
+    <style>
+        /* texto corrido do contrato */
+        .contrato p {
+            text-align: justify;
+            margin-bottom: 10px;
+            font-size: 11pt;
+            line-height: 1.55;
+        }
+
+        .contrato .clausula {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 9.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin: 22px 0 10px;
+            break-after: avoid;
+            page-break-after: avoid;
+        }
+
+        .contrato .lista-servicos {
+            margin: 0 0 10px 28px;
+            font-size: 11pt;
+            line-height: 1.55;
+        }
+
+        .contrato .lista-servicos li {
+            list-style: none;
+        }
+
+        .contrato .local-data {
+            text-align: right;
+            margin-top: 26px;
+        }
+
+        .assinaturas-contrato {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            margin-top: 64px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .assinaturas-contrato div {
+            text-align: center;
+            font-size: 10.5pt;
+        }
+
+        .assinaturas-contrato .linha {
+            border-top: 1px solid #222;
+            margin-bottom: 6px;
+        }
+
+        .assinaturas-contrato small {
+            display: block;
+            color: #666;
+            font-size: 9pt;
+        }
+
+        .contrato .clausula + p,
+        .contrato p {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="info-paciente" id="conteudo-impressao"></div>
+
+    <script src="../assets/js/imprimir-contrato.js"></script>
+</body>
+
+</html>

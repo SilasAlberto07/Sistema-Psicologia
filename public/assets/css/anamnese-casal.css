@@ -1,0 +1,419 @@
+/* ═══════════════════════════════════════════════
+   ANAMNESE-CASAL.CSS — complementa o anamnese.css
+   (só o que é exclusivo da anamnese de casal)
+═══════════════════════════════════════════════ */
+
+/* índice com os números das seções, fica fixo no topo ao rolar */
+.indice-anamnese {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 0;
+    margin-bottom: 8px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #ede8e0;
+}
+
+.indice-anamnese a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 30px;
+    padding: 0 8px;
+    border-radius: 15px;
+    border: 1px solid #ddd8ce;
+    background-color: #faf8f4;
+    color: #5a5a48;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.indice-anamnese a:hover {
+    background-color: #eef3e8;
+    border-color: #c8d8b8;
+    color: #3d5a28;
+}
+
+/* ao pular para uma seção pelo índice, não fica escondida atrás dele */
+.form-section {
+    scroll-margin-top: 64px;
+}
+
+.subtitulo-secao {
+    width: 100%;
+    margin: 14px 0 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #5c7a48;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.aviso-secao {
+    width: 100%;
+    margin-bottom: 10px;
+    font-size: 12.5px;
+    color: #9a7a48;
+}
+
+/* título das perguntas de marcar: é um <label> como as outras perguntas,
+   então herda a mesma fonte, tamanho e espessura do anamnese.css */
+.label-grupo {
+    display: block;
+    margin-bottom: 6px;
+    cursor: default;
+}
+
+/* opções de marcar (radio / checkbox): só a caixinha + o texto, sem "botão" em volta */
+.opcoes-linha {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+}
+
+.opcao {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+    font-size: 13px;
+    font-weight: 400;
+    color: #4a4a38;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* o estilo geral da ficha deixa todo input com largura total e altura de
+   caixa de texto — aqui as caixinhas voltam ao tamanho normal */
+.anamnese-container .opcao input[type="radio"],
+.anamnese-container .opcao input[type="checkbox"],
+.anamnese-container .tabela-conflitos input[type="checkbox"] {
+    appearance: auto;
+    -webkit-appearance: auto;
+    width: 15px !important;
+    min-width: 15px !important;
+    height: 15px !important;
+    min-height: 15px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    flex: 0 0 auto;
+    accent-color: #7a8e68;
+    cursor: pointer;
+}
+
+.opcao-outro {
+    flex: 1 1 260px;
+    cursor: default;
+}
+
+.anamnese-container .opcao-outro input[type="text"] {
+    flex: 1;
+    width: auto !important;
+    min-width: 120px;
+    height: 26px !important;
+    border: none !important;
+    border-bottom: 1px solid #ddd8ce !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 2px 4px !important;
+    font-size: 13px;
+    outline: none;
+}
+
+/* escala de 0 a 10 */
+.escala {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.anamnese-container .escala-num input {
+    position: absolute;
+    opacity: 0;
+    width: 1px !important;
+    height: 1px !important;
+    pointer-events: none;
+}
+
+.escala-num span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid #e3ded4;
+    background-color: #faf8f4;
+    font-size: 13px;
+    font-weight: 600;
+    color: #5a5a48;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.escala-num span:hover {
+    border-color: #8a9e78;
+}
+
+.escala-num input:checked + span {
+    background-color: #7a8e68;
+    border-color: #7a8e68;
+    color: #ffffff;
+}
+
+.escala-num input:focus-visible + span {
+    outline: 2px solid #8a9e78;
+    outline-offset: 2px;
+}
+
+/* perguntas que se repetem para cada pessoa: duas colunas */
+.duas-pessoas {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+@media (max-width: 900px) {
+    .duas-pessoas {
+        grid-template-columns: 1fr;
+    }
+}
+
+.coluna-pessoa {
+    border: 1px solid #ede8e0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    background-color: #fdfcfa;
+}
+
+.cabecalho-pessoa {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ede8e0;
+    font-weight: 600;
+    font-size: 14px;
+    color: #3d5a28;
+}
+
+/* tabela de áreas de conflito */
+.tabela-conflitos-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 10px;
+}
+
+.tabela-conflitos {
+    width: 100%;
+    max-width: 560px;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.tabela-conflitos th {
+    text-align: left;
+    padding: 8px 10px;
+    background-color: #f0ece3;
+    color: #5a5a48;
+    font-weight: 600;
+}
+
+.tabela-conflitos td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #f2eee8;
+}
+
+.tabela-conflitos td:nth-child(2),
+.tabela-conflitos th:nth-child(2) {
+    text-align: center;
+}
+
+
+.tabela-conflitos select {
+    padding: 4px 8px;
+    border: 1px solid #ddd8ce;
+    border-radius: 6px;
+    background-color: #ffffff;
+}
+
+/* seções especiais */
+.secao-exclusiva {
+    border-color: #c8d8b8 !important;
+    background-color: #f8faf5;
+}
+
+.secao-sigilosa {
+    border-color: #e3c8a8 !important;
+    background-color: #fdf8f2;
+}
+
+/* balãozinho com o nome da seção ao passar o mouse no número do índice */
+.indice-anamnese a {
+    position: relative;
+}
+
+.indice-anamnese a::after {
+    content: attr(data-titulo);
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background-color: #3d3a28;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.12s;
+}
+
+/* setinha do balão */
+.indice-anamnese a::before {
+    content: "";
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    border: 6px solid transparent;
+    border-top: none;
+    border-bottom-color: #3d3a28;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.12s;
+}
+
+.indice-anamnese a:hover::after,
+.indice-anamnese a:hover::before,
+.indice-anamnese a:focus-visible::after,
+.indice-anamnese a:focus-visible::before {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* nos últimos números, o balão abre para a esquerda para não sair da tela */
+.indice-anamnese a:nth-last-child(-n+4)::after {
+    left: auto;
+    right: 0;
+    transform: none;
+}
+
+/* nos primeiros números, abre para a direita (não fica atrás do menu) */
+.indice-anamnese a:nth-child(-n+3)::after {
+    left: 0;
+    right: auto;
+    transform: none;
+}
+
+/* ═══════════════════════════════════════════════
+   MAIS RESPIRO ENTRE AS PERGUNTAS
+   (só na anamnese de casal — a individual não muda)
+═══════════════════════════════════════════════ */
+#secoesAnamnese .form-section {
+    padding: 26px 28px 14px;
+    margin-bottom: 28px;
+}
+
+#secoesAnamnese .form-section legend {
+    padding: 0 8px;
+}
+
+/* espaço entre uma pergunta e a próxima */
+#secoesAnamnese .form-group {
+    margin-bottom: 26px;
+}
+
+/* espaço entre a pergunta e o campo de resposta */
+#secoesAnamnese .form-group > label,
+#secoesAnamnese .label-grupo {
+    display: block;
+    margin-bottom: 9px;
+    line-height: 1.45;
+}
+
+#secoesAnamnese .form-group > input,
+#secoesAnamnese .form-group > textarea,
+#secoesAnamnese .form-group > select {
+    margin-top: 0;
+}
+
+/* opções de marcar um pouco mais afastadas */
+#secoesAnamnese .opcoes-linha {
+    gap: 10px 22px;
+}
+
+#secoesAnamnese .subtitulo-secao {
+    margin: 30px 0 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #ede8e0;
+}
+
+#secoesAnamnese legend + .subtitulo-secao,
+#secoesAnamnese .aviso-secao + .subtitulo-secao {
+    margin-top: 6px;
+}
+
+#secoesAnamnese .aviso-secao {
+    margin-bottom: 20px;
+}
+
+#secoesAnamnese .duas-pessoas {
+    gap: 24px;
+    margin-bottom: 26px;
+}
+
+#secoesAnamnese .coluna-pessoa {
+    padding: 18px 20px 4px;
+}
+
+#secoesAnamnese .cabecalho-pessoa {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+#secoesAnamnese .tabela-conflitos-wrapper {
+    margin-bottom: 26px;
+}
+
+#secoesAnamnese .tabela-conflitos td {
+    padding: 9px 10px;
+}
+
+/* o texto ao lado de cada caixinha fica menor e mais leve que a pergunta,
+   mesmo que o anamnese.css estilize todo <label> da ficha */
+#secoesAnamnese .opcao {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 2px 0;
+    font-size: 13px;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    color: #4a4a38;
+}
+
+#secoesAnamnese .escala-num {
+    display: inline-block;
+    margin: 0;
+    font-weight: 400;
+    text-transform: none;
+}

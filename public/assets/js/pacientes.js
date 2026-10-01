@@ -33,7 +33,8 @@ function obterRegistrosUnificados() {
         _nomeExibicao: c.nomeCasal || "-",
     }));
 
-    return [...individuais, ...casaisUnificados].filter((r) => !r.excluido);
+    // fora da lista: quem está na Lixeira e quem já recebeu alta (vai para a página "Altas")
+    return [...individuais, ...casaisUnificados].filter((r) => !r.excluido && !r.alta);
 }
 
 // ===============================
@@ -146,8 +147,9 @@ function renderizarTabela() {
                 </td>
 
                 <td>
-                    ${ehCasal ? "" : `<button class="btnAnamnese" data-id="${registro.id}">Anamnese</button>`}
+                    <button class="btnAnamnese" data-id="${registro.id}" data-tipo="${tipo}">Anamnese</button>
                     <button class="btnOpen" data-id="${registro.id}" data-tipo="${tipo}">Ficha</button>
+                    <button class="btnAlta" data-indice="${indice}" data-id="${registro.id}" data-tipo="${tipo}" title="Registrar alta do paciente">Alta</button>
                     <button class="btnDelete" data-indice="${indice}" data-tipo="${tipo}">Excluir</button>
                 </td>
             </tr>
@@ -227,6 +229,97 @@ document.addEventListener("click", async function (event) {
 });
 
 // ===============================
+// ALTA — marca o paciente/casal como "recebeu alta", tira da lista
+// e manda para a página "Altas" (onde fica o relatório do tratamento)
+// ===============================
+function hojeISO() {
+    const agora = new Date();
+    return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, "0")}-${String(agora.getDate()).padStart(2, "0")}`;
+}
+
+function escaparHTML(texto) {
+    return String(texto ?? "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+}
+
+document.addEventListener("click", async function (event) {
+
+    const botao = event.target.closest(".btnAlta");
+    if (!botao) return;
+
+    const tipo = botao.dataset.tipo === "casal" ? "casal" : "individual";
+    const chave = tipo === "casal" ? "casais" : "pacientes";
+    const idRegistro = botao.dataset.id;
+    const indice = Number(botao.dataset.indice);
+
+    // lê a lista atualizada (pode ter chegado algo do outro computador)
+    let lista = JSON.parse(await window.storage.getItem(chave)) || [];
+
+    let registro = lista[indice];
+    if (!registro || String(registro.id) !== String(idRegistro)) {
+        registro = lista.find(r => String(r.id) === String(idRegistro));
+    }
+    if (!registro) {
+        mostrarMensagem("Paciente não encontrado. Atualize a tela e tente de novo.", "error");
+        return;
+    }
+
+    const nome = tipo === "casal"
+        ? (registro.nomeCasal || `${registro.p1NomeCompleto || "?"} e ${registro.p2NomeCompleto || "?"}`)
+        : (registro.nomeCompleto || "-");
+
+    const resposta = await Swal.fire({
+        title: "Registrar alta",
+        html: `
+            <p style="margin-bottom:14px;">Dar alta para <strong>${escaparHTML(nome)}</strong>?<br>
+            <small style="color:#9a9a88;">O paciente sai da lista e vai para a página "Altas", onde fica o relatório do tratamento.</small></p>
+            <div style="text-align:left;">
+                <label for="swalDataAlta" style="font-size:13px;font-weight:500;">Data da alta</label>
+                <input type="date" id="swalDataAlta" class="swal2-input" style="margin:6px 0 14px;width:100%;" value="${hojeISO()}">
+                <label for="swalObsAlta" style="font-size:13px;font-weight:500;">Motivo / observações da alta (opcional — aparece no relatório)</label>
+                <textarea id="swalObsAlta" class="swal2-textarea" style="margin:6px 0 0;width:100%;min-height:90px;" placeholder="Ex.: objetivos terapêuticos alcançados..."></textarea>
+            </div>
+        `,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Dar alta",
+        cancelButtonText: "Cancelar",
+        focusConfirm: false,
+        preConfirm: () => {
+            const data = document.getElementById("swalDataAlta").value;
+            if (!data) {
+                Swal.showValidationMessage("Informe a data da alta.");
+                return false;
+            }
+            return {
+                data,
+                obs: document.getElementById("swalObsAlta").value.trim()
+            };
+        }
+    });
+
+    if (!resposta.isConfirmed || !resposta.value) return;
+
+    registro.alta = true;
+    registro.altaEm = resposta.value.data;
+    registro.altaObs = resposta.value.obs;
+    registro.altaRegistradaEm = new Date().toISOString();
+
+    await window.storage.setItem(chave, JSON.stringify(lista));
+
+    if (tipo === "casal") {
+        casais = lista;
+    } else {
+        pacientes = lista;
+    }
+
+    renderizarTabela();
+
+    mostrarMensagem(`Alta registrada para ${nome}. Ele(a) agora está na página "Altas".`, "success");
+});
+
+// ===============================
 // ABRIR FICHA — passa o tipo na URL para a ficha.html saber como exibir
 // ===============================
 document.addEventListener("click", function (event) {
@@ -246,6 +339,12 @@ document.addEventListener("click", function (event) {
     if (event.target.classList.contains("btnAnamnese")) {
 
         const id = event.target.dataset.id;
+
+        // casal tem uma anamnese própria (anamnese-casal.html)
+        if (event.target.dataset.tipo === "casal") {
+            window.location.href = `anamnese-casal.html?id=${encodeURIComponent(id)}`;
+            return;
+        }
 
         window.location.href = `anamnese.html?id=${id}`;
     }

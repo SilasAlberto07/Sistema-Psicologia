@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../assets/css/global.css">
     <link rel="stylesheet" href="../assets/css/button.css">
     <link rel="stylesheet" href="../assets/css/documentos.css">
+    <link rel="stylesheet" href="../assets/css/contrato.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
 
@@ -36,6 +37,7 @@
                             <select id="tipoDocumento">
                                 <option value="declaracao">Declaração de Comparecimento</option>
                                 <option value="atestado">Atestado Psicológico</option>
+                                <option value="contrato">Contrato de Prestação de Serviços de Psicoterapia</option>
                             </select>
                         </div>
                     </div>
@@ -82,6 +84,118 @@
                                 <label>Motivo / quadro apresentado</label>
                                 <input type="text" id="atestMotivo"
                                     placeholder="Ex: quadro de ansiedade e esgotamento emocional">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CAMPOS CONTRATO -->
+                    <div id="camposContrato" class="grupo-campos" style="display:none">
+
+                        <p class="contrato-aviso">Campos com <span class="obrigatorio">*</span> são obrigatórios. Só as assinaturas ficam para preencher à mão.</p>
+
+                        <h4 class="contrato-subtitulo">Dados da psicóloga <small>(ficam guardados para os próximos contratos)</small></h4>
+                        <div class="linha">
+                            <div class="form-group w-50">
+                                <label>Nome <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctPsiNome">
+                            </div>
+                            <div class="form-group w-20">
+                                <label>CRP <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctPsiCrp" placeholder="18/0000">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>CPF <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctPsiCpf" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Endereço do atendimento <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctPsiEndereco" placeholder="Rua, número, bairro, cidade-UF, CEP">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-50">
+                                <label>E-mail</label>
+                                <input type="text" id="ctPsiEmail">
+                            </div>
+                            <div class="form-group w-50">
+                                <label>Telefone</label>
+                                <input type="text" id="ctPsiTelefone">
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">Dados do(a) paciente <small>(vêm do cadastro ao escolher o paciente acima — confira)</small></h4>
+                        <div class="linha">
+                            <div class="form-group w-50">
+                                <label>Nome completo <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctPacNome">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>CPF <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctPacCpf" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Endereço <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctPacEndereco" placeholder="Rua, número, bairro, cidade-UF">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-50">
+                                <label>E-mail</label>
+                                <input type="text" id="ctPacEmail">
+                            </div>
+                            <div class="form-group w-50">
+                                <label>Telefone</label>
+                                <input type="text" id="ctPacTelefone">
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">Serviços, valores e sessões</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Serviços oferecidos (um por linha) <span class="obrigatorio">*</span></label>
+                                <textarea id="ctServicos" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-20">
+                                <label>Valor da sessão (R$) <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctValor" placeholder="180,00">
+                            </div>
+                            <div class="form-group w-50">
+                                <label>Formas de pagamento <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctFormasPagamento">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Prazo do pagamento <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctPrazoPagamento">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-20">
+                                <label>Duração da sessão (min) <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctDuracao" placeholder="45">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Periodicidade <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctPeriodicidade" placeholder="semanal / de 15 em 15 dias">
+                            </div>
+                            <div class="form-group w-20">
+                                <label>Multa por gravação (R$) <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctMulta" placeholder="500,00">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Foro (comarca) <span class="obrigatorio">*</span></label>
+                                <input type="text" id="ctForo" placeholder="Sinop-MT">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-30">
+                                <label>Data do contrato <span class="obrigatorio">*</span></label>
+                                <input type="date" id="ctData">
                             </div>
                         </div>
                     </div>
