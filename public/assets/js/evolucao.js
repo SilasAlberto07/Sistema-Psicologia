@@ -553,7 +553,7 @@ function gerarPromptEvolucao() {
     // paciente individual continua com o prompt da TCC
     const aviso = ehCasal
         ? "Preencha as perguntas baseado com o relato do paciente citado abaixo, a responda deve ser de acordo com o código de ética CFP e a abordagem de terapia de casal:\n\n"
-        : "Preencha as perguntas baseado com o relato do paciente citado abaixo, a responda deve ser de acordo com o código de ética CFP e a abordagem da TCC::\n\n";
+        : "Preencha as perguntas baseado com o relato do paciente citado abaixo, a respostas devem ser de acordo com o código de ética CFP e a abordagem da TCC de forma ética, técnica e revisada com CFP\n\n";
 
     const campos = mapaCamposEvolucao.map(([label]) => `${label}:`).join("\n");
 

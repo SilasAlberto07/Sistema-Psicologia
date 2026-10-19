@@ -542,6 +542,12 @@ async function atualizarStatusAutomatico() {
 
 document.addEventListener("input", async (e) => {
 
+    // o select "Atendido(a)" é salvo só pelo listener de "change" lá embaixo.
+    // Se este listener também rodar para ele, os dois leem a lista ao mesmo tempo
+    // e este (que é mais lento por checar conflito de horário) grava por último
+    // a versão SEM o atendido — e o nome escolhido some ao sair da tela.
+    if (e.target.classList.contains("input-atendido")) return;
+
     const origem = e.target.dataset.origem === "casal" ? "casal" : "individual";
     const chave = origem === "casal" ? "casais" : "pacientes";
 
@@ -670,6 +676,7 @@ document.addEventListener("change", async (e) => {
         const casal = casais.find(c => c.id == id);
         if (!casal) return;
 
+        if (!Array.isArray(casal.sessoes)) casal.sessoes = [];
         if (!casal.sessoes[index]) casal.sessoes[index] = {};
         casal.sessoes[index].atendido = e.target.value; // "p1" ou "p2"
 
