@@ -8,6 +8,10 @@
 #   Mac     → Sistema-Psicologia-X-arm64.pkg  (Macs com chip Apple: M1, M2, M3, M4...)
 #             Sistema-Psicologia-X-x64.pkg    (Macs com processador Intel)
 #
+# A senha do backup NÃO vai mais dentro do instalador (o repositório é
+# público). Cada computador guarda a senha no próprio cofre do sistema;
+# ver app/senhaBackup.js e o quadro "Senha do backup" em Configurações.
+#
 # Se o build do Mac falhar, o Windows é publicado mesmo assim
 # (a atualização automática do Windows nunca fica travada por causa do Mac).
 
@@ -49,17 +53,6 @@ jobs:
 
       - name: Instalar dependências
         run: npm ci
-
-      - name: Criar o .env do app (só a senha do backup)
-        shell: bash
-        env:
-          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
-        run: |
-          if [ -z "$BACKUP_PASSWORD" ]; then
-            echo "::error::O secret BACKUP_PASSWORD não está configurado no GitHub (Settings > Secrets and variables > Actions)."
-            exit 1
-          fi
-          printf 'BACKUP_PASSWORD=%s\n' "$BACKUP_PASSWORD" > .env
 
       - name: Gerar o instalador
         run: npx electron-builder --win --publish never
@@ -105,16 +98,6 @@ jobs:
 
       - name: Instalar dependências
         run: npm ci
-
-      - name: Criar o .env do app (só a senha do backup)
-        env:
-          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
-        run: |
-          if [ -z "$BACKUP_PASSWORD" ]; then
-            echo "::error::O secret BACKUP_PASSWORD não está configurado no GitHub."
-            exit 1
-          fi
-          printf 'BACKUP_PASSWORD=%s\n' "$BACKUP_PASSWORD" > .env
 
       - name: Gerar os instaladores (.pkg) para Apple Silicon e Intel
         run: npx electron-builder --mac pkg --arm64 --x64 --publish never

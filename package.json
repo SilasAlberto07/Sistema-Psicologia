@@ -45,6 +45,7 @@
       "!node_modules/electron-builder",
       "!node_modules/electron",
       "!.github${/*}",
+      "!.env",
       "!dist${/*}"
     ],
     "asarUnpack": [

@@ -106,6 +106,10 @@ function detectarGoogleDrive() {
 // Serviço de sincronização
 // ------------------------------------------------------------------
 function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtualizarDados, fazerBackup }) {
+    // "senha" pode ser um texto ou uma função que devolve a senha na hora.
+    // Com a função, uma senha configurada depois (em Configurações) já vale
+    // sem precisar reiniciar o programa.
+    const lerSenha = typeof senha === 'function' ? senha : () => senha;
 
     db.exec(`
         CREATE TABLE IF NOT EXISTS sync_meta (chave TEXT PRIMARY KEY, meta TEXT);
@@ -301,11 +305,12 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
     async function enviar() {
         const p = pasta();
         if (!p) return;
-        if (!senha) throw new Error('SEM_SENHA');
+        const senhaAtual = lerSenha();
+        if (!senhaAtual) throw new Error('SEM_SENHA');
         fs.mkdirSync(p, { recursive: true });
 
         const pacote = montarPacote();
-        const conteudo = cifrar(zlib.gzipSync(Buffer.from(JSON.stringify(pacote))), senha);
+        const conteudo = cifrar(zlib.gzipSync(Buffer.from(JSON.stringify(pacote))), senhaAtual);
         const temporario = path.join(p, `.${arquivoProprio}.tmp`);
         const final = path.join(p, arquivoProprio);
         await fs.promises.writeFile(temporario, conteudo);
@@ -323,8 +328,9 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
             const dados = {};
             CHAVES_SINCRONIZADAS.forEach((c) => { dados[c] = lerChave(c); });
             const nome = `antes-de-juntar-${new Date().toISOString().replace(/[:.]/g, '-')}.psisync`;
-            const conteudo = senha
-                ? cifrar(zlib.gzipSync(Buffer.from(JSON.stringify({ motivo, dados }))), senha)
+            const senhaAtual = lerSenha();
+            const conteudo = senhaAtual
+                ? cifrar(zlib.gzipSync(Buffer.from(JSON.stringify({ motivo, dados }))), senhaAtual)
                 : zlib.gzipSync(Buffer.from(JSON.stringify({ motivo, dados })));
             fs.writeFileSync(path.join(dir, nome), conteudo);
 
@@ -340,7 +346,8 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
     async function receber() {
         const p = pasta();
         if (!p) return { mudou: false };
-        if (!senha) throw new Error('SEM_SENHA');
+        const senhaAtual = lerSenha();
+        if (!senhaAtual) throw new Error('SEM_SENHA');
 
         let arquivos;
         try {
@@ -367,7 +374,7 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
             let pacote;
             try {
                 const bruto = await fs.promises.readFile(caminho);
-                pacote = JSON.parse(zlib.gunzipSync(decifrar(bruto, senha)).toString('utf8'));
+                pacote = JSON.parse(zlib.gunzipSync(decifrar(bruto, senhaAtual)).toString('utf8'));
             } catch (e) {
                 if (e.message === 'SENHA_DIFERENTE') throw e;
                 log.warn(`[sync] Arquivo ${arq} ainda incompleto ou inválido, tento de novo depois:`, e.message);

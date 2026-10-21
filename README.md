@@ -35,6 +35,11 @@ Crie um arquivo `.env` na raiz (use o `.env.example` como modelo):
 BACKUP_PASSWORD=sua-senha
 ```
 
+O `.env` serve só para o modo desenvolvimento (`npm start`) e para o
+`restore.js`. Ele **não** vai dentro do instalador: no programa instalado, a
+senha do backup fica no cofre do sistema (Windows/Mac) e é digitada uma vez
+em **Configurações → Senha do backup**, a mesma nos dois computadores.
+
 ## Scripts
 
 | Comando | Descrição |

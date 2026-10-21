@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../assets/css/global.css">
     <link rel="stylesheet" href="../assets/css/button.css">
     <link rel="stylesheet" href="../assets/css/configuracoes.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="/assets/vendor/tabler-icons/tabler-icons.min.css">
 </head>
 
 <body>
@@ -139,11 +139,52 @@
                     </div>
                 </section>
 
+                <!-- SENHA DO BACKUP -->
+                <section class="config-card">
+                    <div class="config-card-icone">
+                        <i class="ti ti-shield-lock"></i>
+                    </div>
+
+                    <div class="config-card-corpo">
+                        <h2>Senha do backup</h2>
+                        <p>
+                            Criptografa os backups e a sincronização. Fica guardada no cofre de
+                            senhas deste computador (Windows ou Mac) e precisa ser a
+                            <strong>mesma</strong> nos dois computadores.
+                        </p>
+
+                        <div class="sync-status">
+                            <span class="sync-bolinha" id="senhaBackupBolinha"></span>
+                            <span id="senhaBackupTexto">Carregando...</span>
+                        </div>
+
+                        <div class="config-form" id="senhaBackupForm" style="display:none">
+                            <div class="form-group">
+                                <label for="senhaBackupNova">Senha do backup</label>
+                                <input type="password" id="senhaBackupNova" autocomplete="off">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="senhaBackupConfirmar">Confirmar senha do backup</label>
+                                <input type="password" id="senhaBackupConfirmar" autocomplete="off">
+                            </div>
+
+                            <div id="mensagem-erro-senha-backup" class="config-erro"></div>
+
+                            <div class="botoes">
+                                <button class="btn-salvar" id="btnSalvarSenhaBackup">
+                                    <i class="ti ti-device-floppy"></i> Salvar senha do backup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
             </div>
         </main>
 
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
     <script src="../assets/js/alert.js"></script>
     <script src="../assets/js/menu.js"></script>
     <script src="../assets/js/configuracoes.js"></script>

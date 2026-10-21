@@ -2,7 +2,7 @@ const path = require('path');
 const { startBackupScheduler } = require('./backups/scheduler');
 const { runBackup } = require('./backups/backupManager');
 
-const { app, BrowserWindow, ipcMain, dialog, Menu, session } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, session, safeStorage } = require('electron');
 const http = require('http');
 const handler = require('serve-handler');
 const fs = require('fs');
@@ -11,6 +11,7 @@ const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
 const { criarSincronizacao } = require('./sync/sincronizacao');
 const { criarAutenticacao } = require('./auth');
+const { criarSenhaBackup } = require('./senhaBackup');
 
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
@@ -38,6 +39,7 @@ let mainWindow;
 let server;
 let db;
 let auth; // controle do login (ver app/auth.js)
+let senhaBackup; // senha dos backups, guardada no cofre do sistema (ver app/senhaBackup.js)
 
 // Guardados aqui para serem reutilizados pelo backup disparado a cada salvamento
 let caminhoBancoAtual;
@@ -61,7 +63,7 @@ function agendarBackupAposSalvar() {
             dbPath: caminhoBancoAtual,
             dataDir: null,
             backupDir: pastaBackupAtual,
-            password: process.env.BACKUP_PASSWORD,
+            password: senhaBackup.obter(),
         }).catch((err) => log.error('[backup] Falha no backup após salvar:', err));
     }, 20000); // espera 20s de "silêncio" antes de rodar — dá tempo do backup inicial terminar
 }
@@ -84,6 +86,7 @@ function iniciarBanco() {
     `);
 
     auth = criarAutenticacao({ db, log });
+    senhaBackup = criarSenhaBackup({ app, safeStorage, log });
 
     caminhoBancoAtual = caminhoBanco;
     // Pasta na Área de Trabalho do usuário logado (funciona tanto no seu PC quanto no notebook dela).
@@ -99,6 +102,7 @@ function iniciarBanco() {
         dataDir: null, // não há pasta separada de anexos hoje; deixe null
         backupDir: pastaBackupAtual,
         cronExpr: '0 */6 * * *',
+        obterSenha: () => senhaBackup.obter(),
     });
 
     iniciarSincronizacao(pastaDados);
@@ -120,13 +124,13 @@ function iniciarSincronizacao(pastaDados) {
             log,
             pastaDadosApp: pastaDados,
             versaoApp: app.getVersion(),
-            senha: process.env.BACKUP_PASSWORD,
+            senha: () => senhaBackup.obter(), // lida na hora (pode ser configurada depois)
             // antes da 1ª junção com outro computador, faz um backup completo
             fazerBackup: () => runBackup({
                 dbPath: caminhoBancoAtual,
                 dataDir: null,
                 backupDir: pastaBackupAtual,
-                password: process.env.BACKUP_PASSWORD,
+                password: senhaBackup.obter(),
             }),
             aoAtualizarDados: (info) => avisarTelas('sync-dados-atualizados', info),
         });
@@ -188,6 +192,46 @@ ipcMain.handle('auth-entrar', (event, senha) => auth.entrar(senha));
 ipcMain.handle('auth-trocar', (event, atual, nova, confirmar) => auth.trocarSenha(atual, nova, confirmar));
 ipcMain.handle('auth-redefinir', (event, resposta) => auth.redefinirComResposta(resposta));
 ipcMain.handle('auth-sair', () => { auth.sair(); return true; });
+
+// ================================
+// SENHA DO BACKUP — tela de Configurações
+// ================================
+function fazerBackupAgora() {
+    runBackup({
+        dbPath: caminhoBancoAtual,
+        dataDir: null,
+        backupDir: pastaBackupAtual,
+        password: senhaBackup.obter(),
+    }).catch((err) => log.error('[backup] Falha no backup após configurar a senha:', err));
+}
+
+ipcMain.handle('backup-senha-status', () => {
+    if (!auth.estaAutenticado()) return null;
+    return senhaBackup.status();
+});
+
+ipcMain.handle('backup-senha-definir', async (event, senha, confirmar) => {
+    if (!auth.estaAutenticado()) return { ok: false, erro: 'Faça login novamente.' };
+
+    const resultado = senhaBackup.definir(senha, confirmar);
+    if (!resultado.ok) return resultado;
+
+    if (sync) {
+        const status = await sync.sincronizarAgora();
+        // a sincronização usa este texto quando não consegue abrir os dados
+        // do outro computador (ver mensagens em app/sync/sincronizacao.js)
+        if (status && status.ultimoErro && status.ultimoErro.includes('senha de criptografia diferente')) {
+            senhaBackup.desfazer();
+            return { ok: false, erro: 'Essa senha não é a mesma do outro computador. Confira e digite de novo.' };
+        }
+        if (status && status.pasta && status.ultimoErro) {
+            fazerBackupAgora();
+            return { ok: true, aviso: status.ultimoErro };
+        }
+    }
+    fazerBackupAgora();
+    return resultado;
+});
 
 /**
  * Só entrega/aceita dados se a pessoa fez login, e nunca deixa as telas

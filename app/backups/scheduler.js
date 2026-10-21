@@ -24,12 +24,13 @@ const { runBackup } = require('./backupManager');
  * @param {string} config.dataDir    Pasta de dados/anexos
  * @param {string} config.backupDir  Pasta local sincronizada com o Google Drive
  * @param {string} [config.cronExpr] Expressão cron (padrão: a cada 6 horas)
+ * @param {Function} config.obterSenha Devolve a senha do backup (ver app/senhaBackup.js)
  */
 function startBackupScheduler(config) {
   const cronExpr = config.cronExpr || '0 */6 * * *'; // a cada 6 horas
 
-  if (!process.env.BACKUP_PASSWORD) {
-    log.error('[backup] BACKUP_PASSWORD não encontrado no .env — os backups vão falhar até isso ser corrigido.');
+  if (!config.obterSenha()) {
+    log.error('[backup] Senha do backup não configurada — os backups vão falhar até ela ser definida em Configurações.');
   }
 
   // Roda uma vez logo ao iniciar o app, além do agendamento
@@ -37,7 +38,7 @@ function startBackupScheduler(config) {
     dbPath: config.dbPath,
     dataDir: config.dataDir,
     backupDir: config.backupDir,
-    password: process.env.BACKUP_PASSWORD,
+    password: config.obterSenha(),
   }).then((finalPath) => {
     log.info(`[backup] Backup inicial concluído -> ${finalPath}`);
   }).catch((err) => log.error('[backup] Falha no backup inicial:', err));
@@ -47,7 +48,7 @@ function startBackupScheduler(config) {
       dbPath: config.dbPath,
       dataDir: config.dataDir,
       backupDir: config.backupDir,
-      password: process.env.BACKUP_PASSWORD,
+      password: config.obterSenha(),
     }).then((finalPath) => {
       log.info(`[backup] Backup agendado concluído -> ${finalPath}`);
     }).catch((err) => log.error('[backup] Falha no backup agendado:', err));

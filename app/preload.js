@@ -16,6 +16,12 @@ contextBridge.exposeInMainWorld('auth', {
     sair: () => ipcRenderer.invoke('auth-sair')
 });
 
+// Senha que criptografa backups e sincronização (fica no cofre do sistema)
+contextBridge.exposeInMainWorld('senhaBackup', {
+    status: () => ipcRenderer.invoke('backup-senha-status'),
+    definir: (senha, confirmar) => ipcRenderer.invoke('backup-senha-definir', senha, confirmar)
+});
+
 contextBridge.exposeInMainWorld('atualizacao', {
     verificar: () => ipcRenderer.invoke('verificar-atualizacao'),
     versao: () => ipcRenderer.invoke('versao-app'),

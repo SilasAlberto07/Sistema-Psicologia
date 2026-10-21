@@ -201,3 +201,71 @@ if (window.sincronizacao) {
 } else {
     mostrarStatusSync(null);
 }
+
+
+// ================================
+// CONFIGURAÇÕES — Senha do backup
+// ================================
+// A senha fica no cofre do sistema (app/senhaBackup.js). Esta tela só
+// mostra se ela existe e, se faltar, deixa digitar. Nunca mostra a senha.
+const senhaBackupEls = {
+    bolinha: document.getElementById("senhaBackupBolinha"),
+    texto: document.getElementById("senhaBackupTexto"),
+    form: document.getElementById("senhaBackupForm"),
+    nova: document.getElementById("senhaBackupNova"),
+    confirmar: document.getElementById("senhaBackupConfirmar"),
+    erro: document.getElementById("mensagem-erro-senha-backup"),
+    btnSalvar: document.getElementById("btnSalvarSenhaBackup"),
+};
+
+async function atualizarStatusSenhaBackup() {
+    const st = window.senhaBackup ? await window.senhaBackup.status() : null;
+
+    if (!st) {
+        senhaBackupEls.bolinha.className = "sync-bolinha erro";
+        senhaBackupEls.texto.textContent = "Indisponível";
+        senhaBackupEls.form.style.display = "none";
+        return;
+    }
+
+    if (st.configurada) {
+        senhaBackupEls.bolinha.className = "sync-bolinha ativa";
+        senhaBackupEls.texto.textContent = "Configurada neste computador";
+        senhaBackupEls.form.style.display = "none";
+        return;
+    }
+
+    senhaBackupEls.bolinha.className = "sync-bolinha erro";
+    senhaBackupEls.texto.textContent = st.cofreDisponivel
+        ? "Não configurada: os backups estão parados até a senha ser digitada"
+        : "O cofre de senhas deste computador não está disponível";
+    senhaBackupEls.form.style.display = st.cofreDisponivel ? "" : "none";
+}
+
+async function salvarSenhaBackup() {
+    senhaBackupEls.erro.style.display = "none";
+
+    const resultado = await window.senhaBackup.definir(
+        senhaBackupEls.nova.value,
+        senhaBackupEls.confirmar.value
+    );
+
+    if (!resultado.ok) {
+        senhaBackupEls.erro.textContent = resultado.erro;
+        senhaBackupEls.erro.style.display = "block";
+        return;
+    }
+
+    senhaBackupEls.nova.value = "";
+    senhaBackupEls.confirmar.value = "";
+    await atualizarStatusSenhaBackup();
+
+    if (resultado.aviso) {
+        mostrarMensagem(`Senha salva, mas a sincronização avisou: ${resultado.aviso}`, "warning");
+    } else {
+        mostrarMensagem("Senha do backup salva!", "success");
+    }
+}
+
+senhaBackupEls.btnSalvar.addEventListener("click", salvarSenhaBackup);
+atualizarStatusSenhaBackup();
