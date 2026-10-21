@@ -1,40 +1,19 @@
-async function gerarHash(texto) {
-    const encoder = new TextEncoder();
-    const dados = encoder.encode(texto);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", dados);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
+// A conferência da senha é feita no processo principal (app/auth.js)
 async function trocarSenha() {
-    const atual = document.getElementById("senhaAtual").value;
-    const nova = document.getElementById("senhaNovaTroca").value;
-    const confirmar = document.getElementById("confirmarNovaTroca").value;
     const erroDiv = document.getElementById("mensagem-erro-troca");
+    erroDiv.style.display = "none";
 
-    const senhaSalva = await window.storage.getItem("senhaHash");
-    const hashAtual = await gerarHash(atual);
+    const resultado = await window.auth.trocar(
+        document.getElementById("senhaAtual").value,
+        document.getElementById("senhaNovaTroca").value,
+        document.getElementById("confirmarNovaTroca").value
+    );
 
-    if (hashAtual !== senhaSalva) {
-        erroDiv.textContent = "Senha atual incorreta.";
+    if (!resultado.ok) {
+        erroDiv.textContent = resultado.erro;
         erroDiv.style.display = "block";
         return;
     }
-
-    if (nova.length < 4) {
-        erroDiv.textContent = "A nova senha precisa ter pelo menos 4 caracteres.";
-        erroDiv.style.display = "block";
-        return;
-    }
-
-    if (nova !== confirmar) {
-        erroDiv.textContent = "As senhas novas não coincidem.";
-        erroDiv.style.display = "block";
-        return;
-    }
-
-    const novoHash = await gerarHash(nova);
-    await window.storage.setItem("senhaHash", novoHash);
 
     mostrarMensagem(
         "Senha alterada com sucesso!",
@@ -46,4 +25,4 @@ async function trocarSenha() {
 }
 
 document.getElementById("btnSalvarSenha").addEventListener("click", trocarSenha);
-document.getElementById("btnVoltar").addEventListener("click", () => history.back());
+document.getElementById("btnVoltar").addEventListener("click", () => history.back());

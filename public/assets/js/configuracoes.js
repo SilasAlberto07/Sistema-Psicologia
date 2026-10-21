@@ -48,14 +48,7 @@ btnVerificar.addEventListener("click", async () => {
 // ================================
 // CONFIGURAÇÕES — Trocar senha
 // ================================
-async function gerarHash(texto) {
-    const encoder = new TextEncoder();
-    const dados = encoder.encode(texto);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", dados);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
+// A conferência da senha é feita no processo principal (app/auth.js)
 const campoSenhaAtual = document.getElementById("senhaAtual");
 const campoSenhaNova = document.getElementById("senhaNovaTroca");
 const campoConfirmar = document.getElementById("confirmarNovaTroca");
@@ -70,30 +63,16 @@ function mostrarErroSenha(texto) {
 async function trocarSenha() {
     erroSenha.style.display = "none";
 
-    const atual = campoSenhaAtual.value;
-    const nova = campoSenhaNova.value;
-    const confirmar = campoConfirmar.value;
+    const resultado = await window.auth.trocar(
+        campoSenhaAtual.value,
+        campoSenhaNova.value,
+        campoConfirmar.value
+    );
 
-    const senhaSalva = await window.storage.getItem("senhaHash");
-    const hashAtual = await gerarHash(atual);
-
-    if (hashAtual !== senhaSalva) {
-        mostrarErroSenha("Senha atual incorreta.");
+    if (!resultado.ok) {
+        mostrarErroSenha(resultado.erro);
         return;
     }
-
-    if (nova.length < 4) {
-        mostrarErroSenha("A nova senha precisa ter pelo menos 4 caracteres.");
-        return;
-    }
-
-    if (nova !== confirmar) {
-        mostrarErroSenha("As senhas novas não coincidem.");
-        return;
-    }
-
-    const novoHash = await gerarHash(nova);
-    await window.storage.setItem("senhaHash", novoHash);
 
     campoSenhaAtual.value = "";
     campoSenhaNova.value = "";

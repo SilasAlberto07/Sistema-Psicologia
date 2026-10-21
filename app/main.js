@@ -2,7 +2,7 @@ const path = require('path');
 const { startBackupScheduler } = require('./backups/scheduler');
 const { runBackup } = require('./backups/backupManager');
 
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, session } = require('electron');
 const http = require('http');
 const handler = require('serve-handler');
 const fs = require('fs');
@@ -10,6 +10,7 @@ const Database = require('better-sqlite3');
 const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
 const { criarSincronizacao } = require('./sync/sincronizacao');
+const { criarAutenticacao } = require('./auth');
 
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
@@ -36,6 +37,7 @@ app.setName("Sistema Psicologia");
 let mainWindow;
 let server;
 let db;
+let auth; // controle do login (ver app/auth.js)
 
 // Guardados aqui para serem reutilizados pelo backup disparado a cada salvamento
 let caminhoBancoAtual;
@@ -80,6 +82,8 @@ function iniciarBanco() {
             valor TEXT
         )
     `);
+
+    auth = criarAutenticacao({ db, log });
 
     caminhoBancoAtual = caminhoBanco;
     // Pasta na Área de Trabalho do usuário logado (funciona tanto no seu PC quanto no notebook dela).
@@ -175,7 +179,32 @@ app.on('web-contents-created', (event, contents) => {
 // ================================
 // IPC — comunicação tela <-> banco
 // ================================
+// ================================
+// LOGIN — as telas pedem, o processo principal decide
+// ================================
+ipcMain.handle('auth-estado', () => auth.estado());
+ipcMain.handle('auth-criar', (event, nova, confirmar, resposta) => auth.criarSenha(nova, confirmar, resposta));
+ipcMain.handle('auth-entrar', (event, senha) => auth.entrar(senha));
+ipcMain.handle('auth-trocar', (event, atual, nova, confirmar) => auth.trocarSenha(atual, nova, confirmar));
+ipcMain.handle('auth-redefinir', (event, resposta) => auth.redefinirComResposta(resposta));
+ipcMain.handle('auth-sair', () => { auth.sair(); return true; });
+
+/**
+ * Só entrega/aceita dados se a pessoa fez login, e nunca deixa as telas
+ * mexerem diretamente nos hashes de senha. É isso que torna o login uma
+ * proteção de verdade, e não só uma tela na frente do sistema.
+ */
+function acessoPermitido(chave) {
+    if (!auth || !auth.estaAutenticado()) return false;
+    if (auth.chaveProtegida(chave)) return false;
+    return true;
+}
+
 ipcMain.handle('storage-get', (event, chave) => {
+    if (!acessoPermitido(chave)) {
+        log.warn(`[auth] Leitura negada para "${chave}" (sem login ou chave protegida).`);
+        return null;
+    }
     // guarda o que esta tela leu (a sincronização usa isso para saber
     // exatamente o que a pessoa mudou quando ela mandar salvar)
     if (sync && sync.ehSincronizada(chave)) {
@@ -186,6 +215,10 @@ ipcMain.handle('storage-get', (event, chave) => {
 });
 
 ipcMain.handle('storage-set', (event, chave, valor) => {
+    if (!acessoPermitido(chave)) {
+        log.warn(`[auth] Gravação negada para "${chave}" (sem login ou chave protegida).`);
+        return false;
+    }
     if (sync && sync.ehSincronizada(chave)) {
         // pacientes/casais/financeiro: junta com o que já está salvo
         // (inclusive o que chegou do outro computador) em vez de sobrescrever
@@ -202,6 +235,10 @@ ipcMain.handle('storage-set', (event, chave, valor) => {
 });
 
 ipcMain.handle('storage-remove', (event, chave) => {
+    if (!acessoPermitido(chave)) {
+        log.warn(`[auth] Remoção negada para "${chave}" (sem login ou chave protegida).`);
+        return false;
+    }
     if (sync && sync.ehSincronizada(chave)) {
         // apagar a lista inteira apagaria também no outro computador — bloqueado por segurança
         log.warn(`[sync] storage-remove ignorado para a chave sincronizada "${chave}".`);
@@ -244,6 +281,9 @@ function abrirJanela(porta) {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
+            // DevTools (Ctrl+Shift+I) só no modo desenvolvimento (npm start).
+            // No programa instalado ele daria acesso direto aos dados.
+            devTools: !app.isPackaged,
             preload: path.join(__dirname, 'preload.js')
         }
     });
@@ -255,6 +295,7 @@ function abrirJanela(porta) {
                 webPreferences: {
                     nodeIntegration: false,
                     contextIsolation: true,
+                    devTools: !app.isPackaged,
                     preload: path.join(__dirname, 'preload.js')
                 }
             }
@@ -300,9 +341,53 @@ function abrirJanela(porta) {
     });
 }
 
+/**
+ * Sem login, qualquer página do sistema (index.html, pacientes.html...)
+ * é redirecionada para o login.html. Assim não adianta tentar abrir uma
+ * tela direto pelo endereço.
+ */
+function protegerPaginas(porta) {
+    session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
+        try {
+            const url = new URL(details.url);
+            const ehDoSistema = url.hostname === '127.0.0.1' && Number(url.port) === porta;
+            const ehPagina = url.pathname.toLowerCase().endsWith('.html');
+            const ehLogin = url.pathname.toLowerCase() === '/login.html';
+
+            if (ehDoSistema && ehPagina && !ehLogin && !auth.estaAutenticado()) {
+                return callback({ redirectURL: `http://127.0.0.1:${porta}/login.html` });
+            }
+        } catch (err) {
+            log.error('[auth] Erro ao conferir a página pedida:', err);
+        }
+        callback({});
+    });
+}
+
+/**
+ * No programa instalado tiramos o menu padrão do Electron, que tem
+ * "Toggle Developer Tools". No Mac mantemos um menu mínimo, porque sem
+ * ele param de funcionar atalhos como Cmd+C, Cmd+V e Cmd+Q.
+ */
+function configurarMenu() {
+    if (!app.isPackaged) return; // em desenvolvimento fica o menu completo
+
+    if (process.platform === 'darwin') {
+        Menu.setApplicationMenu(Menu.buildFromTemplate([
+            { role: 'appMenu' },
+            { role: 'editMenu' },
+            { role: 'windowMenu' },
+        ]));
+    } else {
+        Menu.setApplicationMenu(null);
+    }
+}
+
 async function criarJanela() {
+    configurarMenu();
     iniciarBanco();
     portaAtual = await iniciarServidor();
+    protegerPaginas(portaAtual);
     abrirJanela(portaAtual);
 }
 
@@ -534,6 +619,7 @@ app.on('activate', () => {
     const janelasAbertas = BrowserWindow.getAllWindows().length;
     log.info(`[app] activate disparado. Janelas abertas: ${janelasAbertas}. portaAtual: ${portaAtual}`);
     if (janelasAbertas === 0 && portaAtual) {
+        if (auth) auth.sair(); // janela nova = pede a senha de novo
         abrirJanela(portaAtual);
     } else if (janelasAbertas === 0 && !portaAtual) {
         log.error('[app] activate disparou mas portaAtual está vazio — servidor pode não ter iniciado corretamente.');
@@ -552,4 +638,4 @@ app.on('before-quit', (event) => {
     }
     if (server) server.close();
     if (db && db.open) db.close();
-});
+});

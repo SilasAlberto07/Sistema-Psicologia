@@ -198,105 +198,72 @@
     <script src="./assets/js/alert.js"></script>
     
     <script>
+        // ==========================================================
+        // A senha é conferida no processo principal (app/auth.js).
+        // Esta tela só envia o que foi digitado e mostra a resposta.
+        // ==========================================================
+
+        function mostrarErro(idDiv, texto) {
+            const erroDiv = document.getElementById(idDiv);
+            erroDiv.textContent = texto;
+            erroDiv.style.display = "block";
+        }
+
+        function mostrarCard(id) {
+            ["cardLogin", "cardCriarSenha", "cardResetSenha"].forEach((card) => {
+                document.getElementById(card).style.display = card === id ? "block" : "none";
+            });
+        }
+
         // decide qual tela mostrar assim que a página carrega
         window.addEventListener("DOMContentLoaded", async () => {
-            const senhaSalva = await window.storage.getItem("senhaHash");
-
-            if (senhaSalva) {
-                document.getElementById("cardLogin").style.display = "block";
-            } else {
-                document.getElementById("cardCriarSenha").style.display = "block";
-            }
+            const estado = await window.auth.estado();
+            mostrarCard(estado.temSenha ? "cardLogin" : "cardCriarSenha");
+            document.getElementById("novaSenha").placeholder = `Mínimo de ${estado.tamanhoMinimo} caracteres`;
         });
 
         // cria a senha no primeiro acesso
         async function criarSenha() {
-            const nova = document.getElementById("novaSenha").value;
-            const confirmar = document.getElementById("confirmarSenha").value;
-            const erroDiv = document.getElementById("mensagem-erro-criar");
+            const resultado = await window.auth.criar(
+                document.getElementById("novaSenha").value,
+                document.getElementById("confirmarSenha").value,
+                document.getElementById("respostaSeguranca").value
+            );
 
-            if (nova.length < 4) {
-                erroDiv.textContent = "A senha precisa ter pelo menos 4 caracteres.";
-                erroDiv.style.display = "block";
+            if (!resultado.ok) {
+                mostrarErro("mensagem-erro-criar", resultado.erro);
                 return;
             }
-
-            if (nova !== confirmar) {
-                erroDiv.textContent = "As senhas não coincidem.";
-                erroDiv.style.display = "block";
-                return;
-            }
-
-            const resposta = document.getElementById("respostaSeguranca").value.trim().toLowerCase();
-
-            if (!resposta) {
-                erroDiv.textContent = "Preencha a resposta de segurança.";
-                erroDiv.style.display = "block";
-                return;
-            }
-
-            const hash = await gerarHash(nova);
-            const hashResposta = await gerarHash(resposta);
-
-            await window.storage.setItem("senhaHash", hash);
-            await window.storage.setItem("respostaSegurancaHash", hashResposta);
-
             window.location.href = "index.html";
         }
 
-        // login normal (substitui a função antiga)
         async function verificarSenha() {
-            const senhaDigitada = document.getElementById('senha').value;
-            const senhaSalva = await window.storage.getItem("senhaHash");
-            const erroDiv = document.getElementById("mensagem-erro");
+            const resultado = await window.auth.entrar(document.getElementById("senha").value);
 
-            const hashDigitado = await gerarHash(senhaDigitada);
-
-            if (hashDigitado === senhaSalva) {
+            if (resultado.ok) {
                 window.location.href = "index.html";
             } else {
-                erroDiv.style.display = "block";
+                mostrarErro("mensagem-erro", resultado.erro);
             }
         }
 
-        document.getElementById('senha').addEventListener('keypress', function (event) {
-            if (event.key === 'Enter') {
+        document.getElementById("senha").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
                 verificarSenha();
             }
         });
 
-        async function gerarHash(texto) {
-            const encoder = new TextEncoder();
-            const dados = encoder.encode(texto);
-            const hashBuffer = await crypto.subtle.digest("SHA-256", dados);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-        }
-
-        function mostrarTrocarSenha() {
-            document.getElementById("cardLogin").style.display = "none";
-            document.getElementById("cardTrocarSenha").style.display = "block";
-        }
-
         function resetarSenha() {
-            document.getElementById("cardLogin").style.display = "none";
-            document.getElementById("cardResetSenha").style.display = "block";
+            mostrarCard("cardResetSenha");
         }
 
         async function confirmarReset() {
-            const respostaDigitada = document.getElementById("respostaReset").value;
-            const erroDiv = document.getElementById("mensagem-erro-reset");
+            const resultado = await window.auth.redefinir(document.getElementById("respostaReset").value);
 
-            const hashDigitado = await gerarHash(respostaDigitada.trim().toLowerCase());
-            const hashSalvo = await window.storage.getItem("respostaSegurancaHash");
-
-            if (hashDigitado !== hashSalvo) {
-                erroDiv.textContent = "Resposta incorreta. Não foi possível redefinir a senha.";
-                erroDiv.style.display = "block";
+            if (!resultado.ok) {
+                mostrarErro("mensagem-erro-reset", resultado.erro);
                 return;
             }
-
-            await window.storage.removeItem("senhaHash");
 
             mostrarMensagem(
                 "Senha removida. Você será direcionada para criar uma nova.",
@@ -311,4 +278,4 @@
 
 </body>
 
-</html>
+</html>

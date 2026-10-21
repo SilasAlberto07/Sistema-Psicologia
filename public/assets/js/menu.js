@@ -21,13 +21,10 @@ function marcarLinkAtivo() {
         }
     });
 }
-function encerrarSessao() {
+async function encerrarSessao() {
 
-    // encerra a sessão
-    sessionStorage.removeItem("logado");
-
-    // se quiser apagar outras informações da sessão
-    // sessionStorage.clear();
+    // avisa o processo principal: a partir daqui ele não entrega mais dados
+    if (window.auth) await window.auth.sair();
 
     // detecta em qual pasta está
     if (window.location.pathname.includes("/Pages/")) {

@@ -6,6 +6,16 @@ contextBridge.exposeInMainWorld('storage', {
     removeItem: (chave) => ipcRenderer.invoke('storage-remove', chave)
 });
 
+// Login: a tela só pergunta; quem confere a senha é o processo principal
+contextBridge.exposeInMainWorld('auth', {
+    estado: () => ipcRenderer.invoke('auth-estado'),
+    criar: (nova, confirmar, resposta) => ipcRenderer.invoke('auth-criar', nova, confirmar, resposta),
+    entrar: (senha) => ipcRenderer.invoke('auth-entrar', senha),
+    trocar: (atual, nova, confirmar) => ipcRenderer.invoke('auth-trocar', atual, nova, confirmar),
+    redefinir: (resposta) => ipcRenderer.invoke('auth-redefinir', resposta),
+    sair: () => ipcRenderer.invoke('auth-sair')
+});
+
 contextBridge.exposeInMainWorld('atualizacao', {
     verificar: () => ipcRenderer.invoke('verificar-atualizacao'),
     versao: () => ipcRenderer.invoke('versao-app'),
