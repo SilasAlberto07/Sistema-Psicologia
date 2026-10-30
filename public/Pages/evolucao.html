@@ -93,6 +93,45 @@
                     <input type="datetime-local" id="dataSessao">
                 </fieldset>
 
+                <!-- Janela: anexar documento -->
+                <div class="modal-colar oculto" id="modalAnexo">
+                    <div class="modal-colar-box modal-anexo-box">
+                        <div class="modal-colar-header">
+                            <h2><i class="ti ti-paperclip"></i> Anexar Documento</h2>
+                            <button type="button" id="fecharModalAnexo"><i class="ti ti-x"></i></button>
+                        </div>
+                        <div class="modal-colar-body">
+                            <label for="tituloAnexo" class="label-anexo">Documento ou teste aplicado</label>
+                            <input type="text" id="tituloAnexo" class="input-anexo"
+                                placeholder="Ex.: Teste BDI-II, Laudo, Encaminhamento...">
+
+                            <label class="label-anexo">Arquivo (PDF ou imagem)</label>
+                            <div class="area-arquivo-anexo" id="areaArquivoAnexo">
+                                <i class="ti ti-upload"></i> <span>Clique para escolher o arquivo</span>
+                            </div>
+                            <input type="file" id="arquivoAnexo" accept="application/pdf,image/*" hidden>
+                            <div class="preview-anexo" id="previewAnexo"></div>
+                        </div>
+                        <div class="modal-colar-footer">
+                            <button type="button" class="btn-cancelar" id="cancelarModalAnexo">Cancelar</button>
+                            <button type="button" class="btn-preencher" id="btnConfirmarAnexo">
+                                <i class="ti ti-check"></i> Salvar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Janela: visualizar documento -->
+                <div class="modal-colar oculto" id="modalVerAnexo">
+                    <div class="modal-colar-box modal-ver-anexo-box">
+                        <div class="modal-colar-header">
+                            <h2><i class="ti ti-file-text"></i> <span id="tituloVerAnexo"></span></h2>
+                            <button type="button" id="fecharModalVerAnexo"><i class="ti ti-x"></i></button>
+                        </div>
+                        <div class="corpo-ver-anexo" id="corpoVerAnexo"></div>
+                    </div>
+                </div>
+
                 <fieldset class="form-evolucao">
                     <legend>Relato da Sessão</legend>
                     <textarea id="relatoSessao" rows="3" placeholder="Escreva o relato da sessão..."></textarea>
@@ -108,11 +147,20 @@
                     <textarea id="planoAcao" rows="3" placeholder="Próximos passos / plano de ação..."></textarea>
                 </fieldset>
 
+                <fieldset class="form-evolucao fieldset-anexos">
+                    <legend>Documentos e Testes Aplicados</legend>
+                    <div class="anexos-topo">
+                        <button type="button" class="btn-preencher" id="btnAbrirModalAnexo">
+                            <i class="ti ti-paperclip"></i> Anexar documento
+                        </button>
+                    </div>
+                    <div id="listaAnexos" class="lista-anexos"></div>
+                </fieldset>
+
                 <div class="botoes">
                     <button type="submit" class="btn-salvar"><i class="ti ti-device-floppy"></i> Salvar</button>
                     <button class="btn-abrir"><i class="ti ti-folder-open"></i> Abrir Prontuário</button>
                     <button class="btn-imprimir-tudo"><i class="ti ti-printer"></i> Imprimir Prontuário</button>
-                    <button class="btn-voltar"><i class="ti ti-arrow-left"></i> Voltar</button>
                 </div>
 
                 <hr>

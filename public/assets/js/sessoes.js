@@ -701,7 +701,7 @@ document.addEventListener("click", async function (event) {
     // sessão de paciente individual
     if (origem === "individual") {
         guardarEstadoSessoes(`individual-${id}`);
-        window.location.href = `evolucao.html?id=${id}${ehConsulta ? "&tipo=consulta" : ""}&voltar=sessoes`;
+        window.location.href = `evolucao.html?id=${id}${ehConsulta ? "&tipo=consulta" : `&sessao=${event.target.dataset.index}`}&voltar=sessoes`;
         return;
     }
 
@@ -734,7 +734,7 @@ document.addEventListener("click", async function (event) {
 
     guardarEstadoSessoes(`casal-${id}`);
     window.location.href =
-        `evolucao.html?id=${id}&origem=casal&pessoa=${atendido}&nome=${encodeURIComponent(nomePessoa)}&voltar=sessoes`;
+        `evolucao.html?id=${id}&origem=casal&pessoa=${atendido}&nome=${encodeURIComponent(nomePessoa)}&sessao=${event.target.dataset.index}&voltar=sessoes`;
 });
 
 // =========================

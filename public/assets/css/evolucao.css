@@ -199,3 +199,211 @@ hr {
     align-self: flex-start;
     margin-bottom: 14px;
 }
+
+/* ═══════════════════════════════════════════════
+   DOCUMENTOS E TESTES APLICADOS (anexos da sessão)
+═══════════════════════════════════════════════ */
+.anexos-topo {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.lista-anexos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.anexos-vazio {
+    grid-column: 1 / -1;
+    font-size: 13px;
+    color: #a0a090;
+    padding: 6px 4px;
+}
+
+.card-anexo {
+    position: relative;
+    background-color: #ffffff;
+    border: 1px solid #ede8e0;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.card-anexo:hover {
+    box-shadow: 0 4px 14px rgba(61, 58, 40, 0.10);
+    transform: translateY(-1px);
+}
+
+.card-anexo-titulo {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #3d4a30;
+    background-color: #eaf0e3;
+    padding: 8px 10px;
+    border-bottom: 1px solid #ede8e0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-anexo-miniatura {
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #faf8f4;
+}
+
+.card-anexo-miniatura img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-anexo-miniatura .icone-pdf {
+    font-size: 46px;
+    color: #c0504d;
+}
+
+.card-anexo-arquivo {
+    font-size: 11px;
+    color: #a0a090;
+    padding: 6px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-remover-anexo {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.92);
+    color: #b04040;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.card-anexo:hover .btn-remover-anexo {
+    display: flex;
+}
+
+/* anexos dentro do card do histórico */
+.anexos-historico {
+    padding: 0 20px 16px;
+}
+
+.anexos-historico > strong {
+    display: block;
+    font-size: 14px;
+    color: #5a5a48;
+    margin-bottom: 8px;
+}
+
+/* janela de anexar */
+.modal-colar-box.modal-anexo-box {
+    width: 520px;
+    height: auto;
+}
+
+.label-anexo {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #3d3a28;
+    margin: 4px 0 6px;
+}
+
+.input-anexo {
+    width: 100%;
+    padding: 10px 14px;
+    background-color: #faf8f4;
+    border: 1px solid #ddd8ce;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #3d3a28;
+    outline: none;
+    margin-bottom: 14px;
+}
+
+.input-anexo:focus {
+    border-color: #8a9e78;
+    background-color: #ffffff;
+}
+
+.area-arquivo-anexo {
+    border: 2px dashed #ddd8ce;
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+    color: #9a9a88;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.area-arquivo-anexo:hover {
+    border-color: #8a9e78;
+    color: #5c7a48;
+}
+
+.area-arquivo-anexo.selecionado {
+    border-style: solid;
+    border-color: #8a9e78;
+    color: #3d3a28;
+}
+
+.preview-anexo {
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+}
+
+.preview-anexo img {
+    max-height: 160px;
+    max-width: 100%;
+    border-radius: 6px;
+}
+
+.preview-anexo .icone-pdf {
+    font-size: 54px;
+    color: #c0504d;
+}
+
+/* janela de visualizar */
+.modal-colar-box.modal-ver-anexo-box {
+    width: 1000px;
+    height: 90vh;
+}
+
+.corpo-ver-anexo {
+    flex: 1;
+    background-color: #525659;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+}
+
+.corpo-ver-anexo img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.corpo-ver-anexo iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background-color: #ffffff;
+}

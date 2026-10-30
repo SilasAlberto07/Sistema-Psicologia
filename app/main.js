@@ -328,6 +328,8 @@ function abrirJanela(porta) {
             // DevTools (Ctrl+Shift+I) só no modo desenvolvimento (npm start).
             // No programa instalado ele daria acesso direto aos dados.
             devTools: !app.isPackaged,
+            // liga o leitor de PDF embutido (usado para abrir os documentos anexados no prontuário)
+            plugins: true,
             preload: path.join(__dirname, 'preload.js')
         }
     });

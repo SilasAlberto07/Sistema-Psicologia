@@ -22,6 +22,34 @@ function agoraParaInputDatetime() {
     return local.toISOString().slice(0, 16);
 }
 
+// data/hora padrão do prontuário, puxada da tela de Sessões:
+//  - aberto pela linha de uma sessão (02, 03...) → data e hora daquela sessão
+//  - aberto pela linha da 1ª Consulta (ou sem linha definida) → data e hora da 1ª Consulta
+//  - se a linha ainda não tiver data e hora → data e hora de agora
+// O campo continua editável normalmente.
+function dataDaLinhaSessoes() {
+    if (!registro) return "";
+
+    const indiceSessao = params.get("sessao");
+    if (indiceSessao !== null && Array.isArray(registro.sessoes)) {
+        const sessao = registro.sessoes[Number(indiceSessao)];
+        if (sessao && sessao.data && sessao.hora) {
+            return `${sessao.data}T${sessao.hora}`;
+        }
+        return "";
+    }
+
+    const consulta = registro.consulta;
+    if (consulta && consulta.data && consulta.hora) {
+        return `${consulta.data}T${consulta.hora}`;
+    }
+    return "";
+}
+
+function dataPadraoSessao() {
+    return dataDaLinhaSessoes() || agoraParaInputDatetime();
+}
+
 // converte o valor do input datetime-local para o formato de exibição pt-BR
 function formatarDataSessaoBR(valorInput) {
     if (!valorInput) return "";
@@ -31,7 +59,6 @@ function formatarDataSessaoBR(valorInput) {
 }
 
 const btnSalvar = document.querySelector(".btn-salvar");
-const btnVoltar = document.querySelector(".botoes .btn-voltar");
 const btnImprimir = document.querySelector(".btn-imprimir-tudo");
 const btnAbrirProntuario = document.querySelector(".btn-abrir");
 
@@ -42,6 +69,7 @@ let ehCasal = false;
 let pessoaAtual = null; // "p1" | "p2" | null — só existe quando for sessão individual do casal
 let nomeAtual = "";
 let editandoIndex = null; // sempre se refere ao índice REAL em registro.evolucoes
+let anexosAtuais = [];    // documentos/testes anexados à sessão que está sendo escrita
 
 // true quando essa tela foi aberta pelo botão "Prontuário" da linha da
 // 1ª Consulta de um paciente INDIVIDUAL (o equivalente, para casal, é
@@ -112,11 +140,13 @@ async function iniciarEvolucao() {
         textoEvolucao.value = draft.texto || "";
         planoAcao.value = draft.plano || "";
         relatoSessao.value = draft.relato || "";
-        dataSessao.value = draft.dataSessao || agoraParaInputDatetime();
+        // a data da linha da tela de Sessões tem prioridade sobre a do rascunho
+        dataSessao.value = dataDaLinhaSessoes() || draft.dataSessao || agoraParaInputDatetime();
     } else {
-        dataSessao.value = agoraParaInputDatetime();
+        dataSessao.value = dataPadraoSessao();
     }
 
+    renderAnexosFormulario();
     renderHistorico();
 }
 
@@ -195,6 +225,13 @@ function renderHistorico() {
                     <p><strong>Evolução:</strong> ${item.texto}</p>
                     ${item.plano ? `<p><strong>Plano de ação:</strong> ${item.plano}</p>` : ""}
                 </div>
+                ${Array.isArray(item.anexos) && item.anexos.length ? `
+                <div class="anexos-historico">
+                    <strong>Documentos e Testes Aplicados:</strong>
+                    <div class="lista-anexos">
+                        ${item.anexos.map((anexo, i) => montarCardAnexo(anexo, { registro: indiceReal, anexo: i })).join("")}
+                    </div>
+                </div>` : ""}
                 <div class="acoes-evolucao">
                     <button class="btn-editar-evolucao" data-index="${indiceReal}">
                         <i class="ti ti-pencil"></i> Editar
@@ -244,6 +281,7 @@ btnSalvar.addEventListener("click", async () => {
         registro.evolucoes[indice].plano = plano;
         registro.evolucoes[indice].dataSessao = dataSessaoValor;
         registro.evolucoes[indice].data = formatarDataSessaoBR(dataSessaoValor);
+        registro.evolucoes[indice].anexos = anexosAtuais;
         // o campo "tipo" (1ª Consulta ou não) não é alterado aqui — permanece
         // como já estava, já que essa marcação é definida só na criação
 
@@ -253,7 +291,9 @@ btnSalvar.addEventListener("click", async () => {
         relatoSessao.value = "";
         textoEvolucao.value = "";
         planoAcao.value = "";
-        dataSessao.value = agoraParaInputDatetime();
+        dataSessao.value = dataPadraoSessao();
+        anexosAtuais = [];
+        renderAnexosFormulario();
         localStorage.removeItem(draftKey);
 
         // atualiza a lista
@@ -294,6 +334,10 @@ btnSalvar.addEventListener("click", async () => {
             plano: plano
         };
 
+        if (anexosAtuais.length) {
+            novoRegistro.anexos = anexosAtuais;
+        }
+
         if (ehCasal && pessoaAtual) {
             novoRegistro.pessoa = pessoaAtual;
         }
@@ -312,7 +356,9 @@ btnSalvar.addEventListener("click", async () => {
         relatoSessao.value = "";
         textoEvolucao.value = "";
         planoAcao.value = "";
-        dataSessao.value = agoraParaInputDatetime();
+        dataSessao.value = dataPadraoSessao();
+        anexosAtuais = [];
+        renderAnexosFormulario();
 
         renderHistorico();
 
@@ -364,7 +410,10 @@ historico.addEventListener("click", (e) => {
         textoEvolucao.value = item.texto || "";
         planoAcao.value = item.plano || "";
         // registros antigos não têm "dataSessao" salvo (só o texto já formatado) — nesse caso mantém a data/hora atual
-        dataSessao.value = item.dataSessao || agoraParaInputDatetime();
+        dataSessao.value = item.dataSessao || dataPadraoSessao();
+        // carrega os anexos desse registro no campo (cópia da lista, mesmos itens)
+        anexosAtuais = Array.isArray(item.anexos) ? item.anexos.slice() : [];
+        renderAnexosFormulario();
 
         textoEvolucao.scrollIntoView({
             behavior: "smooth",
@@ -431,8 +480,6 @@ function voltarTelaAnterior() {
     }
 }
 
-btnVoltar.addEventListener("click", voltarTelaAnterior);
-
 const btnVoltarTopo = document.getElementById("btnVoltarTopo");
 if (btnVoltarTopo) {
     btnVoltarTopo.addEventListener("click", voltarTelaAnterior);
@@ -440,6 +487,240 @@ if (btnVoltarTopo) {
         btnVoltarTopo.querySelector("span").textContent = "Voltar para Sessões";
     }
 }
+
+
+// ==========================================
+// DOCUMENTOS E TESTES APLICADOS (anexos)
+// ==========================================
+// Cada anexo fica salvo dentro do próprio registro da sessão:
+//   { titulo, nome, tipo: "pdf" | "imagem", dados: "data:...;base64,...", criadoEm }
+// Assim ele entra junto no backup e na sincronização entre computadores.
+
+const TAMANHO_MAXIMO_ANEXO_MB = 10;
+
+const listaAnexos = document.getElementById("listaAnexos");
+const modalAnexo = document.getElementById("modalAnexo");
+const tituloAnexo = document.getElementById("tituloAnexo");
+const arquivoAnexo = document.getElementById("arquivoAnexo");
+const areaArquivoAnexo = document.getElementById("areaArquivoAnexo");
+const previewAnexo = document.getElementById("previewAnexo");
+const modalVerAnexo = document.getElementById("modalVerAnexo");
+const corpoVerAnexo = document.getElementById("corpoVerAnexo");
+const tituloVerAnexo = document.getElementById("tituloVerAnexo");
+
+let arquivoSelecionado = null; // arquivo escolhido na janela, antes de salvar
+let urlVisualizacao = null;    // endereço temporário do PDF aberto (liberado ao fechar)
+
+function escaparHTML(texto) {
+    return String(texto ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+// monta o cartão de um anexo. "origem" diz de onde ele vem:
+//   { formulario: i }          → anexo da sessão que está sendo escrita (pode remover)
+//   { registro: r, anexo: i }  → anexo de uma sessão já salva (só abre)
+function montarCardAnexo(anexo, origem) {
+    const atributos = origem.formulario !== undefined
+        ? `data-formulario="${origem.formulario}"`
+        : `data-registro="${origem.registro}" data-anexo="${origem.anexo}"`;
+
+    const miniatura = anexo.tipo === "imagem"
+        ? `<img src="${anexo.dados}" alt="">`
+        : `<i class="ti ti-file-type-pdf icone-pdf"></i>`;
+
+    const botaoRemover = origem.formulario !== undefined
+        ? `<button type="button" class="btn-remover-anexo" title="Remover anexo"><i class="ti ti-x"></i></button>`
+        : "";
+
+    return `
+        <div class="card-anexo" ${atributos} title="Clique para abrir">
+            ${botaoRemover}
+            <div class="card-anexo-titulo">${escaparHTML(anexo.titulo)}</div>
+            <div class="card-anexo-miniatura">${miniatura}</div>
+            <div class="card-anexo-arquivo">${escaparHTML(anexo.nome)}</div>
+        </div>
+    `;
+}
+
+function renderAnexosFormulario() {
+    if (!anexosAtuais.length) {
+        listaAnexos.innerHTML = `<div class="anexos-vazio">Nenhum documento anexado nesta sessão.</div>`;
+        return;
+    }
+    listaAnexos.innerHTML = anexosAtuais
+        .map((anexo, i) => montarCardAnexo(anexo, { formulario: i }))
+        .join("");
+}
+
+// ---------- janela de anexar ----------
+function limparJanelaAnexo() {
+    tituloAnexo.value = "";
+    arquivoAnexo.value = "";
+    arquivoSelecionado = null;
+    previewAnexo.innerHTML = "";
+    areaArquivoAnexo.classList.remove("selecionado");
+    areaArquivoAnexo.innerHTML = `<i class="ti ti-upload"></i> <span>Clique para escolher o arquivo</span>`;
+}
+
+function fecharJanelaAnexo() {
+    modalAnexo.classList.add("oculto");
+    limparJanelaAnexo();
+}
+
+document.getElementById("btnAbrirModalAnexo").addEventListener("click", () => {
+    limparJanelaAnexo();
+    modalAnexo.classList.remove("oculto");
+    setTimeout(() => tituloAnexo.focus(), 50);
+});
+
+document.getElementById("fecharModalAnexo").addEventListener("click", fecharJanelaAnexo);
+document.getElementById("cancelarModalAnexo").addEventListener("click", fecharJanelaAnexo);
+
+areaArquivoAnexo.addEventListener("click", () => arquivoAnexo.click());
+
+function lerArquivoComoDataURL(arquivo) {
+    return new Promise((resolve, reject) => {
+        const leitor = new FileReader();
+        leitor.onload = () => resolve(leitor.result);
+        leitor.onerror = () => reject(leitor.error);
+        leitor.readAsDataURL(arquivo);
+    });
+}
+
+arquivoAnexo.addEventListener("change", async () => {
+    const arquivo = arquivoAnexo.files[0];
+    if (!arquivo) return;
+
+    const ehPdf = arquivo.type === "application/pdf";
+    const ehImagem = arquivo.type.startsWith("image/");
+
+    if (!ehPdf && !ehImagem) {
+        mostrarMensagem("Escolha um arquivo PDF ou uma imagem.", "warning");
+        arquivoAnexo.value = "";
+        return;
+    }
+
+    if (arquivo.size > TAMANHO_MAXIMO_ANEXO_MB * 1024 * 1024) {
+        mostrarMensagem(`O arquivo é maior que ${TAMANHO_MAXIMO_ANEXO_MB} MB. Escolha um arquivo menor.`, "warning");
+        arquivoAnexo.value = "";
+        return;
+    }
+
+    try {
+        const dados = await lerArquivoComoDataURL(arquivo);
+        arquivoSelecionado = {
+            nome: arquivo.name,
+            tipo: ehPdf ? "pdf" : "imagem",
+            dados
+        };
+    } catch (err) {
+        mostrarMensagem("Não foi possível ler o arquivo.", "error");
+        return;
+    }
+
+    areaArquivoAnexo.classList.add("selecionado");
+    areaArquivoAnexo.innerHTML = `<i class="ti ti-check"></i> <span>${escaparHTML(arquivo.name)} (clique para trocar)</span>`;
+    previewAnexo.innerHTML = ehImagem
+        ? `<img src="${arquivoSelecionado.dados}" alt="">`
+        : `<i class="ti ti-file-type-pdf icone-pdf"></i>`;
+});
+
+document.getElementById("btnConfirmarAnexo").addEventListener("click", () => {
+    const titulo = tituloAnexo.value.trim();
+
+    if (!titulo) {
+        mostrarMensagem("Digite qual documento ou teste está sendo anexado.", "warning");
+        return;
+    }
+
+    if (!arquivoSelecionado) {
+        mostrarMensagem("Escolha o arquivo (PDF ou imagem).", "warning");
+        return;
+    }
+
+    anexosAtuais.push({
+        titulo,
+        nome: arquivoSelecionado.nome,
+        tipo: arquivoSelecionado.tipo,
+        dados: arquivoSelecionado.dados,
+        criadoEm: new Date().toISOString()
+    });
+
+    renderAnexosFormulario();
+    fecharJanelaAnexo();
+
+    mostrarMensagem("Documento anexado! Ele será gravado quando você clicar em Salvar.", "info");
+});
+
+// ---------- abrir / remover ----------
+function dataURLParaBlobURL(dataURL) {
+    const [cabecalho, base64] = dataURL.split(",");
+    const mime = (cabecalho.match(/data:(.*?);/) || [])[1] || "application/octet-stream";
+    const binario = atob(base64);
+    const bytes = new Uint8Array(binario.length);
+    for (let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i);
+    return URL.createObjectURL(new Blob([bytes], { type: mime }));
+}
+
+function abrirAnexo(anexo) {
+    if (!anexo) return;
+
+    tituloVerAnexo.textContent = anexo.titulo;
+
+    if (anexo.tipo === "imagem") {
+        corpoVerAnexo.innerHTML = `<img src="${anexo.dados}" alt="">`;
+    } else {
+        urlVisualizacao = dataURLParaBlobURL(anexo.dados);
+        corpoVerAnexo.innerHTML = `<iframe src="${urlVisualizacao}"></iframe>`;
+    }
+
+    modalVerAnexo.classList.remove("oculto");
+}
+
+function fecharVisualizacao() {
+    modalVerAnexo.classList.add("oculto");
+    corpoVerAnexo.innerHTML = "";
+    if (urlVisualizacao) {
+        URL.revokeObjectURL(urlVisualizacao);
+        urlVisualizacao = null;
+    }
+}
+
+document.getElementById("fecharModalVerAnexo").addEventListener("click", fecharVisualizacao);
+modalVerAnexo.addEventListener("click", (e) => {
+    if (e.target === modalVerAnexo) fecharVisualizacao();
+});
+
+// cartões do campo da sessão atual: abrir ou remover
+listaAnexos.addEventListener("click", async (e) => {
+    const card = e.target.closest(".card-anexo");
+    if (!card) return;
+
+    const i = Number(card.dataset.formulario);
+
+    if (e.target.closest(".btn-remover-anexo")) {
+        const resposta = await mostrarConfirmacao(`Remover o anexo "${anexosAtuais[i].titulo}"?`);
+        if (!resposta.isConfirmed) return;
+        anexosAtuais.splice(i, 1);
+        renderAnexosFormulario();
+        return;
+    }
+
+    abrirAnexo(anexosAtuais[i]);
+});
+
+// cartões dentro do histórico (sessões já salvas): só abrir
+historico.addEventListener("click", (e) => {
+    const card = e.target.closest(".card-anexo");
+    if (!card) return;
+
+    const item = registro.evolucoes[Number(card.dataset.registro)];
+    const anexo = item && Array.isArray(item.anexos) ? item.anexos[Number(card.dataset.anexo)] : null;
+    abrirAnexo(anexo);
+});
 
 
 iniciarEvolucao();
