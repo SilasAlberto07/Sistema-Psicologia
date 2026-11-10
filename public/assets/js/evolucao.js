@@ -561,6 +561,7 @@ const TAMANHO_MAXIMO_ANEXO_MB = 10;
 const listaAnexos = document.getElementById("listaAnexos");
 const modalAnexo = document.getElementById("modalAnexo");
 const tituloAnexo = document.getElementById("tituloAnexo");
+const categoriaAnexo = document.getElementById("categoriaAnexo"); // teste | externo | outro (aparece em Sessões → Documentos)
 const arquivoAnexo = document.getElementById("arquivoAnexo");
 const areaArquivoAnexo = document.getElementById("areaArquivoAnexo");
 const previewAnexo = document.getElementById("previewAnexo");
@@ -618,6 +619,7 @@ function renderAnexosFormulario() {
 // ---------- janela de anexar ----------
 function limparJanelaAnexo() {
     tituloAnexo.value = "";
+    if (categoriaAnexo) categoriaAnexo.value = "teste";
     arquivoAnexo.value = "";
     arquivoSelecionado = null;
     previewAnexo.innerHTML = "";
@@ -703,6 +705,7 @@ document.getElementById("btnConfirmarAnexo").addEventListener("click", () => {
 
     anexosAtuais.push({
         titulo,
+        categoria: categoriaAnexo ? categoriaAnexo.value : "outro",
         nome: arquivoSelecionado.nome,
         tipo: arquivoSelecionado.tipo,
         dados: arquivoSelecionado.dados,

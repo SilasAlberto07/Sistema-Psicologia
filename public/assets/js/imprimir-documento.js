@@ -95,7 +95,7 @@ if (!dados) {
     container.innerHTML = `
         <div class="prontuario">
 
-            <img class="marca-dagua" src="../assets/img/logo-marca-dagua.png" alt="">
+            <img class="marca-dagua" src="../assets/img/logo-marca-dagua-documento.png" alt="">
 
             ${corpoHTML}
 
@@ -115,5 +115,13 @@ if (!dados) {
 
     localStorage.removeItem("documentoTemp");
 
-    window.print();
+    // guarda o PDF nos documentos do paciente e depois abre a impressão
+    // (espera a marca d'água carregar para ela sair no PDF)
+    const marca = container.querySelector(".marca-dagua");
+    const seguir = () => DocsPaciente.guardarEImprimir(dados);
+    const pronto = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    pronto.then(() => {
+        if (marca && !marca.complete) marca.onload = marca.onerror = seguir;
+        else seguir();
+    });
 }

@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════
 // IMPRESSÃO DO CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE PSICOTERAPIA
 // Os dados vêm da página Documentos (localStorage "contratoTemp").
-// Só as assinaturas ficam para preencher à mão.
+// Campo deixado em branco no formulário sai como linha para preencher à mão.
 // ═══════════════════════════════════════════════
 
 const container = document.getElementById("conteudo-impressao");
@@ -12,12 +12,16 @@ function esc(texto) {
     }[c]));
 }
 
-function dataPorExtenso(iso) {
-    if (!iso) return "";
-    const [ano, mes, dia] = iso.split("-").map(Number);
-    const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
-        "agosto", "setembro", "outubro", "novembro", "dezembro"];
-    return `${dia} de ${meses[mes - 1]} de ${ano}`;
+// valor preenchido em destaque, ou linha em branco do tamanho indicado (em "em")
+function campo(valor, largura = 10) {
+    const texto = String(valor ?? "").trim();
+    if (texto) return `<span class="preenchido">${esc(texto)}</span>`;
+    return `<span class="branco" style="width:${largura}em"></span>`;
+}
+
+// ( X ) quando marcado, (   ) quando não
+function marcador(marcado) {
+    return marcado ? `<span class="marcar">( X )</span>` : "(&nbsp;&nbsp;&nbsp;)";
 }
 
 // "180" → "180,00"; "180,5" → "180,50"; mantém o que já vier formatado
@@ -28,141 +32,189 @@ function formatarValor(valor) {
     return limpo;
 }
 
-function letras(indice) {
-    return "abcdefghijklmnopqrstuvwxyz"[indice] || String(indice + 1);
+// "2026-11-10" → "10/11/2026"; outros formatos ficam como vieram
+function dataBR(valor) {
+    const texto = String(valor || "").trim();
+    const iso = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return iso ? `${iso[3]}/${iso[2]}/${iso[1]}` : texto;
 }
 
+const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
+    "agosto", "setembro", "outubro", "novembro", "dezembro"];
+
+function localEData(cidade, iso) {
+    const partes = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+    const local = campo(cidade, 12);
+    if (!partes) {
+        return `${local}, ${campo("", 3)} de ${campo("", 9)} de ${campo("", 4)}.`;
+    }
+    const [, ano, mes, dia] = partes;
+    return `${local}, ${campo(Number(dia))} de ${campo(MESES[Number(mes) - 1])} de ${campo(ano)}.`;
+}
+
+const ICONE_TELEFONE = `<svg viewBox="0 0 24 24" fill="none" stroke="#7a8e69" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>`;
+const ICONE_EMAIL = `<svg viewBox="0 0 24 24" fill="none" stroke="#7a8e69" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>`;
+
 function montarContrato(d) {
-    const b = (texto) => `<strong>${esc(texto)}</strong>`;
+    // só a opção escolhida sai marcada e com valor; a outra fica em branco
+    const ehAvulsa = d.opcaoContratada === "avulsa";
+    const ehPacote = d.opcaoContratada === "pacote";
+    const avulsa = ehAvulsa ? formatarValor(d.valorAvulsa) : "";
+    const pacote = ehPacote ? formatarValor(d.valorPacote) : "";
+    const qtdPacote = ehPacote ? d.qtdPacote : "";
+    const presencial = d.modalidade === "presencial";
+    const online = d.modalidade === "online";
 
-    const contatoPsi = [
-        d.psiEmail ? `com endereço eletrônico: ${b(d.psiEmail)}` : "",
-        d.psiTelefone ? `telefone: ${b(d.psiTelefone)}` : ""
-    ].filter(Boolean).join(" e ");
-
-    const contatoPac = [
-        d.pacEmail ? `com endereço eletrônico: ${b(d.pacEmail)}` : "",
-        d.pacTelefone ? `telefone: ${b(d.pacTelefone)}` : ""
-    ].filter(Boolean).join(" e ");
-
-    const servicos = String(d.servicos || "")
-        .split("\n").map(s => s.trim().replace(/[;.]$/, "")).filter(Boolean)
-        .map((s, i, lista) => `<li>${letras(i)}) ${esc(s)}${i < lista.length - 1 ? ";" : "."}</li>`)
-        .join("");
-
-    const duracao = /^\d+$/.test(d.duracao) ? `${d.duracao} minutos` : d.duracao;
+    const rodapeDados = [
+        `<strong>${esc(d.psiNome)}${d.psiCrp ? ` · CRP ${esc(d.psiCrp)}` : ""}</strong>`,
+        d.psiTelefone ? `<span>${ICONE_TELEFONE}${esc(d.psiTelefone)}</span>` : "",
+        d.psiEmail ? `<span>${ICONE_EMAIL}${esc(d.psiEmail)}</span>` : ""
+    ].join("");
 
     return `
-    <div class="prontuario contrato">
+    <div class="folha">
 
-        <img class="marca-dagua" src="../assets/img/logo-marca-dagua.png" alt="">
-
-        <div class="cabecalho-print">
-            <div class="clinica-nome">${esc(d.psiNome)} — Psicóloga Clínica</div>
-            <div class="subtitulo-clinica">CRP ${esc(d.psiCrp)}</div>
+        <div class="topo">
             <h1>Contrato de Prestação de Serviços de Psicoterapia</h1>
+            <div class="traco"></div>
         </div>
 
-        <p>Pelo presente instrumento particular, de um lado ${b(d.psiNome)}, inscrito(a) no Conselho Regional de
-        Psicologia sob o número ${b(d.psiCrp)}, com CPF nº ${b(d.psiCpf)}, realiza atendimento em ${b(d.psiEndereco)}${contatoPsi ? `, ${contatoPsi}` : ""},
-        ora denominada como psicóloga.</p>
-
-        <p>E, de outro lado, ${b(d.pacNome)}, portador(a) do CPF nº ${b(d.pacCpf)}, residente e domiciliado(a) em
-        ${b(d.pacEndereco)}${contatoPac ? `, ${contatoPac}` : ""}, ora denominado(a) como paciente, têm entre si justo e acordado o seguinte
-        contrato, que se regerá pelas cláusulas e condições abaixo:</p>
-
-        <h2 class="clausula">Cláusula Primeira – Do Objeto do Contrato</h2>
-        <p>1.1 Constitui objeto do presente contrato a prestação de serviços de psicoterapia, sem exclusividade, pelo(a)
-        CONTRATADO(A) ao(à) CONTRATANTE, conforme especificado nos atendimentos presenciais e/ou online.</p>
-        <p>1.2 O(a) CONTRATADO(A) poderá oferecer, no âmbito da psicoterapia, os seguintes serviços:</p>
-        <ul class="lista-servicos">${servicos}</ul>
-        <p>1.3 Os serviços serão previamente acordados entre as partes e realizados de acordo com a necessidade e os
-        objetivos do(a) CONTRATANTE.</p>
-        <p>1.4 Todos os serviços contratados, alterações ou ajustes serão documentados por escrito, seja por e-mail,
-        mensagem de texto (WhatsApp ou outro aplicativo) ou outro meio de comunicação previamente aceito pelas partes,
-        e terão validade contratual.</p>
-
-        <h2 class="clausula">Cláusula Segunda – Das Obrigações do(a) Contratado(a)</h2>
-        <p>1. Realizar as sessões de psicoterapia com profissionalismo, de acordo com as técnicas aplicáveis e dentro
-        das normas éticas da profissão.</p>
-        <p>2. Manter sigilo sobre todas as informações compartilhadas durante as sessões, salvo nos casos previstos em lei.</p>
-        <p>3. Informar previamente ao(à) CONTRATANTE quaisquer mudanças que possam impactar a prestação dos serviços.</p>
-
-        <h2 class="clausula">Cláusula Terceira – Das Obrigações do(a) Contratante</h2>
-        <p>1. Comparecer pontualmente às sessões agendadas e avisar o(a) CONTRATADO(A) com antecedência mínima de
-        24 horas em caso de impossibilidade de comparecimento.</p>
-        <p>2. Cumprir com os pagamentos acordados, nos prazos estipulados neste contrato.</p>
-        <p>3. Fornecer informações verídicas e necessárias para a realização do serviço.</p>
-
-        <h2 class="clausula">Cláusula Quarta – Dos Honorários e Condições de Pagamento</h2>
-        <p>1. O valor de cada sessão será de ${b("R$ " + formatarValor(d.valor))}, pago via ${b(d.formasPagamento)}.</p>
-        <p>2. O pagamento deverá ser efetuado ${b(d.prazoPagamento)}, sob pena de suspensão dos serviços até a regularização.</p>
-        <p>3. Reajustes poderão ser realizados anualmente, mediante comunicação prévia ao(à) CONTRATANTE.</p>
-
-        <h2 class="clausula">Cláusula Quinta – Da Duração e Periodicidade das Sessões</h2>
-        <p>1. Cada sessão de psicoterapia terá a duração de ${b(duracao)}.</p>
-        <p>2. As sessões ocorrerão com periodicidade ${b(d.periodicidade)}, conforme combinado entre as partes.</p>
-
-        <h2 class="clausula">Cláusula Sexta – Da Política de Cancelamento e Remarcação</h2>
-        <p>1. O cancelamento ou remarcação de sessões deverá ser solicitado com antecedência de pelo menos 24 horas.</p>
-        <p>2. Em caso de não comparecimento sem aviso prévio, o valor correspondente à sessão será cobrado integralmente.</p>
-        <p>3. Situações excepcionais, como emergências médicas ou casos fortuitos devidamente comprovados, poderão ser
-        analisadas pelo(a) CONTRATADO(A), a seu critério, para isenção dessa cobrança. Como por exemplo: atestado médico
-        ou morte de parentes de 1º e 2º grau.</p>
-
-        <h2 class="clausula">Cláusula Sétima – Da Confidencialidade</h2>
-        <p>1. O(a) CONTRATADO(A) compromete-se a manter sigilo sobre todas as informações compartilhadas durante as
-        sessões, em conformidade com o Código de Ética Profissional.</p>
-        <p>2. O sigilo será rompido apenas em situações previstas em lei, como riscos à vida ou segurança de terceiros.</p>
-        <p>3. O paciente reconhece que as sessões de psicoterapia envolvem informações confidenciais e protegidas pelo
-        sigilo profissional. Qualquer gravação não autorizada, bem como sua divulgação, total ou parcial, constitui
-        violação das presentes condições contratuais e da confidencialidade das informações tratadas.</p>
-
-        <h2 class="clausula">Cláusula Oitava – Proibição de Gravação e Divulgação de Sessões</h2>
-        <p>1. Proibição de Gravação: O paciente concorda que é expressamente proibido realizar gravações de áudio, vídeo
-        ou qualquer outro tipo de registro das sessões realizadas com o psicólogo, salvo mediante prévia autorização
-        por escrito do profissional.</p>
-        <p>2. Sanções pelo Descumprimento: Em caso de gravação ou divulgação não autorizada das sessões:</p>
-        <p style="margin-left:28px">a) O paciente poderá ser responsabilizado civil e criminalmente, nos termos da legislação vigente;</p>
-        <p style="margin-left:28px">b) O paciente estará sujeito ao pagamento de multa compensatória no valor de
-        ${b("R$ " + formatarValor(d.multa))} por violação, além de eventuais danos materiais e morais causados ao psicólogo.</p>
-        <p>3. Proteção de Direitos Autorais e Profissionais: Orientações, estratégias ou qualquer conteúdo compartilhado
-        pelo psicólogo durante as sessões são protegidos como propriedade intelectual e de caráter confidencial. O uso
-        indevido de tais informações sujeitará o paciente às penalidades previstas nesta cláusula.</p>
-
-        <h2 class="clausula">Cláusula Nona – Da Rescisão Contratual</h2>
-        <p>1. O contrato pode ser rescindido por qualquer das partes mediante aviso prévio de 24 horas.</p>
-        <p>2. Em caso de inadimplência por parte do(a) paciente, a psicóloga poderá suspender os serviços até a
-        regularização dos pagamentos.</p>
-
-        <h2 class="clausula">Cláusula Décima – Da LGPD</h2>
-        <p>1. A PSICÓLOGA compromete-se a proteger os dados pessoais do(a) PACIENTE, coletados para a prestação dos
-        serviços, em conformidade com a Lei Geral de Proteção de Dados (LGPD).</p>
-        <p>2. Os dados serão utilizados exclusivamente para fins relacionados ao contrato e não serão compartilhados com
-        terceiros sem a autorização prévia do(a) PACIENTE, salvo em casos previstos em lei.</p>
-        <p>3. O(a) PACIENTE poderá solicitar a exclusão de seus dados ao término do contrato, respeitando-se os prazos
-        legais para retenção de documentos.</p>
-
-        <h2 class="clausula">Cláusula Décima Primeira – Do Foro</h2>
-        <p>Fica eleito o foro da Comarca de ${b(d.foro)}, com exclusão de qualquer outro, por mais privilegiado que
-        seja, para dirimir quaisquer dúvidas ou questões oriundas deste contrato.</p>
-
-        <p>E, por estarem assim justos e contratados, assinam o presente instrumento em vias de igual teor e forma.</p>
-
-        <p class="local-data">${esc(d.cidadeEstado)}, ${esc(dataPorExtenso(d.data))}.</p>
-
-        <div class="assinaturas-contrato">
-            <div>
-                <div class="linha"></div>
-                ${esc(d.pacNome)}
-                <small>Paciente — CPF ${esc(d.pacCpf)}</small>
+        <div class="rodape">
+            <div class="contato">
+                <div class="logo"><img src="../assets/img/logo-contrato-verde.png" alt="Cláudia Bethânia Psicóloga"></div>
+                <div class="separador"></div>
+                <div class="dados">${rodapeDados}</div>
             </div>
-            <div>
+            <div class="faixa"></div>
+        </div>
+
+        <table class="layout">
+            <thead><tr><td><div class="espaco-topo"></div></td></tr></thead>
+            <tfoot><tr><td><div class="espaco-rodape"></div></td></tr></tfoot>
+            <tbody><tr><td><div class="texto">
+
+        <h2>Cláusula Primeira – Identificação das Partes</h2>
+        <p><strong>Contratada:</strong> Psicóloga ${campo(d.psiNome, 20)}, inscrita no Conselho Regional de Psicologia sob o
+        nº ${campo(d.psiCrp, 6)}, inscrita no Cadastro de Pessoa Física sob o nº ${campo(d.psiCpf, 9)}, com endereço
+        profissional em ${campo(d.psiEndereco, 24)}, telefone ${campo(d.psiTelefone, 9)}.</p>
+        <p><strong>Contratante:</strong> ${campo(d.pacNome, 22)}, inscrito(a) no Cadastro de Pessoa Física sob o
+        nº ${campo(d.pacCpf, 9)}, nascido(a) em ${campo(dataBR(d.pacNascimento), 7)}, residente e domiciliado(a) em
+        ${campo(d.pacEndereco, 26)}, telefone ${campo(d.pacTelefone, 9)} e e-mail ${campo(d.pacEmail, 16)}.</p>
+
+        <h2>Cláusula Segunda – Do Objeto e das Condições do Atendimento</h2>
+        <p class="item">I. O presente contrato tem como objetivo estabelecer as condições para a prestação de serviço de
+        psicoterapia, respeitando os princípios éticos e técnicos da Psicologia.</p>
+        <p class="item">II. Modalidade de atendimento:</p>
+        <p class="opcao">${marcador(presencial)} Presencial</p>
+        <p class="opcao">${marcador(online)} On-line</p>
+        <p class="item">III. As sessões terão duração aproximada de 50 (cinquenta) minutos, com frequência inicialmente
+        semanal, podendo ser ajustada conforme a avaliação clínica e as necessidades do paciente.</p>
+        <p class="item">IV. Conforme a evolução do acompanhamento, a frequência poderá passar a ser quinzenal e,
+        posteriormente, mensal, até o encerramento do processo terapêutico, quando indicado.</p>
+
+        <h2>Cláusula Terceira – Dos Honorários e das Formas de Pagamento</h2>
+        <p class="item">I. Valores contratados:</p>
+        <p class="opcao">${marcador(ehAvulsa)} Sessão Avulsa: R$ ${campo(avulsa, 8)}.</p>
+        <p class="opcao">${marcador(ehPacote)} Pacote Mensal de ${campo(qtdPacote, 2)} Sessões: R$ ${campo(pacote, 8)}.</p>
+        <p class="item">II. Para garantir o agendamento, será necessário o pagamento antecipado de, no mínimo, 50%
+        (cinquenta por cento) do valor contratado, com quitação do saldo conforme as condições previamente acordadas
+        entre as partes.</p>
+        <p class="item">III. Os pagamentos poderão ser realizados por Pix ou cartão de crédito, conforme combinado no
+        momento da contratação.</p>
+        <p class="item">IV. Nos pacotes mensais, o valor corresponde à contratação de um conjunto de sessões e à reserva
+        dos respectivos horários na agenda.</p>
+
+        <h2>Cláusula Quarta – Dos Cancelamentos, das Remarcações e dos Atrasos</h2>
+        <p class="item">I. O pedido de cancelamento ou remarcação deverá ser comunicado com antecedência mínima de
+        24 (vinte e quatro) horas, considerando dias úteis, em relação à data e ao horário agendados.</p>
+        <p class="item">II. Quando o pedido for realizado dentro do prazo estabelecido, poderá ser solicitado
+        reagendamento, conforme a disponibilidade de agenda da psicóloga.</p>
+        <p class="item">III. Cancelamentos comunicados fora do prazo ou ausências sem comunicação prévia poderão implicar
+        a cobrança integral da sessão.</p>
+        <p class="item">IV. Será tolerado atraso de até 30 (trinta) minutos, desde que comunicado previamente. A sessão
+        poderá ocorrer durante o tempo restante, sem redução do valor contratado.</p>
+        <p class="item">V. Na ausência de comunicação e no não comparecimento do paciente em até 15 (quinze) minutos após
+        o horário agendado, a sessão poderá ser considerada não comparecida e cobrada integralmente.</p>
+        <p class="item">VI. Em situações excepcionais que impeçam a realização da sessão por parte da psicóloga, como
+        doença ou emergência, será realizado o reagendamento em data conveniente para ambas as partes, sem cobrança
+        adicional pela sessão não realizada.</p>
+
+        <h2>Cláusula Quinta – Da Desistência, da Interrupção do Pacote e da Restituição de Valores</h2>
+        <p class="item">I. Caso o paciente decida interromper voluntariamente o acompanhamento ou desistir do pacote
+        mensal pago antecipadamente, deverá comunicar formalmente sua decisão à psicóloga.</p>
+        <p class="item">II. Para o cálculo de eventual restituição, serão descontados os valores correspondentes às
+        sessões realizadas e às sessões perdidas por cancelamento fora do prazo previsto neste contrato.</p>
+        <p class="item">III. Sobre o saldo referente às sessões não utilizadas, será aplicada retenção compensatória de
+        25% (vinte e cinco por cento), conforme as condições previamente informadas e aceitas pelo paciente, observados
+        os limites da legislação vigente.</p>
+        <p class="item">IV. Eventual saldo a restituir será devolvido no prazo de ${campo(d.prazoRestituicao, 4)} dias
+        úteis, contado a partir da confirmação do cálculo e da formalização da desistência.</p>
+
+        <h2>Cláusula Sexta – Dos Direitos e Deveres da Psicóloga</h2>
+        <p class="item">I. Prestar os serviços com responsabilidade, competência técnica e respeito às normas éticas da
+        profissão.</p>
+        <p class="item">II. Preservar o sigilo profissional, observadas as exceções éticas e legais.</p>
+        <p class="item">III. Informar ao paciente sobre os objetivos, os procedimentos e as condições do acompanhamento
+        psicológico.</p>
+        <p class="item">IV. Manter os registros psicológicos conforme as normas profissionais vigentes.</p>
+        <p class="item">V. Orientar ou encaminhar o paciente a outros serviços quando houver necessidade técnica.</p>
+        <p class="item">VI. Receber os honorários acordados pelos serviços prestados.</p>
+        <p class="item">VII. Definir os procedimentos técnicos do acompanhamento conforme sua competência profissional e
+        as necessidades clínicas do paciente.</p>
+
+        <h3>Dos Direitos e Deveres do Paciente</h3>
+        <p class="item">I. Fornecer informações relevantes para o acompanhamento psicológico.</p>
+        <p class="item">II. Comparecer às sessões nos horários agendados e respeitar as regras de cancelamento e
+        remarcação.</p>
+        <p class="item">III. Efetuar os pagamentos conforme as condições acordadas.</p>
+        <p class="item">IV. No atendimento on-line, buscar ambiente reservado, conexão adequada e condições que favoreçam
+        a privacidade.</p>
+        <p class="item">V. Receber atendimento respeitoso, ético e sem discriminação.</p>
+        <p class="item">VI. Ter suas informações protegidas pelo sigilo profissional, conforme as normas aplicáveis.</p>
+
+        <h2>Cláusula Sétima – Do Sigilo Profissional e da Proteção de Dados</h2>
+        <p class="item">I. A psicóloga compromete-se a preservar o sigilo profissional e a confidencialidade das
+        informações compartilhadas durante o acompanhamento, conforme o Código de Ética Profissional do Psicólogo e as
+        demais normas aplicáveis.</p>
+        <p class="item">II. O sigilo poderá ser relativizado nas hipóteses previstas nas normas éticas e na legislação
+        vigente, observados os critérios técnicos e os princípios de proteção ao paciente.</p>
+        <p class="item">III. Os dados pessoais e os registros psicológicos serão tratados e armazenados conforme as normas
+        profissionais e a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018), quando aplicável.</p>
+        <p class="item">IV. No atendimento on-line, ambas as partes comprometem-se a adotar medidas razoáveis para
+        preservar a privacidade e a confidencialidade das sessões.</p>
+
+        <h2>Cláusula Oitava – Disposições Gerais</h2>
+        <p class="item">I. As partes declaram ter lido e compreendido as condições estabelecidas neste contrato,
+        comprometendo-se a respeitar seus termos e as normas éticas e legais aplicáveis.</p>
+        <p class="item">II. Eventuais alterações nas condições de atendimento, nos valores ou na frequência das sessões
+        deverão ser previamente comunicadas e acordadas entre as partes.</p>
+        <p class="item">III. Este contrato não estabelece garantia de resultado específico, uma vez que a evolução do
+        processo terapêutico depende de fatores clínicos e individuais, respeitados os limites técnicos da atuação
+        profissional.</p>
+        <p class="item">IV. O presente instrumento passa a produzir efeitos a partir da data de sua assinatura.</p>
+
+        <div class="fechamento">
+        <p style="margin-top:18px">E, por estarem de acordo, as partes assinam o presente instrumento.</p>
+
+        <p class="local-data">${localEData(d.cidadeEstado, d.data)}</p>
+
+        <div class="assinaturas">
+            <div class="assinatura">
                 <div class="linha"></div>
                 ${esc(d.psiNome)}
-                <small>Psicóloga — CRP ${esc(d.psiCrp)}</small>
+                <small>Psicóloga</small>
+                <small>CRP: ${esc(d.psiCrp)}</small>
+            </div>
+            <div class="assinatura">
+                <div class="linha"></div>
+                ${d.pacNome ? esc(d.pacNome) : ""}
+                <small>Contratante</small>
             </div>
         </div>
+        </div>
+
+            </div></td></tr></tbody>
+        </table>
     </div>`;
 }
 
@@ -171,13 +223,23 @@ function montarContrato(d) {
     try { dados = JSON.parse(localStorage.getItem("contratoTemp") || "null"); } catch (e) { }
 
     if (!dados) {
-        container.innerHTML = "<h1>Nenhum contrato para imprimir. Gere o contrato pela página Documentos.</h1>";
+        container.innerHTML = "<h1 style='text-align:center;font-size:16px'>Nenhum contrato para imprimir. Gere o contrato pela página Documentos.</h1>";
         return;
     }
 
-    document.title = `Contrato — ${dados.pacNome}`;
+    document.title = dados.pacNome ? `Contrato — ${dados.pacNome}` : "Contrato de Prestação de Serviços de Psicoterapia";
     container.innerHTML = montarContrato(dados);
 
-    // espera a marca d'água carregar antes de abrir a impressão
-    setTimeout(() => window.print(), 300);
+    // espera fontes e logo carregarem antes de abrir a impressão
+    // (antes de imprimir, guarda o PDF nos documentos do paciente)
+    const imprimir = () => setTimeout(() => DocsPaciente.guardarEImprimir(dados, "contratoTemp"), 300);
+    const pronto = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    pronto.then(() => {
+        const logo = container.querySelector(".rodape img");
+        if (logo && !logo.complete) {
+            logo.onload = logo.onerror = imprimir;
+        } else {
+            imprimir();
+        }
+    });
 })();

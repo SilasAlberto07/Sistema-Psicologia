@@ -23,6 +23,11 @@ contextBridge.exposeInMainWorld('senhaBackup', {
     trocar: (senhaLogin, nova, confirmar) => ipcRenderer.invoke('backup-senha-trocar', senhaLogin, nova, confirmar)
 });
 
+// Documentos do paciente: gera o PDF da página de impressão aberta
+contextBridge.exposeInMainWorld('documentosPDF', {
+    gerar: () => ipcRenderer.invoke('documento-gerar-pdf')
+});
+
 contextBridge.exposeInMainWorld('atualizacao', {
     verificar: () => ipcRenderer.invoke('verificar-atualizacao'),
     versao: () => ipcRenderer.invoke('versao-app'),

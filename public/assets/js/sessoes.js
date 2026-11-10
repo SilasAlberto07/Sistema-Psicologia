@@ -393,6 +393,7 @@ async function renderSessoes() {
                         <span class="contador-badge total">${total} sessõ${total === 1 ? "" : "es"}</span>
                         <span class="contador-badge realizada">${realizadas} realizada${realizadas === 1 ? "" : "s"}</span>
                         <span class="contador-badge agendada">${agendadas} agendada${agendadas === 1 ? "" : "s"}</span>
+                        ${botaoDocumentosPaciente(paciente, "individual")}
                     </div>
 
                     <i class="ti ti-chevron-down seta-expandir-sessao ${aberto ? "aberta" : ""}"></i>
@@ -457,6 +458,7 @@ async function renderSessoes() {
                         <span class="contador-badge total">${total} sessõ${total === 1 ? "" : "es"}</span>
                         <span class="contador-badge realizada">${realizadas} realizada${realizadas === 1 ? "" : "s"}</span>
                         <span class="contador-badge agendada">${agendadas} agendada${agendadas === 1 ? "" : "s"}</span>
+                        ${botaoDocumentosPaciente(casal, "casal")}
                     </div>
 
                     <i class="ti ti-chevron-down seta-expandir-sessao ${aberto ? "aberta" : ""}"></i>
@@ -932,6 +934,9 @@ document.addEventListener("click", async (e) => {
 // EXPANDIR / RECOLHER CARD DO PACIENTE (mostra a tabela só quando clicado)
 // =========================
 document.addEventListener("click", (e) => {
+
+    // o botão "Documentos" fica dentro do cabeçalho, mas não abre/fecha o card
+    if (e.target.closest(".btn-docs-paciente")) return;
 
     const header = e.target.closest(".paciente-header");
     if (!header) return;

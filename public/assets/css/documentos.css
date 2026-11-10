@@ -76,3 +76,48 @@
     margin-top: 4px;
     margin-bottom: 14px;
 }
+
+/* ═══════════════════════════════════════════════
+   DOCUMENTOS DO PACIENTE — aviso de edição e contador de atestados
+═══════════════════════════════════════════════ */
+.aviso-edicao,
+.info-atestados {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.aviso-edicao {
+    background-color: #f1ecf6;
+    border: 1px solid #ddd2e8;
+    color: #4f4260;
+}
+
+.aviso-edicao button {
+    margin-left: auto;
+    border: 1px solid #cbbedb;
+    background: #ffffff;
+    color: #4f4260;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.info-atestados {
+    background-color: #eef4e8;
+    border: 1px solid #d8e6c8;
+    color: #3d5a28;
+}
+
+.info-atestados.limite {
+    background-color: #fff6e6;
+    border-color: #f0dcb0;
+    color: #8a6420;
+}

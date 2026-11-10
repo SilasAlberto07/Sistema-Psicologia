@@ -4,80 +4,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../assets/css/impressao.css">
+    <link rel="stylesheet" href="../assets/vendor/fonts/fontes.css">
     <title>Contrato de Prestação de Serviços de Psicoterapia</title>
     <style>
-        /* texto corrido do contrato */
-        .contrato p {
-            text-align: justify;
-            margin-bottom: 10px;
-            font-size: 11pt;
-            line-height: 1.55;
+        /* ═══════════════════════════════════════════════
+           CONTRATO — modelo com faixa no topo
+           e rodapé com logo, nas cores do sistema.
+           Na impressão, topo e rodapé repetem em cada página.
+        ═══════════════════════════════════════════════ */
+        :root {
+            --verde-escuro: #66784f;
+            --verde: #7a8e69;
+            --verde-titulo: #5c7a48;
+            --verde-claro: #d8e6c8;
+            --creme: #f7f4ee;
+            --borda: #eae5dc;
+            --texto: #3d3a28;
+            --texto-suave: #6a6a58;
         }
 
-        .contrato .clausula {
-            font-family: Arial, Helvetica, sans-serif;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            color: var(--texto);
+            background: #e9e9e6;
+            padding: 32px 0;
+        }
+
+        /* folha A4 na tela */
+        .folha {
+            position: relative;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: #ffffff;
+            box-shadow: 0 2px 24px rgba(0, 0, 0, 0.14);
+            overflow: hidden;
+        }
+
+        /* ---------- TOPO ---------- */
+        .topo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 26mm;
+            background: var(--verde-escuro);
+            border-radius: 0 0 9mm 9mm;
+            padding: 8mm 16mm 0;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .topo h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-weight: 600;
+            font-size: 19pt;
+            color: #ffffff;
+            letter-spacing: 0.01em;
+        }
+
+        .topo .traco {
+            width: 82mm;
+            height: 2px;
+            margin: 3mm auto 0;
+            background: var(--verde-claro);
+            border-radius: 2px;
+        }
+
+        /* ---------- RODAPÉ ---------- */
+        .rodape {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 35mm;
+            z-index: 2;
+        }
+
+        .rodape .contato {
+            position: absolute;
+            top: 2mm;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5mm;
+        }
+
+        /* logo da psicóloga em verde (versão recortada só para o contrato) */
+        .rodape .logo img {
+            display: block;
+            width: 30mm;
+            height: auto;
+        }
+
+        .rodape .contato .separador {
+            width: 1px;
+            height: 15mm;
+            background: var(--borda);
+        }
+
+        .rodape .dados {
+            font-size: 8.5pt;
+            line-height: 1.6;
+            color: var(--texto-suave);
+        }
+
+        .rodape .dados strong {
+            display: block;
+            color: var(--verde-titulo);
+            font-weight: 600;
+        }
+
+        .rodape .dados span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .rodape .dados svg {
+            width: 10px;
+            height: 10px;
+            flex-shrink: 0;
+        }
+
+        .rodape .faixa {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 8mm;
+            background: var(--verde-claro);
+            border-radius: 7mm 7mm 0 0;
+        }
+
+        /* ---------- TABELA QUE RESERVA ESPAÇO PARA TOPO E RODAPÉ ---------- */
+        table.layout {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table.layout td {
+            padding: 0;
+            vertical-align: top;
+        }
+
+        .espaco-topo {
+            height: 37mm;
+        }
+
+        .espaco-rodape {
+            height: 41mm;
+        }
+
+        .texto {
+            padding: 0 17mm;
+            font-size: 10pt;
+            line-height: 1.6;
+        }
+
+        /* ---------- TEXTO DO CONTRATO ---------- */
+        .texto h2 {
             font-size: 9.5pt;
-            font-weight: 700;
+            font-weight: 600;
+            color: var(--verde-titulo);
             text-transform: uppercase;
             letter-spacing: 0.04em;
-            margin: 22px 0 10px;
+            margin: 16px 0 8px;
             break-after: avoid;
             page-break-after: avoid;
         }
 
-        .contrato .lista-servicos {
-            margin: 0 0 10px 28px;
-            font-size: 11pt;
-            line-height: 1.55;
+        .texto h2:first-child {
+            margin-top: 0;
         }
 
-        .contrato .lista-servicos li {
-            list-style: none;
+        .texto h3 {
+            font-size: 9.5pt;
+            font-weight: 600;
+            color: var(--verde-titulo);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin: 12px 0 6px;
+            break-after: avoid;
+            page-break-after: avoid;
         }
 
-        .contrato .local-data {
-            text-align: right;
-            margin-top: 26px;
-        }
-
-        .assinaturas-contrato {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 48px;
-            margin-top: 64px;
+        .texto p {
+            text-align: justify;
+            margin-bottom: 5px;
             break-inside: avoid;
             page-break-inside: avoid;
         }
 
-        .assinaturas-contrato div {
-            text-align: center;
-            font-size: 10.5pt;
+        .texto p.item {
+            padding-left: 22px;
+            text-indent: -22px;
         }
 
-        .assinaturas-contrato .linha {
-            border-top: 1px solid #222;
+        .texto p.opcao {
+            padding-left: 22px;
+        }
+
+        /* valor preenchido pelo sistema */
+        .preenchido {
+            font-weight: 600;
+            color: #2f2c1e;
+        }
+
+        /* espaço em branco para preencher à mão */
+        .branco {
+            display: inline-block;
+            border-bottom: 1px solid #555;
+            height: 1.05em;
+            vertical-align: baseline;
+        }
+
+        .marcar {
+            font-weight: 600;
+        }
+
+        .local-data {
+            margin: 26px 0 0;
+        }
+
+        /* frase final, local/data e assinaturas ficam sempre juntos */
+        .fechamento {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .assinaturas {
+            margin-top: 10px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .assinatura {
+            width: 120mm;
+            margin: 0 auto 10px;
+            padding-top: 16mm; /* espaço para assinar acima da linha */
+            text-align: center;
+            font-size: 10pt;
+            line-height: 1.45;
+        }
+
+        .assinatura .linha {
+            border-top: 1px solid #333;
             margin-bottom: 6px;
         }
 
-        .assinaturas-contrato small {
+        .assinatura small {
             display: block;
-            color: #666;
+            color: var(--texto-suave);
             font-size: 9pt;
         }
 
-        .contrato .clausula + p,
-        .contrato p {
-            break-inside: avoid;
-            page-break-inside: avoid;
+        /* ---------- IMPRESSÃO ---------- */
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+
+            .folha {
+                width: auto;
+                min-height: 0;
+                box-shadow: none;
+                overflow: visible;
+            }
+
+            /* fixos = repetem em todas as páginas */
+            .topo,
+            .rodape {
+                position: fixed;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="info-paciente" id="conteudo-impressao"></div>
+    <div id="conteudo-impressao"></div>
 
+    <script src="../assets/js/documentos-paciente.js"></script>
     <script src="../assets/js/imprimir-contrato.js"></script>
 </body>
 

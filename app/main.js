@@ -916,6 +916,22 @@ autoUpdater.on('error', (err) => {
 ipcMain.handle('verificar-atualizacao', () => verificarAtualizacao(true));
 ipcMain.handle('versao-app', () => app.getVersion());
 
+// Documentos do paciente: transforma a página de impressão aberta em PDF
+// (o PDF fica guardado no cadastro do paciente, e a impressão continua normal)
+ipcMain.handle('documento-gerar-pdf', async (event) => {
+    if (!auth || !auth.estaAutenticado()) return null;
+    try {
+        const pdf = await event.sender.printToPDF({
+            printBackground: true,
+            preferCSSPageSize: true
+        });
+        return pdf.toString('base64');
+    } catch (err) {
+        log.error('[documentos] Falha ao gerar PDF:', err);
+        return null;
+    }
+});
+
 app.whenReady().then(async () => {
     await criarJanela();
     verificarAtualizacao(false);

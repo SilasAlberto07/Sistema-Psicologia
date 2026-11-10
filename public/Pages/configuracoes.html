@@ -162,6 +162,34 @@
                     </div>
                 </div>
 
+                <!-- DOCUMENTOS DO PACIENTE -->
+                <section class="config-card">
+                    <div class="config-card-icone">
+                        <i class="ti ti-folder"></i>
+                    </div>
+
+                    <div class="config-card-corpo">
+                        <h2>Documentos do paciente</h2>
+                        <p>Limite de atestados por paciente. Ao chegar no limite, o sistema só avisa —
+                            a Dra decide se gera mais um. Atestados cancelados não contam.</p>
+
+                        <div class="config-form">
+                            <div class="form-group">
+                                <label for="limiteAtestados">Total de atestados por paciente (máximo 15)</label>
+                                <input type="number" id="limiteAtestados" min="1" max="15" step="1">
+                            </div>
+
+                            <div id="mensagem-erro-documentos" class="config-erro"></div>
+                        </div>
+
+                        <div class="botoes">
+                            <button class="btn-salvar" id="btnSalvarConfigDocumentos">
+                                <i class="ti ti-device-floppy"></i> Salvar limite
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- SENHA -->
                 <section class="config-card">
                     <div class="config-card-icone">
@@ -291,6 +319,8 @@
     <script src="../assets/js/alert.js"></script>
     <script src="../assets/js/menu.js"></script>
     <script src="../assets/js/configuracoes.js"></script>
+    <script src="../assets/js/documentos-paciente.js"></script>
+    <script src="../assets/js/configuracoes-documentos.js"></script>
 </body>
 
 </html>
