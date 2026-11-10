@@ -407,3 +407,55 @@
     box-shadow: 0 0 0 3px rgba(138, 158, 120, 0.55);
     transition: box-shadow 0.6s ease;
 }
+
+/* =========================
+   BARRA "ADICIONAR SESSÕES"
+   ========================= */
+.barra-adicionar-sessoes {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 4px 4px;
+}
+
+.barra-adicionar-sessoes label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #5c6b52;
+}
+
+.input-qtd-adicionar {
+    width: 64px;
+    padding: 6px 8px;
+    border: 1px solid #cfd8c4;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.btn-adicionar-sessoes {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    background-color: #8a9e78;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-adicionar-sessoes:hover {
+    background-color: #74875f;
+}
+
+.btn-adicionar-sessoes:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}

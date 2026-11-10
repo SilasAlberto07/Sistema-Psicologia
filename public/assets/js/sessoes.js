@@ -151,6 +151,7 @@ function montarLinhaSessao(registro, sessao, i, origem) {
                     <option value="" ${!sessao.atendido ? "selected" : ""}>Selecionar...</option>
                     <option value="p1" ${sessao.atendido === "p1" ? "selected" : ""}>${registro.p1NomeCompleto || "Pessoa 1"}</option>
                     <option value="p2" ${sessao.atendido === "p2" ? "selected" : ""}>${registro.p2NomeCompleto || "Pessoa 2"}</option>
+                    <option value="ambos" ${sessao.atendido === "ambos" ? "selected" : ""}>${registro.nomeCasal || "Ambos"}</option>
                 </select>
             </td>
         `
@@ -228,6 +229,31 @@ function montarLinhaSessao(registro, sessao, i, origem) {
 }
 
 // =========================
+// BARRA "ADICIONAR SESSÕES" — fica no fim da tabela de cada paciente/casal.
+// Só ACRESCENTA sessões novas no final; nunca mexe nas que já existem.
+// =========================
+function montarBarraAdicionarSessoes(registro, origem) {
+    return `
+        <div class="barra-adicionar-sessoes">
+            <label>
+                Adicionar
+                <input type="number"
+                    class="input-qtd-adicionar"
+                    data-id-adicionar="${registro.id}"
+                    data-origem-adicionar="${origem}"
+                    value="1" min="1" max="50">
+                sessão(ões)
+            </label>
+            <button class="btn-adicionar-sessoes"
+                data-id="${registro.id}"
+                data-origem="${origem}">
+                <i class="ti ti-plus"></i> Adicionar sessões
+            </button>
+        </div>
+    `;
+}
+
+// =========================
 // SESSÕES - CONTROLE GERAL
 // =========================
 async function renderSessoes() {
@@ -240,7 +266,7 @@ async function renderSessoes() {
         container.innerHTML = `
             <div class="placeholder-sessoes">
                 <h3>Nenhuma sessão registrada</h3>
-                <p>Cadastre um paciente e defina a quantidade de sessões.</p>
+                <p>Cadastre um paciente e adicione as sessões aqui nesta página.</p>
             </div>
         `;
         return;
@@ -323,7 +349,7 @@ async function renderSessoes() {
 
         const texto = semResultadoBusca
             ? "Verifique se o nome digitado está correto."
-            : "Cadastre um paciente e defina a quantidade de sessões.";
+            : "Cadastre um paciente e adicione as sessões aqui nesta página.";
 
         container.innerHTML = `
             <div class="placeholder-sessoes">
@@ -391,6 +417,7 @@ async function renderSessoes() {
                             </tbody>
                         </table>
                     </div>
+                    ${montarBarraAdicionarSessoes(paciente, "individual")}
                 </div>
             </div>
         `;
@@ -455,6 +482,7 @@ async function renderSessoes() {
                             </tbody>
                         </table>
                     </div>
+                    ${montarBarraAdicionarSessoes(casal, "casal")}
                 </div>
             </div>
         `;
@@ -547,6 +575,9 @@ document.addEventListener("input", async (e) => {
     // e este (que é mais lento por checar conflito de horário) grava por último
     // a versão SEM o atendido — e o nome escolhido some ao sair da tela.
     if (e.target.classList.contains("input-atendido")) return;
+
+    // campo de quantidade da barra "Adicionar sessões" não é dado de sessão
+    if (e.target.classList.contains("input-qtd-adicionar")) return;
 
     const origem = e.target.dataset.origem === "casal" ? "casal" : "individual";
     const chave = origem === "casal" ? "casais" : "pacientes";
@@ -800,6 +831,64 @@ function rolarAtePacienteAberto(estado) {
 }
 
 // =========================
+// ADICIONAR SESSÕES — acrescenta N sessões vazias no FINAL da lista.
+// Lê a lista mais recente do storage e só usa push: as sessões que já
+// existem (datas, status, prontuários) ficam exatamente como estão.
+// =========================
+document.addEventListener("click", async (e) => {
+
+    const botao = e.target.closest(".btn-adicionar-sessoes");
+    if (!botao) return;
+
+    const id = botao.dataset.id;
+    const origem = botao.dataset.origem === "casal" ? "casal" : "individual";
+    const chave = origem === "casal" ? "casais" : "pacientes";
+
+    const barra = botao.closest(".barra-adicionar-sessoes");
+    const campoQtd = barra ? barra.querySelector(".input-qtd-adicionar") : null;
+    const quantidade = Math.floor(Number(campoQtd ? campoQtd.value : 1));
+
+    if (!Number.isFinite(quantidade) || quantidade < 1) {
+        mostrarMensagem("Informe uma quantidade de pelo menos 1 sessão.", "warning");
+        return;
+    }
+    if (quantidade > 50) {
+        mostrarMensagem("Adicione no máximo 50 sessões por vez.", "warning");
+        return;
+    }
+
+    botao.disabled = true;
+
+    try {
+        let lista = JSON.parse(await window.storage.getItem(chave)) || [];
+        const registro = lista.find(r => r.id == id);
+        if (!registro) return;
+
+        if (!Array.isArray(registro.sessoes)) registro.sessoes = [];
+
+        for (let i = 0; i < quantidade; i++) {
+            const nova = { data: "", hora: "", duracao: 50, status: "agendada" };
+            if (origem === "casal") nova.atendido = "";
+            registro.sessoes.push(nova);
+        }
+
+        await window.storage.setItem(chave, JSON.stringify(lista));
+
+        // mantém o card aberto depois de redesenhar
+        cardsAbertosSessoes.clear();
+        cardsAbertosSessoes.add(`${origem}-${id}`);
+        await renderSessoes();
+
+        mostrarMensagem(
+            quantidade === 1 ? "1 sessão adicionada!" : `${quantidade} sessões adicionadas!`,
+            "success"
+        );
+    } finally {
+        botao.disabled = false;
+    }
+});
+
+// =========================
 // EXCLUIR SESSÃO
 // =========================
 
@@ -904,4 +993,4 @@ document.addEventListener("input", (e) => {
 setInterval(async () => {
     await atualizarStatusAutomatico();
     await renderSessoes();
-}, 60000);
+}, 60000);

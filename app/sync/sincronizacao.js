@@ -105,11 +105,33 @@ function detectarGoogleDrive() {
 // ------------------------------------------------------------------
 // Serviço de sincronização
 // ------------------------------------------------------------------
-function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtualizarDados, fazerBackup }) {
+function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, senhasConhecidas, aoAtualizarDados, fazerBackup }) {
     // "senha" pode ser um texto ou uma função que devolve a senha na hora.
     // Com a função, uma senha configurada depois (em Configurações) já vale
     // sem precisar reiniciar o programa.
     const lerSenha = typeof senha === 'function' ? senha : () => senha;
+
+    // Todas as senhas que este computador conhece: a atual + as antigas
+    // (depois de trocar a senha, ainda dá para ler o arquivo do outro
+    // computador enquanto ele não foi atualizado para a senha nova).
+    const lerSenhasConhecidas = () => {
+        const lista = typeof senhasConhecidas === 'function' ? senhasConhecidas() : [lerSenha()];
+        return [...new Set((lista || []).filter(Boolean))];
+    };
+
+    // tenta abrir um arquivo cifrado com cada senha da lista
+    function decifrarComAlguma(bruto, senhas) {
+        let diferente = false;
+        for (const s of senhas) {
+            try {
+                return decifrar(bruto, s);
+            } catch (e) {
+                if (e.message !== 'SENHA_DIFERENTE') throw e;
+                diferente = true;
+            }
+        }
+        throw new Error(diferente ? 'SENHA_DIFERENTE' : 'SEM_SENHA');
+    }
 
     db.exec(`
         CREATE TABLE IF NOT EXISTS sync_meta (chave TEXT PRIMARY KEY, meta TEXT);
@@ -157,6 +179,7 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
         ultimoEnvio: config.ler('ultimo_envio'),
         ultimaRecepcao: config.ler('ultima_recepcao'),
         ultimoErro: null,
+        senhaDiferente: false, // o outro computador usa uma senha que este não conhece
         sincronizando: false,
     };
 
@@ -254,6 +277,33 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
         agendarEnvio();
     }
 
+    /**
+     * Restaura uma chave a partir de um backup, SEM apagar o que é novo
+     * (ver uniaoParaRestaurar em merge.js). Entra como uma alteração feita
+     * agora neste computador, então também vale no outro computador.
+     * Devolve quantas alterações foram feitas (0 = nada para restaurar).
+     */
+    function restaurarChave(chave, valorBackup, metaBackup) {
+        const atual = lerChave(chave);
+        const metaAtual = atual.meta || M.metaVazio();
+        if (metaBackup) relogio.observar(M.maiorCarimbo(metaBackup));
+
+        const { novo, metaBase } = M.uniaoParaRestaurar(chave, atual.valor, metaAtual, valorBackup, metaBackup);
+        const r = M.gravacaoLocal(chave, atual.valor, metaAtual, atual.valor, metaBase, novo, relogio.agora());
+        if (r.mudancas === 0) return 0;
+
+        salvarVarias([{ chave, valor: r.valor, meta: r.meta }]);
+
+        // as telas abertas leram a versão antiga — esquece, elas vão recarregar
+        leiturasPorTela.forEach((porChave) => porChave.delete(chave));
+
+        if (r.renumerados.length) {
+            log.info('[sync] Códigos repetidos corrigidos na restauração:', r.renumerados);
+        }
+        agendarEnvio();
+        return r.mudancas;
+    }
+
     // ---------------- pasta de sincronização ----------------
     function pasta() {
         return config.ler('pasta_sync');
@@ -269,11 +319,60 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
             log.info('[sync] Sincronização desativada.');
         }
         estado.ultimoErro = null;
+        estado.senhaDiferente = false;
     }
 
     function pastaSugerida() {
         const drive = detectarGoogleDrive();
         return drive ? path.join(drive, NOME_PASTA_SUGERIDA) : null;
+    }
+
+    // ---------------- conferência da senha com os outros computadores ----------------
+    /**
+     * Abre (só lê, não grava nada) os arquivos dos OUTROS computadores na
+     * pasta de sincronização e diz se alguma das senhas da lista abre.
+     *   resultado: 'sem-pasta' | 'pasta-inacessivel' | 'sem-outros' | 'confere' | 'diferente'
+     */
+    async function verificarSenhas(senhas) {
+        const p = pasta();
+        if (!p) return { resultado: 'sem-pasta' };
+        const lista = [...new Set((senhas || []).filter(Boolean))];
+
+        let arquivos;
+        try {
+            arquivos = await fs.promises.readdir(p);
+        } catch (_) {
+            return { resultado: 'pasta-inacessivel' };
+        }
+
+        let diferentes = 0;
+        for (const arq of arquivos) {
+            const m = arq.match(/^sync-([a-f0-9]+)\.psisync$/);
+            if (!m || m[1] === idDispositivo) continue;
+            let bruto;
+            try { bruto = await fs.promises.readFile(path.join(p, arq)); } catch (_) { continue; }
+            let incompleto = false;
+            for (const s of lista) {
+                try {
+                    decifrar(bruto, s);
+                    return { resultado: 'confere' };
+                } catch (e) {
+                    if (e.message !== 'SENHA_DIFERENTE') { incompleto = true; break; } // arquivo incompleto: ignora
+                }
+            }
+            if (lista.length && !incompleto) diferentes++;
+        }
+        return { resultado: diferentes > 0 ? 'diferente' : 'sem-outros' };
+    }
+
+    /** Confere UMA senha digitada com os arquivos dos outros computadores. */
+    function testarSenha(senhaDigitada) {
+        return verificarSenhas([senhaDigitada]);
+    }
+
+    /** Confere as senhas que este computador já conhece (atual + antigas). */
+    function testarSenhasConhecidas() {
+        return verificarSenhas(lerSenhasConhecidas());
     }
 
     // ---------------- envio ----------------
@@ -308,6 +407,11 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
         const senhaAtual = lerSenha();
         if (!senhaAtual) throw new Error('SEM_SENHA');
         fs.mkdirSync(p, { recursive: true });
+
+        // Nunca grava com uma senha que o outro computador não reconhece:
+        // isso faria o outro computador parar de sincronizar.
+        const conferencia = await verificarSenhas(lerSenhasConhecidas());
+        if (conferencia.resultado === 'diferente') throw new Error('SENHA_DIFERENTE');
 
         const pacote = montarPacote();
         const conteudo = cifrar(zlib.gzipSync(Buffer.from(JSON.stringify(pacote))), senhaAtual);
@@ -348,6 +452,7 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
         if (!p) return { mudou: false };
         const senhaAtual = lerSenha();
         if (!senhaAtual) throw new Error('SEM_SENHA');
+        const senhas = lerSenhasConhecidas();
 
         let arquivos;
         try {
@@ -374,7 +479,7 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
             let pacote;
             try {
                 const bruto = await fs.promises.readFile(caminho);
-                pacote = JSON.parse(zlib.gunzipSync(decifrar(bruto, senhaAtual)).toString('utf8'));
+                pacote = JSON.parse(zlib.gunzipSync(decifrarComAlguma(bruto, senhas)).toString('utf8'));
             } catch (e) {
                 if (e.message === 'SENHA_DIFERENTE') throw e;
                 log.warn(`[sync] Arquivo ${arq} ainda incompleto ou inválido, tento de novo depois:`, e.message);
@@ -439,10 +544,11 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
     function registrarErro(onde, e) {
         const mensagens = {
             SEM_SENHA: 'A senha de criptografia não está configurada neste computador.',
-            SENHA_DIFERENTE: 'O outro computador usa uma senha de criptografia diferente. Instale a mesma versão do sistema nos dois.',
+            SENHA_DIFERENTE: 'O outro computador usa uma senha do backup diferente (ela pode ter sido trocada lá). Vá em "Senha do backup" → "Trocar senha do backup" e digite a mesma senha do outro computador.',
             PASTA_INACESSIVEL: 'Não foi possível acessar a pasta de sincronização. Verifique se o Google Drive está aberto.',
         };
         estado.ultimoErro = mensagens[e.message] || `Erro na sincronização (${onde}): ${e.message}`;
+        if (e.message === 'SENHA_DIFERENTE') estado.senhaDiferente = true;
         log.error(`[sync] Erro (${onde}):`, e);
     }
 
@@ -464,7 +570,7 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
             if (!deuErro) registrarErro('envio', e);
             deuErro = true;
         }
-        if (!deuErro) estado.ultimoErro = null;
+        if (!deuErro) { estado.ultimoErro = null; estado.senhaDiferente = false; }
         estado.sincronizando = false;
         return status();
     }
@@ -476,7 +582,7 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
             if (!pasta() || estado.sincronizando) return;
             estado.sincronizando = true;
             receber()
-                .then(() => { estado.ultimoErro = null; })
+                .then(() => { estado.ultimoErro = null; estado.senhaDiferente = false; })
                 .catch((e) => registrarErro('recepção', e))
                 .finally(() => { estado.sincronizando = false; });
         }, INTERVALO_LEITURA_MS);
@@ -505,6 +611,7 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
             ultimoEnvio: estado.ultimoEnvio,
             ultimaRecepcao: estado.ultimaRecepcao,
             ultimoErro: estado.ultimoErro,
+            senhaDiferente: estado.senhaDiferente,
             sincronizando: estado.sincronizando,
             outrosComputadores: Object.values(pares).map((p) => ({
                 nome: p.nome,
@@ -519,9 +626,12 @@ function criarSincronizacao({ db, log, pastaDadosApp, versaoApp, senha, aoAtuali
         registrarLeitura,
         esquecerTela,
         gravar,
+        restaurarChave,
         definirPasta,
         pastaSugerida,
         sincronizarAgora,
+        testarSenha,
+        testarSenhasConhecidas,
         enviarAoFechar,
         iniciar,
         parar,

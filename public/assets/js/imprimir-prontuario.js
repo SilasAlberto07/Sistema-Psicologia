@@ -109,18 +109,30 @@ async function iniciarImpressaoProntuario() {
         // senão (veio de uma sessão normal): mostra tudo, incluindo a 1ª consulta compartilhada
     }
 
-    const evolucoes = evolucoesParaImprimir;
+    // aberto por uma sessão (?sessao=N): só até ela, em ordem de sessão
+    // (mesma regra da tela do prontuário — ver registros-sessao.js).
+    // O relatório de alta continua com o tratamento inteiro.
+    const ordenadas = registrosAteASessao(
+        paciente, ehCasal,
+        evolucoesParaImprimir.map((item, indiceReal) => ({ item, indiceReal })),
+        modoRelatorioAlta ? null : indiceSessaoDoEndereco(params)
+    );
+    const evolucoes = ordenadas.map(v => v.item);
 
     let sessoesHTML = "";
     let contador = 0;
 
-    evolucoes.forEach((registro) => {
+    ordenadas.forEach(({ item: registro, numero }) => {
 
         const ehConsulta = registro.tipo === "consulta" || (!registro.pessoa && !registro.tipo && ehCasal);
 
+        // número real da sessão; se não der para saber, segue a contagem
+        const numeroExibido = numero ? numero : ++contador;
+        if (numero) contador = numero;
+
         let rotuloHTML = ehConsulta
             ? `<span class="sessao-numero" style="background:#5c7a48;">📋 1ª Consulta</span>`
-            : `<span class="sessao-numero">Sessão ${String(++contador).padStart(2, "0")}</span>`;
+            : `<span class="sessao-numero">Sessão ${String(numeroExibido).padStart(2, "0")}</span>`;
 
         // no relatório de alta do casal, mostra de quem é cada sessão individual
         if (modoRelatorioAlta && ehCasal && (registro.pessoa === "p1" || registro.pessoa === "p2")) {
@@ -133,7 +145,7 @@ async function iniciarImpressaoProntuario() {
 
             <div class="sessao-cabecalho">
                 ${rotuloHTML}
-                <span class="sessao-data">${registro.data || "-"}</span>
+                <span class="sessao-data">${dataDoRegistroProntuario(paciente, ehCasal, registro).texto || "-"}</span>
             </div>
 
             <div class="campo-impresso">
@@ -242,4 +254,4 @@ iniciarImpressaoProntuario().then(() => {
         document.getElementById("btnFecharRelatorio").addEventListener("click", () => window.close());
     }
 
-});
+});

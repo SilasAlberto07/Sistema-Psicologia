@@ -205,6 +205,19 @@ function criarAutenticacao({ db, log }) {
         return { ok: true };
     }
 
+    // Confere a senha de login sem mudar nada (usado antes de trocar a
+    // senha do backup). Conta como tentativa, igual ao login.
+    async function conferirSenha(senha) {
+        if (!autenticado) return { ok: false, erro: 'Faça login novamente.' };
+        if (segundosBloqueado()) return erroBloqueio();
+        if (!(await conferir(String(senha || ''), ler(CHAVE_SENHA)))) {
+            registrarErro();
+            return segundosBloqueado() ? erroBloqueio() : { ok: false, erro: 'Senha de login incorreta.' };
+        }
+        errosSeguidos = 0;
+        return { ok: true };
+    }
+
     function sair() {
         autenticado = false;
     }
@@ -215,6 +228,7 @@ function criarAutenticacao({ db, log }) {
         entrar,
         trocarSenha,
         redefinirComResposta,
+        conferirSenha,
         sair,
         estaAutenticado: () => autenticado,
         chaveProtegida: (chave) => CHAVES_PROTEGIDAS.includes(chave),

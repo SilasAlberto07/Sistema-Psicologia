@@ -216,7 +216,31 @@ const senhaBackupEls = {
     confirmar: document.getElementById("senhaBackupConfirmar"),
     erro: document.getElementById("mensagem-erro-senha-backup"),
     btnSalvar: document.getElementById("btnSalvarSenhaBackup"),
+
+    // trocar a senha
+    blocoBotaoTrocar: document.getElementById("senhaBackupBotaoTrocar"),
+    btnMostrarTroca: document.getElementById("btnMostrarTrocaSenhaBackup"),
+    formTroca: document.getElementById("senhaBackupTrocaForm"),
+    login: document.getElementById("senhaBackupLogin"),
+    trocaNova: document.getElementById("senhaBackupTrocaNova"),
+    trocaConfirmar: document.getElementById("senhaBackupTrocaConfirmar"),
+    erroTroca: document.getElementById("mensagem-erro-troca-senha-backup"),
+    btnSalvarTroca: document.getElementById("btnSalvarTrocaSenhaBackup"),
+    btnCancelarTroca: document.getElementById("btnCancelarTrocaSenhaBackup"),
 };
+
+function mostrarFormTroca(mostrar) {
+    senhaBackupEls.formTroca.style.display = mostrar ? "" : "none";
+    senhaBackupEls.blocoBotaoTrocar.style.display = mostrar ? "none" : "";
+    senhaBackupEls.erroTroca.style.display = "none";
+    if (!mostrar) {
+        senhaBackupEls.login.value = "";
+        senhaBackupEls.trocaNova.value = "";
+        senhaBackupEls.trocaConfirmar.value = "";
+    } else {
+        senhaBackupEls.login.focus();
+    }
+}
 
 async function atualizarStatusSenhaBackup() {
     const st = window.senhaBackup ? await window.senhaBackup.status() : null;
@@ -225,16 +249,33 @@ async function atualizarStatusSenhaBackup() {
         senhaBackupEls.bolinha.className = "sync-bolinha erro";
         senhaBackupEls.texto.textContent = "Indisponível";
         senhaBackupEls.form.style.display = "none";
+        senhaBackupEls.blocoBotaoTrocar.style.display = "none";
+        senhaBackupEls.formTroca.style.display = "none";
         return;
     }
 
     if (st.configurada) {
-        senhaBackupEls.bolinha.className = "sync-bolinha ativa";
-        senhaBackupEls.texto.textContent = "Configurada neste computador";
         senhaBackupEls.form.style.display = "none";
+
+        if (st.senhaDiferenteDoOutro) {
+            senhaBackupEls.bolinha.className = "sync-bolinha erro";
+            senhaBackupEls.texto.textContent =
+                "O outro computador está usando outra senha (ela pode ter sido trocada lá). " +
+                "Clique em \"Trocar senha do backup\" e digite a mesma senha do outro computador.";
+        } else {
+            senhaBackupEls.bolinha.className = "sync-bolinha ativa";
+            senhaBackupEls.texto.textContent = "Configurada neste computador";
+        }
+
+        // não esconde o formulário de troca se a pessoa já está digitando nele
+        if (senhaBackupEls.formTroca.style.display === "none") {
+            senhaBackupEls.blocoBotaoTrocar.style.display = st.cofreDisponivel ? "" : "none";
+        }
         return;
     }
 
+    senhaBackupEls.blocoBotaoTrocar.style.display = "none";
+    senhaBackupEls.formTroca.style.display = "none";
     senhaBackupEls.bolinha.className = "sync-bolinha erro";
     senhaBackupEls.texto.textContent = st.cofreDisponivel
         ? "Não configurada: os backups estão parados até a senha ser digitada"
@@ -242,13 +283,26 @@ async function atualizarStatusSenhaBackup() {
     senhaBackupEls.form.style.display = st.cofreDisponivel ? "" : "none";
 }
 
+// Primeira vez neste computador: o sistema confere com o outro computador ANTES de salvar
 async function salvarSenhaBackup() {
     senhaBackupEls.erro.style.display = "none";
 
-    const resultado = await window.senhaBackup.definir(
-        senhaBackupEls.nova.value,
-        senhaBackupEls.confirmar.value
-    );
+    const original = senhaBackupEls.btnSalvar.innerHTML;
+    senhaBackupEls.btnSalvar.disabled = true;
+    senhaBackupEls.btnSalvar.innerHTML = '<i class="ti ti-loader-2 config-girando"></i> Conferindo...';
+
+    let resultado;
+    try {
+        resultado = await window.senhaBackup.definir(
+            senhaBackupEls.nova.value,
+            senhaBackupEls.confirmar.value
+        );
+    } catch (e) {
+        resultado = { ok: false, erro: "Não foi possível salvar a senha do backup." };
+    } finally {
+        senhaBackupEls.btnSalvar.disabled = false;
+        senhaBackupEls.btnSalvar.innerHTML = original;
+    }
 
     if (!resultado.ok) {
         senhaBackupEls.erro.textContent = resultado.erro;
@@ -260,12 +314,358 @@ async function salvarSenhaBackup() {
     senhaBackupEls.confirmar.value = "";
     await atualizarStatusSenhaBackup();
 
-    if (resultado.aviso) {
-        mostrarMensagem(`Senha salva, mas a sincronização avisou: ${resultado.aviso}`, "warning");
+    mostrarMensagem(
+        resultado.conferida
+            ? "Senha conferida: é a mesma do outro computador. Senha do backup salva!"
+            : "Senha do backup salva! (Ainda não há outro computador na sincronização para conferir.)",
+        "success"
+    );
+}
+
+// Trocar a senha (ou igualar com a senha nova do outro computador)
+async function trocarSenhaBackup() {
+    senhaBackupEls.erroTroca.style.display = "none";
+
+    const original = senhaBackupEls.btnSalvarTroca.innerHTML;
+    senhaBackupEls.btnSalvarTroca.disabled = true;
+    senhaBackupEls.btnSalvarTroca.innerHTML = '<i class="ti ti-loader-2 config-girando"></i> Conferindo...';
+
+    let resultado;
+    try {
+        resultado = await window.senhaBackup.trocar(
+            senhaBackupEls.login.value,
+            senhaBackupEls.trocaNova.value,
+            senhaBackupEls.trocaConfirmar.value
+        );
+    } catch (e) {
+        resultado = { ok: false, erro: "Não foi possível trocar a senha do backup." };
+    } finally {
+        senhaBackupEls.btnSalvarTroca.disabled = false;
+        senhaBackupEls.btnSalvarTroca.innerHTML = original;
+    }
+
+    if (!resultado.ok) {
+        senhaBackupEls.erroTroca.textContent = resultado.erro;
+        senhaBackupEls.erroTroca.style.display = "block";
+        return;
+    }
+
+    mostrarFormTroca(false);
+    await atualizarStatusSenhaBackup();
+    if (typeof atualizarStatusBackup === "function") atualizarStatusBackup();
+
+    if (resultado.modo === "igualar") {
+        mostrarMensagem(
+            "Senha atualizada! Agora ela é a mesma do outro computador e a sincronização voltou a funcionar.",
+            "success"
+        );
+    } else if (resultado.temOutroComputador) {
+        Swal.fire({
+            icon: "success",
+            title: "Senha do backup trocada!",
+            html:
+                "<p><strong>Agora faça o mesmo no outro computador:</strong> abra Configurações → " +
+                "Senha do backup → <em>Trocar senha do backup</em> e digite esta mesma senha nova.</p>" +
+                "<p style='margin-top:10px'>Até lá, a sincronização entre os dois fica pausada. " +
+                "Nenhum dado é perdido: tudo é enviado assim que o outro computador for atualizado.</p>",
+            confirmButtonText: "Entendi",
+        });
     } else {
-        mostrarMensagem("Senha do backup salva!", "success");
+        mostrarMensagem("Senha do backup trocada! Os backups antigos continuam podendo ser restaurados.", "success");
     }
 }
 
 senhaBackupEls.btnSalvar.addEventListener("click", salvarSenhaBackup);
+senhaBackupEls.btnMostrarTroca.addEventListener("click", () => mostrarFormTroca(true));
+senhaBackupEls.btnCancelarTroca.addEventListener("click", () => mostrarFormTroca(false));
+senhaBackupEls.btnSalvarTroca.addEventListener("click", trocarSenhaBackup);
+[senhaBackupEls.login, senhaBackupEls.trocaNova, senhaBackupEls.trocaConfirmar].forEach((campo) => {
+    campo.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") trocarSenhaBackup();
+    });
+});
 atualizarStatusSenhaBackup();
+
+
+// ================================
+// CONFIGURAÇÕES — Backup e restauração
+// ================================
+// Quem faz o backup e a restauração é o processo principal (main.js).
+// Restaurar NUNCA apaga dados: o que está no backup volta, o que foi
+// cadastrado depois continua, e antes de tudo é feita uma cópia de segurança.
+const backupEls = {
+    bolinha: document.getElementById("backupBolinha"),
+    texto: document.getElementById("backupStatusTexto"),
+    btnAgora: document.getElementById("btnBackupAgora"),
+    btnRestaurar: document.getElementById("btnAbrirRestaurar"),
+    btnPasta: document.getElementById("btnAbrirPastaBackup"),
+    janela: document.getElementById("janelaRestaurar"),
+    lista: document.getElementById("listaBackups"),
+    btnFechar: document.getElementById("btnFecharRestaurar"),
+    btnArquivo: document.getElementById("btnEscolherArquivoBackup"),
+};
+
+function escaparTexto(texto) {
+    return String(texto ?? "")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function dataBackupPorExtenso(iso) {
+    const d = new Date(iso);
+    const hoje = new Date();
+    const ontem = new Date(); ontem.setDate(hoje.getDate() - 1);
+    const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    if (d.toDateString() === hoje.toDateString()) return `Hoje às ${hora}`;
+    if (d.toDateString() === ontem.toDateString()) return `Ontem às ${hora}`;
+    return `${d.toLocaleDateString("pt-BR")} às ${hora}`;
+}
+
+function tamanhoLegivel(bytes) {
+    if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`;
+}
+
+let backupsConhecidos = [];
+
+async function atualizarStatusBackup() {
+    if (!window.backup) {
+        backupEls.bolinha.className = "sync-bolinha erro";
+        backupEls.texto.textContent = "Indisponível neste computador";
+        [backupEls.btnAgora, backupEls.btnRestaurar, backupEls.btnPasta].forEach(b => b.disabled = true);
+        return;
+    }
+
+    const info = await window.backup.listar();
+    if (!info) return;
+
+    backupsConhecidos = info.backups;
+    const automaticos = info.backups.filter(b => b.tipo === "automatico");
+
+    if (!info.senhaConfigurada) {
+        backupEls.bolinha.className = "sync-bolinha erro";
+        backupEls.texto.textContent = "Backups parados: configure a senha do backup abaixo";
+    } else if (!info.backups.length) {
+        backupEls.bolinha.className = "sync-bolinha erro";
+        backupEls.texto.textContent = "Nenhum backup encontrado ainda";
+    } else {
+        const ultimo = info.backups[0];
+        backupEls.bolinha.className = "sync-bolinha ativa";
+        backupEls.texto.textContent =
+            `Último backup: ${dataBackupPorExtenso(ultimo.data).toLowerCase()} · ${automaticos.length} guardado(s)`;
+    }
+}
+
+function montarListaBackups() {
+    if (!backupsConhecidos.length) {
+        backupEls.lista.innerHTML = `
+            <div class="restaurar-vazio">
+                Nenhum backup na pasta deste computador.<br>
+                Se o backup está em outro lugar (Google Drive, pendrive...), use o botão abaixo.
+            </div>`;
+        return;
+    }
+
+    backupEls.lista.innerHTML = backupsConhecidos.map(b => `
+        <div class="restaurar-item">
+            <div class="restaurar-item-info">
+                <div class="restaurar-item-data">
+                    ${escaparTexto(dataBackupPorExtenso(b.data))}
+                    ${b.tipo === "antes-de-restaurar"
+                        ? '<span class="restaurar-selo copia">Cópia de antes de restaurar</span>'
+                        : '<span class="restaurar-selo">Automático</span>'}
+                </div>
+                <div class="restaurar-item-detalhe">${tamanhoLegivel(b.tamanho)}</div>
+            </div>
+            <button class="btn-salvar btn-restaurar-este" data-arquivo="${escaparTexto(b.nome)}">
+                <i class="ti ti-restore"></i> Restaurar
+            </button>
+        </div>
+    `).join("");
+}
+
+function abrirJanelaRestaurar() {
+    montarListaBackups();
+    backupEls.janela.classList.remove("oculto");
+}
+
+function fecharJanelaRestaurar() {
+    backupEls.janela.classList.add("oculto");
+}
+
+async function pedirSenhaDoArquivo(mensagemErro) {
+    const r = await Swal.fire({
+        icon: "question",
+        title: "Senha do backup",
+        html: (mensagemErro ? `<p style="color:#ba3c3c">${escaparTexto(mensagemErro)}</p>` : "") +
+            "<p>Esse backup foi feito com uma senha diferente da configurada agora. " +
+            "Digite a senha que estava em uso quando ele foi feito.</p>",
+        input: "password",
+        inputAttributes: { autocomplete: "off" },
+        showCancelButton: true,
+        confirmButtonText: "Abrir backup",
+        cancelButtonText: "Cancelar",
+        inputValidator: (v) => (!v ? "Digite a senha." : undefined),
+    });
+    return r.isConfirmed ? r.value : null;
+}
+
+// =========================
+// SENHA DO BACKUP antes de ações sensíveis (restaurar / abrir a pasta)
+// A tela só pergunta; quem confere de verdade é o processo principal.
+// Devolve a senha digitada (já conferida) ou null se cancelou.
+// =========================
+async function pedirSenhaParaBackup({ titulo, html, textoBotao, icone = "warning" }) {
+    const r = await Swal.fire({
+        icon: icone,
+        title: titulo,
+        html: html +
+            "<p style='margin-top:14px'><strong>Digite a senha do backup para continuar:</strong></p>",
+        input: "password",
+        inputPlaceholder: "Senha do backup",
+        inputAttributes: { autocomplete: "off" },
+        showCancelButton: true,
+        confirmButtonText: textoBotao,
+        cancelButtonText: "Cancelar",
+        showLoaderOnConfirm: true,
+        allowOutsideClick: () => !Swal.isLoading(),
+        preConfirm: async (senha) => {
+            if (!senha) {
+                Swal.showValidationMessage("Digite a senha do backup.");
+                return false;
+            }
+            let r;
+            try {
+                r = await window.backup.conferirSenha(senha);
+            } catch (e) {
+                r = { ok: false, erro: "Não foi possível conferir a senha." };
+            }
+            if (!r || !r.ok) {
+                Swal.showValidationMessage((r && r.erro) || "Senha do backup incorreta.");
+                return false;
+            }
+            return senha;
+        },
+    });
+    return r.isConfirmed ? r.value : null;
+}
+
+async function restaurarBackup(arquivo, descricao) {
+    const senhaConfirmacao = await pedirSenhaParaBackup({
+        titulo: "Restaurar este backup?",
+        html:
+            `<p>Os dados de <strong>${escaparTexto(descricao)}</strong> voltarão para o sistema.</p>` +
+            "<p style='margin-top:10px'>Nada será apagado: o que foi cadastrado depois desse backup continua no sistema. " +
+            "Se o mesmo dado foi alterado depois, ele volta a ficar como estava no backup.</p>" +
+            "<p style='margin-top:10px'>Antes de começar, o sistema guarda uma cópia dos dados de agora.</p>",
+        textoBotao: "Sim, restaurar",
+    });
+    if (!senhaConfirmacao) return;
+
+    let senhaDoArquivo;
+    for (;;) {
+        // sem Swal.showLoading(): ele deixa a próxima janela sem o botão OK
+        Swal.fire({
+            title: "Restaurando...",
+            html: '<i class="ti ti-loader-2 config-girando" style="font-size:34px;color:#7a8e69"></i>' +
+                "<p style='margin-top:12px'>Guardando uma cópia dos dados atuais e trazendo o backup de volta. " +
+                "Não feche o programa.</p>",
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+        });
+
+        let resultado;
+        try {
+            resultado = await window.backup.restaurar(arquivo, senhaDoArquivo, senhaConfirmacao);
+        } catch (e) {
+            resultado = { ok: false, erro: "Não foi possível restaurar o backup." };
+        }
+
+        if (resultado.precisaSenha) {
+            senhaDoArquivo = await pedirSenhaDoArquivo(resultado.erro);
+            if (!senhaDoArquivo) return;
+            continue;
+        }
+
+        if (!resultado.ok) {
+            mostrarMensagem(resultado.erro, "error");
+            await atualizarStatusBackup();
+            return;
+        }
+
+        fecharJanelaRestaurar();
+        await atualizarStatusBackup();
+
+        const texto = resultado.alteracoes > 0
+            ? `Backup de ${dataBackupPorExtenso(resultado.backup.data).toLowerCase()} restaurado. ` +
+              "Uma cópia dos dados de antes da restauração foi guardada na pasta de backups."
+            : "Nada precisou ser restaurado: os dados de agora já têm tudo o que está nesse backup.";
+
+        mostrarMensagem(texto, "success", () => {
+            if (resultado.alteracoes > 0) window.location.href = "../index.html";
+        });
+        return;
+    }
+}
+
+if (window.backup) {
+    backupEls.btnAgora.addEventListener("click", async () => {
+        const original = backupEls.btnAgora.innerHTML;
+        backupEls.btnAgora.disabled = true;
+        backupEls.btnAgora.innerHTML = '<i class="ti ti-loader-2"></i> Fazendo backup...';
+        try {
+            const r = await window.backup.fazerAgora();
+            if (r.ok) mostrarMensagem("Backup feito com sucesso!", "success");
+            else mostrarMensagem(r.erro, "error");
+        } catch (e) {
+            mostrarMensagem("Não foi possível fazer o backup.", "error");
+        } finally {
+            backupEls.btnAgora.disabled = false;
+            backupEls.btnAgora.innerHTML = original;
+            atualizarStatusBackup();
+        }
+    });
+
+    backupEls.btnRestaurar.addEventListener("click", async () => {
+        await atualizarStatusBackup();
+        abrirJanelaRestaurar();
+    });
+
+    backupEls.btnPasta.addEventListener("click", async () => {
+        const senha = await pedirSenhaParaBackup({
+            titulo: "Abrir a pasta de backups",
+            html: "<p>Os arquivos da pasta de backups guardam todos os dados do sistema.</p>",
+            textoBotao: "Abrir pasta",
+            icone: "question",
+        });
+        if (!senha) return;
+
+        let r;
+        try {
+            r = await window.backup.abrirPasta(senha);
+        } catch (e) {
+            r = { ok: false, erro: "Não foi possível abrir a pasta de backups." };
+        }
+        if (r && r.ok === false) mostrarMensagem(r.erro, "error");
+    });
+    backupEls.btnFechar.addEventListener("click", fecharJanelaRestaurar);
+    backupEls.janela.addEventListener("click", (e) => {
+        if (e.target === backupEls.janela) fecharJanelaRestaurar();
+    });
+
+    backupEls.lista.addEventListener("click", (e) => {
+        const botao = e.target.closest(".btn-restaurar-este");
+        if (!botao) return;
+        const b = backupsConhecidos.find(x => x.nome === botao.dataset.arquivo);
+        if (b) restaurarBackup(b.nome, dataBackupPorExtenso(b.data).toLowerCase());
+    });
+
+    backupEls.btnArquivo.addEventListener("click", async () => {
+        const escolhido = await window.backup.escolherArquivo();
+        if (!escolhido) return;
+        restaurarBackup(escolhido.caminho, `${dataBackupPorExtenso(escolhido.data).toLowerCase()} (${escolhido.nome})`);
+    });
+}
+
+atualizarStatusBackup();

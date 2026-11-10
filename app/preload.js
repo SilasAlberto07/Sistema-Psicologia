@@ -19,7 +19,8 @@ contextBridge.exposeInMainWorld('auth', {
 // Senha que criptografa backups e sincronização (fica no cofre do sistema)
 contextBridge.exposeInMainWorld('senhaBackup', {
     status: () => ipcRenderer.invoke('backup-senha-status'),
-    definir: (senha, confirmar) => ipcRenderer.invoke('backup-senha-definir', senha, confirmar)
+    definir: (senha, confirmar) => ipcRenderer.invoke('backup-senha-definir', senha, confirmar),
+    trocar: (senhaLogin, nova, confirmar) => ipcRenderer.invoke('backup-senha-trocar', senhaLogin, nova, confirmar)
 });
 
 contextBridge.exposeInMainWorld('atualizacao', {
@@ -38,4 +39,15 @@ contextBridge.exposeInMainWorld('sincronizacao', {
     aoAtualizarDados: (callback) => {
         ipcRenderer.on('sync-dados-atualizados', (event, info) => callback(info));
     }
+});
+
+// Backup e restauração (tela de Configurações)
+contextBridge.exposeInMainWorld('backup', {
+    listar: () => ipcRenderer.invoke('backup-listar'),
+    fazerAgora: () => ipcRenderer.invoke('backup-fazer-agora'),
+    conferirSenha: (senha) => ipcRenderer.invoke('backup-conferir-senha', senha),
+    abrirPasta: (senha) => ipcRenderer.invoke('backup-abrir-pasta', senha),
+    escolherArquivo: () => ipcRenderer.invoke('backup-escolher-arquivo'),
+    restaurar: (arquivo, senhaDoArquivo, senhaConfirmacao) =>
+        ipcRenderer.invoke('backup-restaurar', arquivo, senhaDoArquivo, senhaConfirmacao)
 });

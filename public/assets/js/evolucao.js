@@ -50,6 +50,20 @@ function dataPadraoSessao() {
     return dataDaLinhaSessoes() || agoraParaInputDatetime();
 }
 
+// ================= A QUAL SESSÃO CADA REGISTRO PERTENCE =================
+// A regra fica em registros-sessao.js (a mesma usada na impressão).
+
+// índice (0, 1, 2...) da sessão aberta agora; null = aberto pela 1ª Consulta ou fora da tela de Sessões
+function indiceSessaoAberta() {
+    return indiceSessaoDoEndereco(params);
+}
+
+function sessaoAberta() {
+    const i = indiceSessaoAberta();
+    if (i === null || !registro || !Array.isArray(registro.sessoes)) return null;
+    return registro.sessoes[i] || null;
+}
+
 // converte o valor do input datetime-local para o formato de exibição pt-BR
 function formatarDataSessaoBR(valorInput) {
     if (!valorInput) return "";
@@ -77,6 +91,12 @@ let anexosAtuais = [];    // documentos/testes anexados à sessão que está sen
 let modoConsultaIndividual = false;
 
 let draftKey = `draft_evolucao_${idPaciente}`;
+let draftKeyAntigo = null;
+
+function apagarRascunho() {
+    localStorage.removeItem(draftKey);
+    if (draftKeyAntigo) localStorage.removeItem(draftKeyAntigo);
+}
 
 // grava de volta no storage certo (pacientes ou casais), dependendo de quem é o registro
 async function salvarRegistro() {
@@ -134,8 +154,12 @@ async function iniciarEvolucao() {
     }
 
     // rascunho continua no localStorage — é dado temporário/descartável,
-    // não precisa de backup nem entra no SQLite
-    const draft = JSON.parse(localStorage.getItem(draftKey) || "null");
+    // não precisa de backup nem entra no SQLite.
+    // Cada sessão tem o seu rascunho; um rascunho antigo (de antes dessa
+    // separação) ainda é aproveitado, para não perder o que foi digitado.
+    draftKeyAntigo = draftKey;
+    draftKey = `${draftKey}_${indiceSessaoAberta() === null ? (tipoParam === "consulta" ? "consulta" : "geral") : "s" + indiceSessaoAberta()}`;
+    const draft = JSON.parse(localStorage.getItem(draftKey) || localStorage.getItem(draftKeyAntigo) || "null");
     if (draft) {
         textoEvolucao.value = draft.texto || "";
         planoAcao.value = draft.plano || "";
@@ -167,7 +191,7 @@ dataSessao.addEventListener("input", salvarRascunho);
 // retorna só as evoluções que pertencem à pessoa atual (quando for sessão
 // individual de casal), mas preserva o índice REAL de registro.evolucoes,
 // necessário para editar/excluir o item certo.
-function evolucoesVisiveis() {
+function evolucoesDaPessoa() {
     return registro.evolucoes
         .map((item, indiceReal) => ({ item, indiceReal }))
         .filter(({ item }) => {
@@ -189,9 +213,14 @@ function evolucoesVisiveis() {
                 return item.tipo === "consulta";
             }
 
-            // aberto por qualquer sessão normal: mostra tudo (sessões + a 1ª consulta compartilhada)
+            // aberto por uma sessão normal: filtrado logo abaixo (só até essa sessão)
             return true;
         });
+}
+
+// os registros da tela: só até a sessão aberta, em ordem de sessão
+function evolucoesVisiveis() {
+    return registrosAteASessao(registro, ehCasal, evolucoesDaPessoa(), indiceSessaoAberta());
 }
 
 function renderHistorico() {
@@ -206,19 +235,23 @@ function renderHistorico() {
 
     let contador = 0; // conta só as sessões normais — a 1ª Consulta não entra nessa numeração
 
-    visiveis.forEach(({ item, indiceReal }, posicao) => {
+    visiveis.forEach(({ item, indiceReal, numero }, posicao) => {
         const aberta = posicao === visiveis.length - 1 ? "open" : "";
         const ehConsulta = item.tipo === "consulta" || (!item.pessoa && !item.tipo && ehCasal);
 
+        // número da sessão a que o registro pertence; se não der para saber, segue a contagem
+        const numeroExibido = numero ? numero : ++contador;
+        if (numero) contador = numero;
+
         const rotuloHTML = ehConsulta
             ? `<span style="background:#eaf0e3;color:#5c7a48;padding:3px 12px;border-radius:20px;font-weight:600;">📋 1ª Consulta</span>`
-            : `<span>Sessão ${String(++contador).padStart(2, "0")}</span>`;
+            : `<span>Sessão ${String(numeroExibido).padStart(2, "0")}</span>`;
 
         historico.innerHTML += `
             <details class="card-evolucao" ${aberta}>
                 <summary>
                     ${rotuloHTML}
-                    <small>${item.data}</small>
+                    <small>${dataDoRegistroProntuario(registro, ehCasal, item).texto}</small>
                 </summary>
                 <div class="conteudo-evolucao">
                     <p><strong>Relato da Sessão:</strong> ${item.relato}</p>
@@ -279,6 +312,14 @@ btnSalvar.addEventListener("click", async () => {
         registro.evolucoes[indice].relato = relato;
         registro.evolucoes[indice].texto = conteudo;
         registro.evolucoes[indice].plano = plano;
+        // a data segue a sessão na tela de Sessões; só fica "manual" se foi trocada aqui
+        const dataDaSessaoDele = dataInputDaAgenda(
+            localizarSessaoDoRegistro(registro, ehCasal, registro.evolucoes[indice]).agenda);
+        if (dataDaSessaoDele && dataSessaoValor !== dataDaSessaoDele) {
+            registro.evolucoes[indice].dataManual = true;
+        } else {
+            delete registro.evolucoes[indice].dataManual;
+        }
         registro.evolucoes[indice].dataSessao = dataSessaoValor;
         registro.evolucoes[indice].data = formatarDataSessaoBR(dataSessaoValor);
         registro.evolucoes[indice].anexos = anexosAtuais;
@@ -294,7 +335,7 @@ btnSalvar.addEventListener("click", async () => {
         dataSessao.value = dataPadraoSessao();
         anexosAtuais = [];
         renderAnexosFormulario();
-        localStorage.removeItem(draftKey);
+        apagarRascunho();
 
         // atualiza a lista
         renderHistorico();
@@ -338,8 +379,21 @@ btnSalvar.addEventListener("click", async () => {
             novoRegistro.anexos = anexosAtuais;
         }
 
+        // data trocada à mão aqui (diferente da marcada na tela de Sessões)?
+        const dataDaLinha = dataDaLinhaSessoes();
+        if (dataDaLinha && dataSessaoValor !== dataDaLinha) {
+            novoRegistro.dataManual = true;
+        }
+
         if (ehCasal && pessoaAtual) {
             novoRegistro.pessoa = pessoaAtual;
+        }
+
+        // guarda de qual sessão esse registro é (para não aparecer nas sessões anteriores)
+        if (indiceSessaoAberta() !== null && tipoParam !== "consulta") {
+            novoRegistro.sessaoIndice = indiceSessaoAberta();
+            const sessao = sessaoAberta();
+            if (sessao && sessao._sid) novoRegistro.sessaoSid = sessao._sid;
         }
 
         // reconhece automaticamente que é a 1ª Consulta quando o botão
@@ -351,7 +405,7 @@ btnSalvar.addEventListener("click", async () => {
         registro.evolucoes.push(novoRegistro);
 
         await salvarRegistro();
-        localStorage.removeItem(draftKey);
+        apagarRascunho();
 
         relatoSessao.value = "";
         textoEvolucao.value = "";
@@ -409,8 +463,9 @@ historico.addEventListener("click", (e) => {
         relatoSessao.value = item.relato || "";
         textoEvolucao.value = item.texto || "";
         planoAcao.value = item.plano || "";
-        // registros antigos não têm "dataSessao" salvo (só o texto já formatado) — nesse caso mantém a data/hora atual
-        dataSessao.value = item.dataSessao || dataPadraoSessao();
+        // data da sessão dele na tela de Sessões (ou a que foi trocada à mão;
+        // registros antigos sem sessão conhecida mantêm a data que já tinham)
+        dataSessao.value = dataDoRegistroProntuario(registro, ehCasal, item).input || dataPadraoSessao();
         // carrega os anexos desse registro no campo (cópia da lista, mesmos itens)
         anexosAtuais = Array.isArray(item.anexos) ? item.anexos.slice() : [];
         renderAnexosFormulario();
@@ -443,6 +498,11 @@ function contextoQuery() {
 
     if (modoConsultaIndividual) {
         query += `&tipo=consulta`;
+    }
+
+    // aberto por uma sessão: abrir/imprimir mostram só até ela
+    if (indiceSessaoAberta() !== null) {
+        query += `&sessao=${indiceSessaoAberta()}`;
     }
 
     return query;
@@ -882,4 +942,4 @@ document.getElementById("btnCopiarPromptIA").addEventListener("click", async () 
         document.body.removeChild(temporario);
         mostrarMensagem("Prompt copiado! Agora é só colar no chat da IA.", "success");
     }
-});
+});

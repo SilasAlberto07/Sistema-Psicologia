@@ -8,6 +8,8 @@
     "dist": "electron-builder --win --publish never",
     "dist:mac": "electron-builder --mac",
     "release": "npm version patch && git push origin main --follow-tags",
+    "release:minor": "npm version minor && git push origin main --follow-tags",
+    "release:major": "npm version major && git push origin main --follow-tags",
     "postinstall": "electron-builder install-app-deps",
     "rebuild": "electron-rebuild -f -w better-sqlite3"
   },

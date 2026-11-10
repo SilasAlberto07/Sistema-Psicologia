@@ -256,6 +256,17 @@ body {
     text-align: center;
 }
 
+/* Crédito do desenvolvedor (discreto) */
+.credito-dev {
+    margin-top: 10px;
+    font-size: 10px;
+    color: #9a9a88;
+    opacity: 0.6;
+    letter-spacing: 0.3px;
+    text-align: center;
+    user-select: none;
+}
+
 
 .copyright {
     display: flex;

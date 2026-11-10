@@ -19,10 +19,14 @@
  */
 
 const fs = require('fs');
+const crypto = require('crypto');
 const path = require('path');
 
 function criarSenhaBackup({ app, safeStorage, log }) {
     const arquivo = path.join(app.getPath('userData'), 'chave-backup.bin');
+    // senhas usadas antes de uma troca (para ainda abrir backups antigos)
+    const arquivoAntigas = path.join(app.getPath('userData'), 'chave-backup-antigas.bin');
+    const MAX_ANTIGAS = 20;
     let emMemoria = null; // evita abrir o cofre a cada backup
 
     function cofreDisponivel() {
@@ -74,6 +78,54 @@ function criarSenhaBackup({ app, safeStorage, log }) {
         return null;
     }
 
+    function lerAntigas() {
+        if (!fs.existsSync(arquivoAntigas) || !cofreDisponivel()) return [];
+        try {
+            const lista = JSON.parse(safeStorage.decryptString(fs.readFileSync(arquivoAntigas)));
+            return Array.isArray(lista) ? lista.filter((s) => typeof s === 'string' && s) : [];
+        } catch (err) {
+            log.error('[senha-backup] Não foi possível abrir as senhas antigas:', err);
+            return [];
+        }
+    }
+
+    function gravarAntigas(lista) {
+        fs.writeFileSync(arquivoAntigas, safeStorage.encryptString(JSON.stringify(lista)));
+    }
+
+    /** Senha atual + senhas antigas (sem repetir), nessa ordem. */
+    function todas() {
+        return [...new Set([obter(), ...lerAntigas()].filter(Boolean))];
+    }
+
+    /**
+     * Troca a senha do backup. Quem chama (main.js) já conferiu a senha de
+     * login e se a senha nova bate com o outro computador. A senha antiga
+     * NÃO é perdida: vai para a lista de antigas, para os backups feitos
+     * antes da troca continuarem podendo ser restaurados.
+     */
+    function trocar(nova) {
+        if (typeof nova !== 'string' || !nova) return { ok: false, erro: 'Digite a nova senha do backup.' };
+        if (!cofreDisponivel()) {
+            return { ok: false, erro: 'O cofre de senhas do sistema não está disponível neste computador.' };
+        }
+        const atual = obter();
+        try {
+            // 1º guarda a antiga; só depois grava a nova (se algo falhar no meio, nada se perde)
+            if (atual && atual !== nova) {
+                const antigas = [atual, ...lerAntigas().filter((s) => s !== atual && s !== nova)];
+                gravarAntigas(antigas.slice(0, MAX_ANTIGAS));
+            }
+            gravarNoCofre(nova);
+        } catch (err) {
+            log.error('[senha-backup] Falha ao trocar a senha do backup:', err);
+            return { ok: false, erro: 'Não foi possível gravar a nova senha. Nada foi alterado.' };
+        }
+        emMemoria = nova;
+        log.info('[senha-backup] Senha do backup trocada pela tela de Configurações.');
+        return { ok: true };
+    }
+
     function status() {
         return {
             configurada: !!obter(),
@@ -112,7 +164,50 @@ function criarSenhaBackup({ app, safeStorage, log }) {
         log.warn('[senha-backup] Senha digitada foi desfeita (não bate com o outro computador).');
     }
 
-    return { obter, status, definir, desfazer };
+    // ---------- conferência antes de restaurar / abrir a pasta ----------
+    // Evita acidente: restaurar ou mexer nos backups só com a senha do backup.
+    const MAX_TENTATIVAS = 5;         // erros seguidos antes de bloquear
+    const ESPERA_BLOQUEIO_MS = 30000; // 30 segundos de espera depois disso
+    let errosSeguidos = 0;
+    let bloqueadoAte = 0;
+
+    function segundosBloqueado() {
+        const restante = bloqueadoAte - Date.now();
+        return restante > 0 ? Math.ceil(restante / 1000) : 0;
+    }
+
+    /**
+     * Confere a senha digitada com a senha do backup guardada no cofre.
+     * Devolve { ok: true } ou { ok: false, erro }.
+     */
+    function conferir(digitada) {
+        const espera = segundosBloqueado();
+        if (espera) return { ok: false, erro: `Muitas tentativas. Aguarde ${espera} segundos.` };
+
+        const salva = obter();
+        if (!salva) {
+            return { ok: false, erro: 'Configure a senha do backup (nesta tela, em "Senha do backup") primeiro.' };
+        }
+
+        // compara pelo hash: mesmo tamanho e "tempo constante"
+        const a = crypto.createHash('sha256').update(String(digitada || ''), 'utf8').digest();
+        const b = crypto.createHash('sha256').update(salva, 'utf8').digest();
+        if (crypto.timingSafeEqual(a, b)) {
+            errosSeguidos = 0;
+            return { ok: true };
+        }
+
+        errosSeguidos += 1;
+        if (errosSeguidos >= MAX_TENTATIVAS) {
+            errosSeguidos = 0;
+            bloqueadoAte = Date.now() + ESPERA_BLOQUEIO_MS;
+            log.warn('[senha-backup] Muitas tentativas erradas na senha do backup, bloqueado por 30s.');
+            return { ok: false, erro: 'Senha incorreta. Muitas tentativas: aguarde 30 segundos.' };
+        }
+        return { ok: false, erro: 'Senha do backup incorreta.' };
+    }
+
+    return { obter, todas, status, definir, trocar, desfazer, conferir };
 }
 
 module.exports = { criarSenhaBackup };

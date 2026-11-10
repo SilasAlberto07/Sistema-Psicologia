@@ -131,12 +131,9 @@ function renderizarTabela() {
                 </td>
                 <td name="dataCadastro">${registro.dataCadastro ?? "-"}</td>
                 <td>
-                    <input type="number"
-                    class="input-sessoes"
-                    data-index="${indice}"
-                    data-tipo="${tipo}"
-                    value="${Array.isArray(registro.sessoes) ? registro.sessoes.length : registro.sessoes ?? 0}"
-                    min="0">
+                    <span class="qtd-sessoes" title="Para adicionar sessões, use a página Sessões">
+                        ${Array.isArray(registro.sessoes) ? registro.sessoes.length : 0}
+                    </span>
                 </td>
                 <td>
                     <select class="input-consulta" data-index="${indice}" data-tipo="${tipo}">
@@ -352,47 +349,11 @@ document.addEventListener("click", function (event) {
 });
 
 // ===============================
-// SESSÕES — grava no storage certo (pacientes ou casais)
+// SESSÕES — aqui só mostra a quantidade (somente leitura).
+// Antes, apagar o número neste campo zerava e apagava todas as sessões já
+// registradas. Agora as sessões são adicionadas na página "Sessões",
+// botão "Adicionar sessões", que só acrescenta e nunca apaga as existentes.
 // ===============================
-document.addEventListener("input", async (e) => {
-
-    if (e.target.classList.contains("input-sessoes")) {
-
-        const index = e.target.dataset.index;
-        const tipo = e.target.dataset.tipo;
-        const novoValor = Number(e.target.value);
-
-        const chave = tipo === "casal" ? "casais" : "pacientes";
-        let lista = JSON.parse(await window.storage.getItem(chave)) || [];
-
-        const registro = lista[index];
-
-        if (!Array.isArray(registro.sessoes)) {
-            registro.sessoes = Array.from({ length: novoValor }, () => ({
-                data: "", hora: "", status: "agendada"
-            }));
-        } else {
-            const diff = novoValor - registro.sessoes.length;
-            if (diff > 0) {
-                for (let i = 0; i < diff; i++) {
-                    registro.sessoes.push({ data: "", hora: "", status: "agendada" });
-                }
-            }
-            if (diff < 0) {
-                registro.sessoes.splice(novoValor);
-            }
-        }
-
-        // atualiza também o array local para não perder a alteração ao reordenar
-        if (tipo === "casal") {
-            casais = lista;
-        } else {
-            pacientes = lista;
-        }
-
-        await window.storage.setItem(chave, JSON.stringify(lista));
-    }
-});
 
 // ===============================
 // TIPO DE CONSULTA — grava no storage certo (pacientes ou casais)

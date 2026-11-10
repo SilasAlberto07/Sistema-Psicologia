@@ -482,6 +482,126 @@ function contarDiferencas(raiz, base, novo) {
     return contador.n;
 }
 
+// ------------------------------------------------------------------
+// 5) RESTAURAR UM BACKUP SEM APAGAR O QUE É NOVO
+//    Junta o que está no backup com o que existe agora:
+//      - o que está no backup volta (inclusive itens que foram apagados);
+//      - quando o mesmo campo existe nos dois, vale o valor do backup;
+//      - o que foi criado DEPOIS do backup continua lá (nada é apagado).
+//    Itens apagados têm "marca de apagado" permanente (meta.x), então eles
+//    voltam com um _sid novo — para a sincronização tratar como item novo.
+//    A data de criação (#c) do backup é mantida, para a ordem da lista
+//    (ex.: numeração das sessões) continuar a mesma de antes.
+// ------------------------------------------------------------------
+function copiarCriacao(metaOrigem, caminhoAntigo, caminhoNovo, metaDestino) {
+    Object.keys(metaOrigem.t).forEach((k) => {
+        if (!k.endsWith('#c')) return;
+        if (k !== `${caminhoAntigo}#c` && !k.startsWith(`${caminhoAntigo}/`)) return;
+        const novoK = caminhoNovo + k.slice(caminhoAntigo.length);
+        if (!metaDestino.t[novoK]) metaDestino.t[novoK] = metaOrigem.t[k];
+    });
+}
+
+function semMarcas(v) {
+    if (Array.isArray(v)) return v.map(semMarcas);
+    if (ehObjeto(v)) {
+        const r = {};
+        Object.keys(v).sort().forEach((k) => { if (k !== MARCA_ITEM) r[k] = semMarcas(v[k]); });
+        return r;
+    }
+    return v;
+}
+
+// O item do backup é o mesmo que já está aqui com outro _sid?
+// (ex.: um paciente apagado que já foi trazido de volta numa restauração anterior)
+function mesmoItem(caminho, itemAqui, itemBackup) {
+    if (caminho === 'pacientes' || caminho === 'casais') {
+        if (!itemAqui.id || itemAqui.id !== itemBackup.id) return false;
+        const nome = (i) => i.nomeCompleto || `${i.p1NomeCompleto || ''}|${i.p2NomeCompleto || ''}`;
+        return nome(itemAqui) === nome(itemBackup) ||
+            (!!itemAqui.dataCadastro && itemAqui.dataCadastro === itemBackup.dataCadastro);
+    }
+    return iguais(semMarcas(itemAqui), semMarcas(itemBackup));
+}
+
+function unirComBackup(atual, backup, caminho, metaAtual, metaBackup, metaBase) {
+    if (backup === undefined) return clonar(atual);
+
+    if (ehListaDeItens(atual) && ehListaDeItens(backup)) {
+        const resultado = atual.map(clonar);
+        const posicao = new Map();
+        resultado.forEach((item, i) => { if (item[MARCA_ITEM]) posicao.set(item[MARCA_ITEM], i); });
+        const usados = new Set(); // posições já ligadas a um item do backup
+
+        // 1º: itens com o mesmo _sid
+        const sobra = [];
+        backup.forEach((itemBackup) => {
+            const sid = itemBackup[MARCA_ITEM];
+            if (sid && posicao.has(sid) && !usados.has(posicao.get(sid))) {
+                const i = posicao.get(sid);
+                usados.add(i);
+                resultado[i] = unirComBackup(resultado[i], itemBackup, caminhoItem(caminho, sid),
+                    metaAtual, metaBackup, metaBase);
+                resultado[i][MARCA_ITEM] = sid;
+            } else {
+                sobra.push(itemBackup);
+            }
+        });
+
+        sobra.forEach((itemBackup) => {
+            const sid = itemBackup[MARCA_ITEM];
+
+            // 2º: o mesmo item com outro _sid (já foi restaurado antes)
+            const i = resultado.findIndex((item, idx) => !usados.has(idx) && idx < atual.length &&
+                mesmoItem(caminho, item, itemBackup));
+            if (i >= 0) {
+                usados.add(i);
+                const sidAqui = resultado[i][MARCA_ITEM];
+                resultado[i] = unirComBackup(resultado[i], { ...itemBackup, [MARCA_ITEM]: sidAqui },
+                    caminhoItem(caminho, sidAqui), metaAtual, metaBackup, metaBase);
+                resultado[i][MARCA_ITEM] = sidAqui;
+                return;
+            }
+            // item que não existe mais aqui (sumiu ou foi apagado) → volta
+            const item = clonar(itemBackup);
+            const apagado = sid && metaAtual.x[caminhoItem(caminho, sid)];
+            if (!sid || apagado) item[MARCA_ITEM] = novoSid();
+            if (sid) copiarCriacao(metaBackup, caminhoItem(caminho, sid), caminhoItem(caminho, item[MARCA_ITEM]), metaBase);
+            resultado.push(item);
+        });
+        return resultado;
+    }
+
+    if (ehObjeto(atual) && ehObjeto(backup)) {
+        const r = clonar(atual);
+        Object.keys(backup).forEach((k) => {
+            if (k === MARCA_ITEM) return;
+            r[k] = Object.prototype.hasOwnProperty.call(atual, k)
+                ? unirComBackup(atual[k], backup[k], caminhoCampo(caminho, k), metaAtual, metaBackup, metaBase)
+                : clonar(backup[k]);
+        });
+        return r;
+    }
+
+    // valores simples (ou tipos diferentes): vale o do backup
+    return clonar(backup);
+}
+
+/**
+ * Prepara a restauração de uma chave.
+ *  atual/metaAtual   → o que está salvo agora
+ *  backup/metaBackup → o que está no backup (metaBackup pode ser null em backups antigos)
+ * Devolve { novo, metaBase } para usar em gravacaoLocal(raiz, atual, metaAtual, atual, metaBase, novo, ts).
+ */
+function uniaoParaRestaurar(raiz, atual, metaAtual, backup, metaBackup) {
+    // backups antigos (de antes da sincronização) ainda não têm _sid:
+    // prepara do mesmo jeito que os dados daqui foram preparados
+    const preparado = prepararChave(raiz, clonar(backup), metaBackup ? clonar(metaBackup) : null);
+    const metaBase = clonar(metaAtual);
+    const novo = unirComBackup(atual, preparado.valor, raiz, metaAtual, preparado.meta, metaBase);
+    return { novo, metaBase };
+}
+
 /** Maior carimbo presente no meta (para acertar o relógio). */
 function maiorCarimbo(meta) {
     let m = '';
@@ -498,6 +618,7 @@ module.exports = {
     juntarRemoto,
     contarDiferencas,
     maiorCarimbo,
+    uniaoParaRestaurar,
     statusCalculado,
     // exportados para os testes
     _interno: { juntar, carimbarDiferencas, corrigirCodigosRepetidos, sidLegado },

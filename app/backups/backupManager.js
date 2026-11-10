@@ -186,6 +186,9 @@ function rotateBackups(backupDir, keepLast = 20, keepDays = 30) {
  * @param {string} opts.password      Senha/chave de criptografia
  * @param {number} [opts.keepLast=20] Quantos backups recentes manter
  * @param {number} [opts.keepDays=30] Por quantos dias manter 1 backup por dia
+ * @param {string} [opts.prefixo='backup'] Início do nome do arquivo. Só os "backup-..."
+ *                                         entram na limpeza automática; os outros
+ *                                         (ex.: "antes-de-restaurar-...") ficam guardados.
  */
 // ------------------------------------------------------------------
 // Trava simples: impede que dois backups rodem ao mesmo tempo
@@ -194,7 +197,7 @@ function rotateBackups(backupDir, keepLast = 20, keepDays = 30) {
 // ------------------------------------------------------------------
 let backupEmAndamento = false;
 
-async function runBackup({ dbPath, dataDir, backupDir, password, keepLast = 20, keepDays = 30 }) {
+async function runBackup({ dbPath, dataDir, backupDir, password, keepLast = 20, keepDays = 30, prefixo = 'backup' }) {
   if (backupEmAndamento) {
     console.log('[backup] Ignorado: já existe um backup em andamento.');
     return null;
@@ -212,7 +215,7 @@ async function runBackup({ dbPath, dataDir, backupDir, password, keepLast = 20, 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const snapshotPath = path.join(tmpDir, 'database-snapshot.sqlite');
   const zipPath = path.join(tmpDir, `backup-${timestamp}.zip`);
-  const finalPath = path.join(backupDir, `backup-${timestamp}.bak`);
+  const finalPath = path.join(backupDir, `${prefixo}-${timestamp}.bak`);
 
   try {
     snapshotDatabase(dbPath, snapshotPath);

@@ -7,7 +7,17 @@ fetch(caminho)
     .then(html => {
         document.getElementById("menu").innerHTML = html;
         marcarLinkAtivo();
+        mostrarVersaoMenu();
     });
+
+// Mostra no rodapé do menu a versão atual do programa
+async function mostrarVersaoMenu() {
+    try {
+        if (!window.atualizacao) return;
+        const versao = await window.atualizacao.versao();
+        if (versao) document.querySelectorAll(".menu .versao-app").forEach(el => el.textContent = "v" + versao);
+    } catch (e) { /* mantém a versão escrita no HTML */ }
+}
 
 // Destaca no menu o item correspondente à página atual
 function marcarLinkAtivo() {

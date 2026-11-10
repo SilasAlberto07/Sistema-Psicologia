@@ -102,6 +102,66 @@
                     </div>
                 </section>
 
+                <!-- BACKUP E RESTAURAÇÃO -->
+                <section class="config-card">
+                    <div class="config-card-icone">
+                        <i class="ti ti-database-export"></i>
+                    </div>
+
+                    <div class="config-card-corpo">
+                        <h2>Backup e restauração</h2>
+                        <p>
+                            O sistema faz backup sozinho ao abrir, a cada 6 horas e depois de cada
+                            alteração. Aqui você pode fazer um backup na hora ou trazer de volta os
+                            dados de um backup.
+                        </p>
+
+                        <div class="sync-status">
+                            <span class="sync-bolinha" id="backupBolinha"></span>
+                            <span id="backupStatusTexto">Carregando...</span>
+                        </div>
+
+                        <div class="botoes">
+                            <button class="btn-salvar" id="btnBackupAgora">
+                                <i class="ti ti-device-floppy"></i> Fazer backup agora
+                            </button>
+                            <button class="btn-salvar" id="btnAbrirRestaurar">
+                                <i class="ti ti-history"></i> Restaurar um backup
+                            </button>
+                            <button class="btn-voltar" id="btnAbrirPastaBackup">
+                                <i class="ti ti-folder-open"></i> Abrir pasta
+                            </button>
+                        </div>
+
+                        <p class="sync-dica">
+                            Ao restaurar, nada é apagado: o que está no backup volta e o que foi
+                            cadastrado depois dele continua no sistema. Antes de restaurar, o sistema
+                            guarda uma cópia dos dados atuais.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Janela: escolher o backup para restaurar -->
+                <div class="restaurar-fundo oculto" id="janelaRestaurar">
+                    <div class="restaurar-janela">
+                        <div class="restaurar-topo">
+                            <h2><i class="ti ti-history"></i> Restaurar um backup</h2>
+                            <button type="button" class="restaurar-fechar" id="btnFecharRestaurar" title="Fechar">
+                                <i class="ti ti-x"></i>
+                            </button>
+                        </div>
+                        <p class="restaurar-explica">
+                            Escolha de qual dia e horário você quer trazer os dados de volta.
+                        </p>
+                        <div class="restaurar-lista" id="listaBackups"></div>
+                        <div class="restaurar-rodape">
+                            <button class="btn-voltar" id="btnEscolherArquivoBackup">
+                                <i class="ti ti-file-search"></i> Escolher arquivo de outro lugar...
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- SENHA -->
                 <section class="config-card">
                     <div class="config-card-icone">
@@ -174,6 +234,49 @@
                             <div class="botoes">
                                 <button class="btn-salvar" id="btnSalvarSenhaBackup">
                                     <i class="ti ti-device-floppy"></i> Salvar senha do backup
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Trocar a senha do backup (também serve se esqueceu a senha) -->
+                        <div class="botoes" id="senhaBackupBotaoTrocar" style="display:none">
+                            <button class="btn-voltar" id="btnMostrarTrocaSenhaBackup">
+                                <i class="ti ti-key"></i> Trocar senha do backup
+                            </button>
+                        </div>
+
+                        <div class="config-form" id="senhaBackupTrocaForm" style="display:none">
+                            <p class="config-dica">
+                                Esqueceu a senha do backup? Não precisa dela: basta a sua
+                                <strong>senha de login</strong> (a de entrar no sistema).
+                                Se a senha foi trocada no outro computador, digite aqui a
+                                <strong>mesma senha nova</strong> de lá. Os backups antigos
+                                continuam podendo ser restaurados.
+                            </p>
+
+                            <div class="form-group">
+                                <label for="senhaBackupLogin">Senha de login</label>
+                                <input type="password" id="senhaBackupLogin" autocomplete="current-password">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="senhaBackupTrocaNova">Nova senha do backup</label>
+                                <input type="password" id="senhaBackupTrocaNova" autocomplete="off">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="senhaBackupTrocaConfirmar">Confirmar nova senha do backup</label>
+                                <input type="password" id="senhaBackupTrocaConfirmar" autocomplete="off">
+                            </div>
+
+                            <div id="mensagem-erro-troca-senha-backup" class="config-erro"></div>
+
+                            <div class="botoes">
+                                <button class="btn-salvar" id="btnSalvarTrocaSenhaBackup">
+                                    <i class="ti ti-device-floppy"></i> Salvar nova senha
+                                </button>
+                                <button class="btn-voltar" id="btnCancelarTrocaSenhaBackup">
+                                    Cancelar
                                 </button>
                             </div>
                         </div>
