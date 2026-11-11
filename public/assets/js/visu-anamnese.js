@@ -138,8 +138,8 @@ async function iniciarVisualizacaoAnamnese() {
 
             <div class="assinatura">
                 <div class="linha-assinatura"></div>
-                <h3>Dra. Cláudia Bethânia</h3>
-                <p>Psicóloga Clínica — CRP: 18/9851</p>
+                <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
+                <p>CRP 18/9851</p>
             </div>
 
             <div class="rodape-contato">
@@ -149,6 +149,7 @@ async function iniciarVisualizacaoAnamnese() {
             <div class="timestamp-impressao">${carimboGeracao()}</div>
         </div>
     `;
+        FolhaPadrao.aplicar(container);
 
     }
 }

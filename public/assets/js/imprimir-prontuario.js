@@ -221,8 +221,8 @@ async function iniciarImpressaoProntuario() {
 
         <div class="assinatura">
             <div class="linha-assinatura"></div>
-            <h3>Dra. Cláudia Bethânia</h3>
-            <p>Psicóloga Clínica — CRP: 18/9851</p>
+            <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
+            <p>CRP 18/9851</p>
         </div>
 
         <div class="rodape-contato">
@@ -232,6 +232,8 @@ async function iniciarImpressaoProntuario() {
         <div class="timestamp-impressao">${carimboGeracao()}</div>
     </div>
 `;
+
+    await FolhaPadrao.aplicar(container);
 }
 
 iniciarImpressaoProntuario().then(() => {
@@ -254,4 +256,4 @@ iniciarImpressaoProntuario().then(() => {
         document.getElementById("btnFecharRelatorio").addEventListener("click", () => window.close());
     }
 
-});
+});

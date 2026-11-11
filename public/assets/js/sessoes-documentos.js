@@ -36,6 +36,7 @@ function botaoDocumentosPaciente(registro, origem) {
         { id: "contrato", nome: "Contratos" },
         { id: "atestado", nome: "Atestados" },
         { id: "declaracao", nome: "Declarações" },
+        { id: "devolutiva", nome: "Devolutivas" },
         { id: "teste", nome: "Testes" },
         { id: "anexo", nome: "Outros anexos" }
     ];

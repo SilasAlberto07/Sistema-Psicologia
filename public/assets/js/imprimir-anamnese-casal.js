@@ -171,8 +171,8 @@ function renderizar(incluirSigiloso) {
 
         <div class="assinatura">
             <div class="linha-assinatura"></div>
-            <h3>Dra. Cláudia Bethânia</h3>
-            <p>Psicóloga Clínica — CRP: 18/9851</p>
+            <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
+            <p>CRP 18/9851</p>
         </div>
 
         <div class="rodape-contato">
@@ -181,6 +181,8 @@ function renderizar(incluirSigiloso) {
 
         <div class="timestamp-impressao">${carimboGeracao()}</div>
     </div>`;
+
+    return FolhaPadrao.aplicar(container);
 }
 
 function montarBarra() {
@@ -213,7 +215,7 @@ async function iniciar() {
     dados = (casal.anamneseCasal && typeof casal.anamneseCasal === "object") ? casal.anamneseCasal : {};
     document.title = `Anamnese de Casal — ${casal.nomeCasal || casal.id}`;
 
-    renderizar(false);
+    await renderizar(false);
     return true;
 }
 

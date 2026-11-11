@@ -468,3 +468,30 @@ body {
         display: none !important;
     }
 }
+
+/* ==========================
+   RELATÓRIO DE DEVOLUTIVA
+   (lista de indicadores e identificação em linhas)
+========================== */
+.documento-lista {
+    font-size: 12pt;
+    font-weight: 500;
+    line-height: 1.8;
+    color: #111;
+    margin: 0 0 16px 28px;
+}
+
+.documento-lista li {
+    margin-bottom: 4px;
+    text-align: justify;
+}
+
+.devolutiva-identificacao p {
+    font-size: 12pt;
+    line-height: 1.8;
+    color: #111;
+}
+
+.devolutiva-identificacao strong {
+    font-weight: 700;
+}

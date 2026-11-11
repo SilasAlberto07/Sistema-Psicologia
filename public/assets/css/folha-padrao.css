@@ -1,0 +1,473 @@
+/* ═══════════════════════════════════════════════
+   FOLHA PADRÃO — mesmo modelo do contrato
+   (faixa verde no topo com o título, rodapé com logo e contato,
+   fonte Inter / Playfair Display e cores do sistema).
+   Usado por todas as folhas de impressão:
+   anamnese, anamnese de casal, prontuário, relatório de alta,
+   declaração, atestado e relatório de devolutiva.
+   Carregar DEPOIS de impressao.css. Quem monta a folha é folha-padrao.js.
+   Na impressão, topo e rodapé repetem em cada página.
+═══════════════════════════════════════════════ */
+:root {
+    --verde-escuro: #66784f;
+    --verde: #7a8e69;
+    --verde-titulo: #5c7a48;
+    --verde-claro: #d8e6c8;
+    --creme: #f7f4ee;
+    --borda: #eae5dc;
+    --texto: #3d3a28;
+    --texto-suave: #6a6a58;
+}
+
+* {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+body {
+    font-family: 'Inter', Arial, sans-serif;
+    color: var(--texto);
+    background: #e9e9e6;
+    padding: 32px 0;
+}
+
+/* folha A4 na tela */
+.folha {
+    position: relative;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: #ffffff;
+    box-shadow: 0 2px 24px rgba(0, 0, 0, 0.14);
+    overflow: hidden;
+}
+
+/* ---------- TOPO ---------- */
+.folha .topo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 26mm;
+    background: var(--verde-escuro);
+    border-radius: 0 0 9mm 9mm;
+    padding: 8mm 16mm 0;
+    text-align: center;
+    z-index: 2;
+}
+
+.folha .topo h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    font-size: 19pt;
+    line-height: 1.2;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    margin: 0;
+}
+
+/* título comprido diminui um pouco para caber em uma linha */
+.folha .topo h1.longo {
+    font-size: 16pt;
+    padding-top: 1mm;
+}
+
+.folha .topo .traco {
+    width: 82mm;
+    height: 2px;
+    margin: 3mm auto 0;
+    background: var(--verde-claro);
+    border-radius: 2px;
+}
+
+/* selo "Confidencial" no canto da faixa */
+.folha .topo .tag-confidencial {
+    position: absolute;
+    top: 4mm;
+    right: 9mm;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 6.5pt;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--verde-claro);
+    border: 1px solid rgba(216, 230, 200, 0.55);
+    padding: 2px 7px;
+    border-radius: 3px;
+}
+
+/* ---------- RODAPÉ ---------- */
+.folha .rodape {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 35mm;
+    z-index: 2;
+}
+
+.folha .rodape .contato {
+    position: absolute;
+    top: 2mm;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5mm;
+}
+
+.folha .rodape .logo img {
+    display: block;
+    width: 30mm;
+    height: auto;
+}
+
+.folha .rodape .contato .separador {
+    width: 1px;
+    height: 15mm;
+    background: var(--borda);
+}
+
+.folha .rodape .dados {
+    font-size: 8.5pt;
+    line-height: 1.6;
+    color: var(--texto-suave);
+}
+
+.folha .rodape .dados strong {
+    display: block;
+    color: var(--verde-titulo);
+    font-weight: 600;
+}
+
+.folha .rodape .dados span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.folha .rodape .dados svg {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+}
+
+.folha .rodape .faixa {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 8mm;
+    background: var(--verde-claro);
+    border-radius: 7mm 7mm 0 0;
+}
+
+/* ---------- TABELA QUE RESERVA ESPAÇO PARA TOPO E RODAPÉ ---------- */
+.folha table.layout {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.folha table.layout > thead > tr > td,
+.folha table.layout > tfoot > tr > td,
+.folha table.layout > tbody > tr > td {
+    padding: 0;
+    vertical-align: top;
+    border: none;
+}
+
+.folha .espaco-topo {
+    height: 37mm;
+}
+
+.folha .espaco-rodape {
+    height: 41mm;
+}
+
+.folha .texto {
+    padding: 0 17mm;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.6;
+    color: var(--texto);
+}
+
+/* ═══════════════════════════════════════════════
+   CONTEÚDO — as mesmas peças de antes,
+   agora nas cores e fontes do contrato
+═══════════════════════════════════════════════ */
+
+/* títulos de seção = títulos de cláusula do contrato */
+.folha .titulo-secao {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: var(--verde-titulo);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 18px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--borda);
+}
+
+.folha .texto > .titulo-secao:first-child {
+    margin-top: 0;
+}
+
+/* identificação do paciente */
+.folha .identificacao-grid {
+    gap: 10px 28px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    background: var(--creme);
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+}
+
+.folha .identificacao-grid .rotulo {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 7.5pt;
+    color: var(--texto-suave);
+    letter-spacing: 0.06em;
+}
+
+.folha .identificacao-grid .valor {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #2f2c1e;
+}
+
+/* pergunta / resposta */
+.folha .campo-impresso {
+    margin-bottom: 11px;
+}
+
+.folha .campo-impresso strong {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: var(--verde);
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+
+.folha .campo-impresso span {
+    font-size: 10pt;
+    font-weight: 400;
+    color: var(--texto);
+    line-height: 1.6;
+}
+
+/* sessões do prontuário */
+.folha .sessao-bloco {
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--borda);
+}
+
+.folha .sessao-cabecalho {
+    margin-bottom: 10px;
+}
+
+.folha .sessao-numero {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 8pt;
+    font-weight: 600;
+    background: var(--verde-escuro);
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.folha .sessao-data {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 8.5pt;
+    color: var(--texto-suave);
+}
+
+.folha .sem-registro {
+    font-size: 10pt;
+    color: var(--texto-suave);
+}
+
+/* tabela (se algum documento usar) */
+.folha .tabela-impressa thead th {
+    font-family: 'Inter', Arial, sans-serif;
+    background: var(--creme);
+    border-color: var(--borda);
+    color: var(--verde-titulo);
+}
+
+.folha .tabela-impressa tbody td {
+    border-color: var(--borda);
+    font-size: 10pt;
+    color: var(--texto);
+}
+
+/* texto corrido (declaração, atestado, devolutiva) */
+.folha .documento-texto,
+.folha .documento-lista,
+.folha .devolutiva-identificacao p {
+    font-size: 10.5pt;
+    font-weight: 400;
+    line-height: 1.75;
+    color: var(--texto);
+}
+
+.folha .documento-texto {
+    text-align: justify;
+    margin-bottom: 10px;
+}
+
+.folha .documento-texto strong,
+.folha .devolutiva-identificacao strong {
+    font-weight: 600;
+    color: #2f2c1e;
+}
+
+.folha .documento-lista {
+    margin: 0 0 10px 22px;
+}
+
+.folha .documento-lista li::marker {
+    color: var(--verde);
+}
+
+.folha .devolutiva-identificacao {
+    margin-bottom: 6px;
+}
+
+.folha .documento-saudacao {
+    font-size: 10.5pt;
+    color: var(--texto);
+    margin-bottom: 10px;
+}
+
+.folha .documento-data {
+    margin-top: 26px;
+    font-size: 10pt;
+    color: var(--texto);
+}
+
+/* assinatura (igual à do contrato) */
+.folha .assinatura {
+    width: 120mm;
+    margin: 0 auto;
+    padding-top: 18mm; /* espaço para assinar acima da linha */
+    text-align: center;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.folha .linha-assinatura {
+    width: auto;
+    border-top: 1px solid #333;
+    margin: 0 0 6px;
+}
+
+.folha .assinatura h3 {
+    font-size: 10pt;
+    font-weight: 600;
+    color: var(--texto);
+}
+
+.folha .assinatura p {
+    font-size: 9pt;
+    color: var(--texto-suave);
+    margin-top: 1px;
+}
+
+/* carimbo de geração, discreto no fim do texto */
+.folha .timestamp-impressao {
+    margin-top: 14px;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 7pt;
+    color: #a8a898;
+}
+
+/* barra de botões na tela, alinhada à folha */
+.barra-acoes-tela {
+    max-width: 210mm;
+    margin: 0 auto 16px;
+    font-family: 'Inter', Arial, sans-serif;
+}
+
+/* ---------- DOCUMENTO CURTO (atestado, declaração) ----------
+   Folha A4 de uma página com o conteúdo centralizado
+   entre o topo e o rodapé, sem sobrar espaço embaixo. */
+.folha.folha-centralizada {
+    height: 297mm;
+}
+
+.folha-centralizada table.layout {
+    height: 297mm;
+}
+
+.folha-centralizada table.layout > tbody > tr > td {
+    vertical-align: middle;
+}
+
+.folha-centralizada .texto {
+    padding: 0 22mm;
+    font-size: 11pt;
+}
+
+.folha-centralizada .documento-texto {
+    font-size: 11.5pt;
+    line-height: 1.9;
+    margin-bottom: 14px;
+}
+
+.folha-centralizada .documento-saudacao {
+    font-size: 11.5pt;
+}
+
+.folha-centralizada .documento-data {
+    margin-top: 30px;
+    font-size: 11pt;
+}
+
+.folha-centralizada .assinatura {
+    padding-top: 22mm;
+}
+
+/* ---------- IMPRESSÃO ---------- */
+@page {
+    size: A4;
+    margin: 0;
+}
+
+@media print {
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    body {
+        background: #ffffff;
+        padding: 0;
+    }
+
+    .folha {
+        width: auto;
+        min-height: 0;
+        box-shadow: none;
+        overflow: visible;
+    }
+
+    /* documento curto: exatamente uma folha A4 */
+    .folha.folha-centralizada,
+    .folha-centralizada table.layout {
+        height: 296mm;
+        overflow: hidden;
+    }
+
+    /* fixos = repetem em todas as páginas */
+    .folha .topo,
+    .folha .rodape {
+        position: fixed;
+    }
+}

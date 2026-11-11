@@ -201,9 +201,8 @@ function montarContrato(d) {
         <div class="assinaturas">
             <div class="assinatura">
                 <div class="linha"></div>
-                ${esc(d.psiNome)}
-                <small>Psicóloga</small>
-                <small>CRP: ${esc(d.psiCrp)}</small>
+                Dra. Cláudia Bethânia – Psicóloga Clínica
+                <small>CRP ${esc(d.psiCrp)}</small>
             </div>
             <div class="assinatura">
                 <div class="linha"></div>

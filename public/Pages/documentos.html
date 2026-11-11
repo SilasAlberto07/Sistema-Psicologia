@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../assets/css/button.css">
     <link rel="stylesheet" href="../assets/css/documentos.css">
     <link rel="stylesheet" href="../assets/css/contrato.css">
+    <link rel="stylesheet" href="../assets/css/modal.css">
     <link rel="stylesheet" href="/assets/vendor/tabler-icons/tabler-icons.min.css">
 </head>
 
@@ -41,6 +42,7 @@
                                 <option value="declaracao">Declaração de Comparecimento</option>
                                 <option value="atestado">Atestado Psicológico</option>
                                 <option value="contrato">Contrato de Prestação de Serviços de Psicoterapia</option>
+                                <option value="devolutiva">Relatório de Devolutiva</option>
                                 <option value="teste" disabled>Teste psicológico (em breve)</option>
                             </select>
                         </div>
@@ -60,9 +62,16 @@
                                 <label>Horário</label>
                                 <input type="time" id="declHora">
                             </div>
+                        </div>
+                        <div class="linha">
                             <div class="form-group w-100">
-                                <label>Endereço do atendimento</label>
-                                <input type="text" id="declEndereco" placeholder="Rua, número, bairro">
+                                <label>Endereço do atendimento <small>(o mesmo do contrato — clique no lápis para mudar)</small></label>
+                                <div class="campo-fixo">
+                                    <input type="text" id="declEndereco" placeholder="Rua, número, bairro" readonly>
+                                    <button type="button" id="btnEditarEnderecoDecl" title="Editar endereço">
+                                        <i class="ti ti-pencil"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="linha">
@@ -70,6 +79,15 @@
                                 <label>Previsão de retorno / observação</label>
                                 <input type="text" id="declPrevisao"
                                     placeholder="Ex: sem data prevista para o término do acompanhamento">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Texto da declaração <small>(monta sozinho com os campos acima — pode editar o texto todo)</small></label>
+                                <textarea id="declTexto" rows="9"></textarea>
+                                <button type="button" class="btn-texto-declaracao" id="btnRefazerTextoDecl">
+                                    <i class="ti ti-refresh"></i> Montar o texto de novo com os campos
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -223,10 +241,165 @@
                         </div>
                     </div>
 
+                    <!-- CAMPOS RELATÓRIO DE DEVOLUTIVA -->
+                    <div id="camposDevolutiva" class="grupo-campos" style="display:none">
+
+                        <div class="botoes-ia-devolutiva">
+                            <button type="button" class="btn-modal" id="btnGerarPromptIA">
+                                <i class="ti ti-robot"></i> Gerar Prompt para IA
+                            </button>
+                            <button type="button" class="btn-modal" id="btnAbrirModalColar">
+                                <i class="ti ti-clipboard-text"></i> Preencher com Texto Colado
+                            </button>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">1. Identificação</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Paciente <small>(nome completo ou identificação necessária)</small></label>
+                                <input type="text" id="devPaciente" placeholder="Vem do paciente escolhido acima — pode ajustar">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-30">
+                                <label>Início do acompanhamento</label>
+                                <input type="date" id="devInicio">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Encerramento</label>
+                                <input type="date" id="devFim">
+                            </div>
+                            <div class="form-group w-20">
+                                <label>Modalidade</label>
+                                <select id="devModalidade">
+                                    <option value="Presencial">Presencial</option>
+                                    <option value="Online">Online</option>
+                                    <option value="Presencial e Online">Presencial e Online</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Abordagem teórica</label>
+                                <input type="text" id="devAbordagem">
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">2. Objetivo do acompanhamento</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="devObjetivo" rows="4"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">3. Desenvolvimento do processo terapêutico</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Demandas iniciais <small>(entra em "foram trabalhadas questões relacionadas a ...")</small></label>
+                                <textarea id="devDemandas" rows="2" placeholder="Descreva brevemente as demandas iniciais"></textarea>
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Estratégias utilizadas</label>
+                                <textarea id="devEstrategias" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">4. Evolução observada <small>(um indicador por linha)</small></h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="devEvolucao" rows="6"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">5. Considerações sobre o encerramento</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Avanços identificados <small>(entra em "observou-se ...")</small></label>
+                                <textarea id="devAvancos" rows="3" placeholder="Descreva os avanços efetivamente identificados"></textarea>
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Motivo do encerramento <small>(escolha uma sugestão ou escreva)</small></label>
+                                <input type="text" id="devMotivo" list="listaMotivosDevolutiva"
+                                    placeholder="Ex: conclusão dos objetivos terapêuticos acordados">
+                                <datalist id="listaMotivosDevolutiva">
+                                    <option value="conclusão dos objetivos terapêuticos acordados"></option>
+                                    <option value="decisão do(a) paciente"></option>
+                                </datalist>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">6. Orientações finais</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="devOrientacoes" rows="4"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="linha">
+                            <div class="form-group w-30">
+                                <label>Data do relatório</label>
+                                <input type="date" id="devData">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Janela: prompt pronto para IA (Relatório de Devolutiva) -->
+                    <div class="modal-colar oculto" id="modalPromptIADevolutiva">
+                        <div class="modal-colar-box">
+                            <div class="modal-colar-header">
+                                <h2><i class="ti ti-robot"></i> Prompt Pronto para IA</h2>
+                                <button type="button" id="fecharModalPromptIA"><i class="ti ti-x"></i></button>
+                            </div>
+                            <div class="modal-colar-body">
+                                <p style="color:#9a9a88; font-size:13px; margin-bottom:10px;">
+                                    Este é o modelo de perguntas. Clique em "Copiar Prompt", cole em um chat de IA
+                                    e cole a resposta da IA no botão "Preencher com Texto Colado".
+                                </p>
+                                <textarea id="textoPromptIA" rows="12" readonly></textarea>
+
+                                <label for="relatoPacienteIA" style="font-size:13px; font-weight:500; color:#3d3a28; margin:14px 0 6px; display:block;">
+                                    Resumo do acompanhamento (preencha manualmente, é específico de cada caso):
+                                </label>
+                                <textarea id="relatoPacienteIA" rows="6" placeholder="Cole ou digite aqui o resumo do acompanhamento: demandas, o que foi trabalhado, evolução, motivo do encerramento..."></textarea>
+                            </div>
+                            <div class="modal-colar-footer">
+                                <button type="button" class="btn-cancelar" id="cancelarModalPromptIA">Fechar</button>
+                                <button type="button" class="btn-preencher" id="btnCopiarPromptIA">
+                                    <i class="ti ti-copy"></i> Copiar Prompt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Janela: colar resposta da IA (Relatório de Devolutiva) -->
+                    <div class="modal-colar oculto" id="modalColarDevolutiva">
+                        <div class="modal-colar-box">
+                            <div class="modal-colar-header">
+                                <h2><i class="ti ti-clipboard-text"></i> Colar Relatório Pronto</h2>
+                                <button type="button" id="fecharModalColar"><i class="ti ti-x"></i></button>
+                            </div>
+                            <div class="modal-colar-body">
+                                <p id="instrucaoColarDevolutiva" style="color:#9a9a88; font-size:13px; margin-bottom:10px;"></p>
+                                <textarea id="textoColadoDevolutiva" rows="1"
+                                    placeholder="Cole aqui a resposta da IA..."></textarea>
+                            </div>
+                            <div class="modal-colar-footer">
+                                <button type="button" class="btn-cancelar" id="cancelarModalColar">Cancelar</button>
+                                <button type="button" class="btn-preencher" id="btnPreencherAutomatico">
+                                    <i class="ti ti-wand"></i> Preencher Automaticamente
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="linha">
                         <div class="form-group w-50">
                             <label>Cidade / Estado</label>
-                            <input type="text" id="cidadeEstado" placeholder="Sinop, MT">
+                            <input type="text" id="cidadeEstado" value="Sinop, MT" placeholder="Sinop, MT">
                         </div>
                     </div>
 
@@ -246,6 +419,7 @@
     <script src="../assets/js/menu.js"></script>
     <script src="../assets/js/documentos-paciente.js"></script>
     <script src="../assets/js/documentos.js"></script>
+    <script src="../assets/js/documentos-devolutiva.js"></script>
 </body>
 
 </html>

@@ -23,6 +23,7 @@ const DocsPaciente = (() => {
         contrato:   { nome: "Contrato",   plural: "Contratos",   icone: "ti-file-certificate", geravel: true,  editavel: true },
         atestado:   { nome: "Atestado",   plural: "Atestados",   icone: "ti-stethoscope",      geravel: true,  editavel: true },
         declaracao: { nome: "Declaração", plural: "Declarações", icone: "ti-file-text",        geravel: true,  editavel: true },
+        devolutiva: { nome: "Devolutiva", plural: "Devolutivas", icone: "ti-report",           geravel: true,  editavel: true },
         teste:      { nome: "Teste",      plural: "Testes",      icone: "ti-clipboard-check",  geravel: false, editavel: false },
         anexo:      { nome: "Anexo",      plural: "Anexos",      icone: "ti-paperclip",        geravel: false, editavel: false }
     };
@@ -30,7 +31,8 @@ const DocsPaciente = (() => {
     const TITULOS = {
         contrato: "Contrato de Prestação de Serviços de Psicoterapia",
         atestado: "Atestado Psicológico",
-        declaracao: "Declaração de Comparecimento"
+        declaracao: "Declaração de Comparecimento",
+        devolutiva: "Relatório de Devolutiva"
     };
 
     const CHAVE_CONFIG = "configDocumentos";

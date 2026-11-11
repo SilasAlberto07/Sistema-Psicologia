@@ -138,8 +138,8 @@ async function iniciarImpressaoAnamnese() {
 
             <div class="assinatura">
                 <div class="linha-assinatura"></div>
-                <h3>Dra. Cláudia Bethânia</h3>
-                <p>Psicóloga Clínica — CRP: 18/9851</p>
+                <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
+                <p>CRP 18/9851</p>
             </div>
 
             <div class="rodape-contato">
@@ -150,7 +150,7 @@ async function iniciarImpressaoAnamnese() {
         </div>
     `;
 
-        window.print();
+        FolhaPadrao.aplicar(container).then(() => window.print());
     }
 }
 

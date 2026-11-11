@@ -121,3 +121,130 @@
     border-color: #f0dcb0;
     color: #8a6420;
 }
+
+/* ═══════════════════════════════════════════════
+   RELATÓRIO DE DEVOLUTIVA
+═══════════════════════════════════════════════ */
+.botoes-ia-devolutiva {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.botoes-ia-devolutiva .btn-modal {
+    width: auto;
+    flex: 1;
+    justify-content: center;
+}
+
+#camposDevolutiva .contrato-subtitulo:first-of-type {
+    margin-top: 10px;
+}
+
+#camposDevolutiva .form-group label {
+    white-space: normal;
+}
+
+#camposDevolutiva .form-group label small {
+    text-transform: none;
+    letter-spacing: normal;
+    color: #9a9a88;
+}
+
+#camposDevolutiva textarea,
+#camposDeclaracao textarea {
+    width: 100%;
+    padding: 10px;
+    background-color: #faf8f4;
+    border: 1px solid #ddd8ce;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #3d3a28;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+#camposDevolutiva textarea:focus,
+#camposDeclaracao textarea:focus {
+    border-color: #8a9e78;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(138, 158, 120, 0.15);
+}
+
+/* ═══════════════════════════════════════════════
+   DECLARAÇÃO — texto editável
+═══════════════════════════════════════════════ */
+#camposDeclaracao .form-group label {
+    white-space: normal;
+}
+
+#camposDeclaracao .form-group label small {
+    text-transform: none;
+    letter-spacing: normal;
+    color: #9a9a88;
+}
+
+.btn-texto-declaracao {
+    align-self: flex-start;
+    margin-top: 8px;
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid #ddd8ce;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #7a7a68;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-texto-declaracao:hover {
+    background: #f5f4f1;
+}
+
+/* campo fixo com lápis para editar (endereço da declaração) */
+.campo-fixo {
+    position: relative;
+    display: flex;
+}
+
+.campo-fixo input {
+    flex: 1;
+    padding-right: 44px !important;
+}
+
+.campo-fixo input[readonly] {
+    color: #6a6a58;
+    background-color: #f1efe9;
+    cursor: default;
+}
+
+.campo-fixo button {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 30px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #7a8e69;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.campo-fixo button:hover {
+    background: #e8eedf;
+}
+
+.campo-fixo button.editando {
+    background: #8a9e78;
+    color: #ffffff;
+}

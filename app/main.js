@@ -923,6 +923,7 @@ ipcMain.handle('documento-gerar-pdf', async (event) => {
     try {
         const pdf = await event.sender.printToPDF({
             printBackground: true,
+            pageSize: 'A4',          // todos os documentos são em folha A4
             preferCSSPageSize: true
         });
         return pdf.toString('base64');

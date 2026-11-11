@@ -63,7 +63,9 @@ tipoDocumento.addEventListener("change", () => {
     camposDeclaracao.style.display = tipo === "declaracao" ? "block" : "none";
     camposAtestado.style.display = tipo === "atestado" ? "block" : "none";
     camposContrato.style.display = tipo === "contrato" ? "block" : "none";
+    document.getElementById("camposDevolutiva").style.display = tipo === "devolutiva" ? "block" : "none";
     if (tipo === "contrato") preencherPacienteContrato();
+    if (tipo === "devolutiva" && typeof preencherPacienteDevolutiva === "function") preencherPacienteDevolutiva();
 });
 
 // ==========================================
@@ -267,6 +269,11 @@ btnGerar.addEventListener("click", async () => {
         return;
     }
 
+    if (tipoDocumento.value === "devolutiva") {
+        gerarDevolutiva();
+        return;
+    }
+
     const selecao = mapaOpcoes[inputPaciente.value.trim()];
 
     if (!selecao) {
@@ -335,6 +342,7 @@ btnGerar.addEventListener("click", async () => {
         dados.hora = document.getElementById("declHora").value;
         dados.endereco = document.getElementById("declEndereco").value.trim();
         dados.previsao = document.getElementById("declPrevisao").value.trim();
+        dados.texto = document.getElementById("declTexto").value.trim();
     } else {
         dados.data = document.getElementById("atestData").value;
         dados.duracao = document.getElementById("atestDuracao").value.trim();
@@ -417,9 +425,16 @@ function encerrarEdicao() {
 
 // campos de cada tipo: [chave nos dados, id do campo]
 const CAMPOS_EDICAO = {
-    declaracao: [["data", "declData"], ["hora", "declHora"], ["endereco", "declEndereco"], ["previsao", "declPrevisao"], ["cidadeEstado", "cidadeEstado"]],
+    declaracao: [["data", "declData"], ["hora", "declHora"], ["endereco", "declEndereco"], ["previsao", "declPrevisao"], ["texto", "declTexto"], ["cidadeEstado", "cidadeEstado"]],
     atestado: [["data", "atestData"], ["duracao", "atestDuracao"], ["motivo", "atestMotivo"], ["cidadeEstado", "cidadeEstado"]],
-    contrato: [...CAMPOS_CONTRATO.map(([chave, id]) => [chave, id]), ["cidadeEstado", "cidadeEstado"]]
+    contrato: [...CAMPOS_CONTRATO.map(([chave, id]) => [chave, id]), ["cidadeEstado", "cidadeEstado"]],
+    devolutiva: [
+        ["paciente", "devPaciente"], ["inicio", "devInicio"], ["fim", "devFim"], ["modalidade", "devModalidade"],
+        ["abordagem", "devAbordagem"], ["objetivo", "devObjetivo"], ["demandas", "devDemandas"],
+        ["estrategias", "devEstrategias"], ["evolucao", "devEvolucao"], ["avancos", "devAvancos"],
+        ["motivo", "devMotivo"], ["orientacoes", "devOrientacoes"], ["data", "devData"],
+        ["cidadeEstado", "cidadeEstado"]
+    ]
 };
 
 function abrirEdicaoDaURL() {
@@ -470,6 +485,14 @@ function abrirEdicaoDaURL() {
         const campo = document.getElementById(id);
         if (campo && dados[chave] !== undefined) campo.value = dados[chave];
     });
+    // documento salvo sem cidade: usa a cidade fixa
+    if (!campoCidadeEstado.value.trim()) campoCidadeEstado.value = cidadeEstadoSalva;
+    // declaração sem endereço: usa o endereço fixo do consultório
+    if (doc.tipo === "declaracao" && !document.getElementById("declEndereco").value.trim()) {
+        document.getElementById("declEndereco").value = document.getElementById("ctPsiEndereco").value;
+    }
+    // declaração antiga (de antes do texto editável): monta o texto com os campos dela
+    if (doc.tipo === "declaracao" && !dados.texto) montarTextoDeclaracao(true);
     if (doc.tipo === "contrato") {
         mostrarCamposOpcao();
         calcularValorPacote();
@@ -487,8 +510,150 @@ function abrirEdicaoDaURL() {
     atualizarInfoAtestados();
 }
 
+// ==========================================
+// DECLARAÇÃO DE COMPARECIMENTO — texto inteiro editável
+// O texto é montado com o paciente e os campos. Enquanto a Dra não mexer
+// no texto, ele acompanha os campos; depois de editado, não é mais trocado
+// (a não ser pelo botão "Montar o texto de novo com os campos").
+// ==========================================
+const declTexto = document.getElementById("declTexto");
+let ultimoTextoDeclAutomatico = "";
+
+function nomeDaSelecaoDecl() {
+    const selecao = mapaOpcoes[inputPaciente.value.trim()];
+    if (!selecao) return "";
+    if (selecao.origem === "casal") {
+        const casal = casais.find(c => String(c.id) === String(selecao.id));
+        return casal ? (casal[`${selecao.pessoa}NomeCompleto`] || "") : "";
+    }
+    const paciente = pacientes.find(p => String(p.id) === String(selecao.id));
+    return paciente ? (paciente.nomeCompleto || "") : "";
+}
+
+function textoPadraoDeclaracao() {
+    const valor = (id) => document.getElementById(id).value.trim();
+    const data = valor("declData");
+    const dataBR = /^\d{4}-\d{2}-\d{2}$/.test(data) ? data.split("-").reverse().join("/") : "____/____/______";
+
+    return [
+        `Declaro para os devidos fins que ${nomeDaSelecaoDecl() || "________________________"}, está sendo submetida a acompanhamento psicológico, sob meus cuidados profissionais, comparecendo às sessões do dia ${dataBR}, no horário ${valor("declHora") || "____:____"}, no endereço ${valor("declEndereco") || "________________________"}.`,
+        valor("declPrevisao") || "Até o presente momento sem data de previsão para o término do acompanhamento.",
+        "Este documento é emitido nos termos da legislação vigente e das normas do Conselho Federal de Psicologia, sendo válido para os fins a que se destina."
+    ].join("\n\n");
+}
+
+// forcar = true → troca mesmo se o texto já foi editado
+function montarTextoDeclaracao(forcar = false) {
+    const atual = declTexto.value.trim();
+    const foiEditado = atual && atual !== ultimoTextoDeclAutomatico.trim();
+    if (foiEditado && !forcar) return;
+    ultimoTextoDeclAutomatico = textoPadraoDeclaracao();
+    declTexto.value = ultimoTextoDeclAutomatico;
+}
+
+["declData", "declHora", "declEndereco", "declPrevisao"].forEach(id => {
+    document.getElementById(id).addEventListener("input", () => montarTextoDeclaracao());
+    document.getElementById(id).addEventListener("change", () => montarTextoDeclaracao());
+});
+inputPaciente.addEventListener("change", () => montarTextoDeclaracao());
+tipoDocumento.addEventListener("change", () => {
+    if (tipoDocumento.value === "declaracao") montarTextoDeclaracao();
+});
+
+document.getElementById("btnRefazerTextoDecl").addEventListener("click", async () => {
+    if (declTexto.value.trim() && declTexto.value.trim() !== ultimoTextoDeclAutomatico.trim()) {
+        const resposta = await mostrarConfirmacao("O texto que você editou será trocado pelo texto montado com os campos. Continuar?");
+        if (!resposta.isConfirmed) return;
+    }
+    montarTextoDeclaracao(true);
+});
+
+// ==========================================
+// ENDEREÇO DO ATENDIMENTO (declaração) — fixo, o mesmo do contrato.
+// Fica travado; o lápis libera para editar. Ao confirmar, o novo endereço
+// passa a ser o padrão (vale para a próxima declaração e para o contrato).
+// ==========================================
+const declEndereco = document.getElementById("declEndereco");
+const btnEditarEnderecoDecl = document.getElementById("btnEditarEnderecoDecl");
+
+function enderecoFixoDecl() {
+    return document.getElementById("ctPsiEndereco").value.trim() || PADROES_CONTRATO.psiEndereco;
+}
+
+function travarEnderecoDecl(travar) {
+    declEndereco.readOnly = travar;
+    btnEditarEnderecoDecl.innerHTML = travar ? '<i class="ti ti-pencil"></i>' : '<i class="ti ti-check"></i>';
+    btnEditarEnderecoDecl.title = travar ? "Editar endereço" : "Confirmar endereço";
+    btnEditarEnderecoDecl.classList.toggle("editando", !travar);
+}
+
+async function salvarEnderecoPadrao(endereco) {
+    // mescla com o que já estava salvo, sem apagar nenhuma outra informação
+    let salvos = {};
+    try { salvos = JSON.parse(await window.storage.getItem(CHAVE_DADOS_CONTRATO)) || {}; } catch (e) { }
+    salvos.psiEndereco = endereco;
+    await window.storage.setItem(CHAVE_DADOS_CONTRATO, JSON.stringify(salvos));
+    document.getElementById("ctPsiEndereco").value = endereco;
+}
+
+btnEditarEnderecoDecl.addEventListener("click", async () => {
+    if (declEndereco.readOnly) {
+        travarEnderecoDecl(false);
+        declEndereco.focus();
+        declEndereco.select();
+        return;
+    }
+    const novo = declEndereco.value.trim();
+    if (!novo) {
+        declEndereco.value = enderecoFixoDecl();
+    } else if (novo !== enderecoFixoDecl()) {
+        await salvarEnderecoPadrao(novo);
+        mostrarMensagem("Endereço atualizado! Ele será usado nas próximas declarações e no contrato.", "success");
+    }
+    travarEnderecoDecl(true);
+    montarTextoDeclaracao();
+});
+
+declEndereco.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !declEndereco.readOnly) {
+        e.preventDefault();
+        btnEditarEnderecoDecl.click();
+    }
+});
+
+// ==========================================
+// CIDADE / ESTADO — fixo em "Sinop, MT".
+// Se a Dra mudar à mão, o novo valor fica guardado para os próximos documentos.
+// ==========================================
+const CHAVE_CIDADE_ESTADO = "cidadeEstadoPadrao";
+const CIDADE_ESTADO_PADRAO = "Sinop, MT";
+const campoCidadeEstado = document.getElementById("cidadeEstado");
+let cidadeEstadoSalva = CIDADE_ESTADO_PADRAO;
+
+async function carregarCidadeEstado() {
+    try {
+        const salvo = await window.storage.getItem(CHAVE_CIDADE_ESTADO);
+        if (salvo && String(salvo).trim()) cidadeEstadoSalva = String(salvo).trim();
+    } catch (e) { }
+    campoCidadeEstado.value = cidadeEstadoSalva;
+}
+
+campoCidadeEstado.addEventListener("change", async () => {
+    const valor = campoCidadeEstado.value.trim();
+    if (!valor) {
+        campoCidadeEstado.value = cidadeEstadoSalva; // apagou tudo → volta o que estava
+        return;
+    }
+    if (valor === cidadeEstadoSalva) return;
+    cidadeEstadoSalva = valor;
+    try { await window.storage.setItem(CHAVE_CIDADE_ESTADO, valor); } catch (e) { }
+});
+
 (async () => {
     await iniciarDocumentos();
+    await carregarCidadeEstado();
     await carregarPadroesContrato();
+    declEndereco.value = enderecoFixoDecl();
     abrirEdicaoDaURL();
+    if (tipoDocumento.value === "declaracao") montarTextoDeclaracao();
 })();

@@ -29,14 +29,105 @@ if (!dados) {
     const cidadeEstado = dados.cidadeEstado || "Sinop, MT";
 
     let corpoHTML = "";
+    let assinaturaHTML = `
+                <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
+                <p>CRP 18/9851</p>`;
 
-    if (dados.tipo === "declaracao") {
+    if (dados.tipo === "devolutiva") {
 
+        // Só sai o que foi escrito nos campos — campo vazio fica em branco
+        // (sem frases do modelo e sem linhas para preencher)
+        const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        // texto com várias linhas → parágrafos
+        const paragrafos = (t) => String(t || "").split(/\n/).map(p => p.trim()).filter(Boolean)
+            .map(p => `<p class="documento-texto">${esc(p)}</p>`).join("");
+        const dataBR = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d || "") ? d.split("-").reverse().join("/") : "";
+        const periodo = [dataBR(dados.inicio), dataBR(dados.fim)];
+        const textoPeriodo = periodo[0] && periodo[1] ? `${periodo[0]} a ${periodo[1]}` : (periodo[0] || periodo[1]);
+
+        const indicadores = String(dados.evolucao || "").split("\n").map(l => l.trim()).filter(Boolean);
+        const dataRelatorio = dados.data ? (() => {
+            const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho",
+                "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+            const [ano, mes, dia] = dados.data.split("-");
+            return `${Number(dia)} de ${meses[Number(mes) - 1]} de ${ano}`;
+        })() : "";
+        const localData = [dados.cidadeEstado, dataRelatorio].map(t => String(t || "").trim()).filter(Boolean).join(", ");
+
+        corpoHTML = `
+            <div class="cabecalho-print">
+                <h1>Relatório de Devolutiva do Acompanhamento Psicológico</h1>
+            </div>
+
+            <div class="titulo-secao">1. Identificação</div>
+            <div class="devolutiva-identificacao">
+                <p><strong>Paciente:</strong> ${esc(dados.paciente || dados.nomeCompleto)}</p>
+                <p><strong>Psicóloga responsável:</strong> Cláudia Bethânia – Psicóloga Clínica</p>
+                <p><strong>CRP:</strong> 18/9851</p>
+                <p><strong>Período do acompanhamento:</strong> ${textoPeriodo}</p>
+                <p><strong>Modalidade:</strong> ${esc(dados.modalidade)}</p>
+                <p><strong>Abordagem teórica:</strong> ${esc(dados.abordagem)}</p>
+            </div>
+
+            <div class="titulo-secao">2. Objetivo do acompanhamento</div>
+            ${paragrafos(dados.objetivo)}
+
+            <div class="titulo-secao">3. Desenvolvimento do processo terapêutico</div>
+            ${paragrafos(dados.demandas)}
+            ${paragrafos(dados.estrategias)}
+
+            <div class="titulo-secao">4. Evolução observada</div>
+            ${indicadores.length ? `<ul class="documento-lista">${indicadores.map(i => `<li>${esc(i)}</li>`).join("")}</ul>` : ""}
+
+            <div class="titulo-secao">5. Considerações sobre o encerramento</div>
+            ${paragrafos(dados.avancos)}
+            ${paragrafos(dados.motivo)}
+
+            <div class="titulo-secao">6. Orientações finais</div>
+            ${paragrafos(dados.orientacoes)}
+
+            ${localData ? `<p class="documento-data">${esc(localData)}.</p>` : ""}
+        `;
+
+        assinaturaHTML = `
+                <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
+                <p>CRP 18/9851</p>`;
+
+    } else if (dados.tipo === "declaracao" && dados.texto) {
+
+        // texto escrito/editado pela Dra na tela Documentos
+        // (o nome do paciente sai em negrito, como antes)
+        const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        // em negrito: nome do paciente, data da sessão e horário
+        const dataSessao = /^\d{4}-\d{2}-\d{2}$/.test(dados.data || "") ? dados.data.split("-").reverse().join("/") : "";
+        const destaques = [dados.nomeCompleto, dataSessao, dados.hora]
+            .map(t => esc(String(t || "").trim())).filter(Boolean);
+        const negrito = (html) => {
+            if (!destaques.length) return html;
+            const regex = new RegExp(destaques.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "g");
+            return html.replace(regex, (m) => `<strong>${m}</strong>`);
+        };
+        const paragrafos = String(dados.texto).split(/\n/).map(p => p.trim()).filter(Boolean)
+            .map(p => `<p class="documento-texto">${negrito(esc(p))}</p>`).join("");
+
+        corpoHTML = `
+            <div class="cabecalho-print">
+                <h1>Declaração de Comparecimento</h1>
+            </div>
+
+            ${paragrafos}
+
+            <p class="documento-data">${esc(cidadeEstado)}, ${dataPorExtenso()}.</p>
+        `;
+
+    } else if (dados.tipo === "declaracao") {
+
+        // declarações antigas (de antes do texto editável)
         corpoHTML = `
             <div class="cabecalho-print">
                 <div class="clinica-nome">Cláudia Bethânia — Psicóloga Clínica</div>
                 <div class="subtitulo-clinica">CRP 18/9851</div>
-                <h1>Declaração</h1>
+                <h1>Declaração de Comparecimento</h1>
                 
             </div>
 
@@ -101,8 +192,7 @@ if (!dados) {
 
             <div class="assinatura">
                 <div class="linha-assinatura"></div>
-                <h3>Cláudia Bethânia Prechedes dos Santos Rocha da Silva</h3>
-                <p>CRP 18/9851</p>
+                ${assinaturaHTML}
             </div>
 
             <div class="rodape-contato">
@@ -117,11 +207,8 @@ if (!dados) {
 
     // guarda o PDF nos documentos do paciente e depois abre a impressão
     // (espera a marca d'água carregar para ela sair no PDF)
-    const marca = container.querySelector(".marca-dagua");
-    const seguir = () => DocsPaciente.guardarEImprimir(dados);
-    const pronto = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-    pronto.then(() => {
-        if (marca && !marca.complete) marca.onload = marca.onerror = seguir;
-        else seguir();
-    });
+    // (monta no modelo do contrato e espera fontes e logo carregarem)
+    // atestado e declaração são curtos: o conteúdo fica centralizado na folha A4
+    const centralizar = dados.tipo !== "devolutiva";
+    FolhaPadrao.aplicar(container, { centralizar }).then(() => DocsPaciente.guardarEImprimir(dados));
 }
