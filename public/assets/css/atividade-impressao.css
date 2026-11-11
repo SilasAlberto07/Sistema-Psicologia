@@ -1,0 +1,89 @@
+/* ═══════════════════════════════════════════════
+   FOLHA DA ATIVIDADE TERAPÊUTICA (imprimir-atividade.html)
+   Carregado depois de folha-padrao.css.
+   Cada pergunta fica junto do seu espaço de resposta
+   (nunca separados entre uma página e outra).
+═══════════════════════════════════════════════ */
+.folha .atividade-texto {
+    font-size: 10.5pt;
+    line-height: 1.7;
+    color: var(--texto);
+    text-align: justify;
+    margin-bottom: 8px;
+    white-space: pre-line;
+}
+
+.folha .atividade-pergunta {
+    margin: 0 0 16px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.folha .atividade-pergunta-texto {
+    display: flex;
+    gap: 8px;
+    font-size: 10.5pt;
+    font-weight: 600;
+    line-height: 1.55;
+    color: #2f2c1e;
+    white-space: pre-line;
+}
+
+.folha .atividade-numero {
+    flex-shrink: 0;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 11px;
+    background: var(--verde-escuro);
+    color: #ffffff;
+    font-size: 8.5pt;
+    line-height: 22px;
+    text-align: center;
+}
+
+/* linhas para escrever à mão */
+.folha .resposta-linhas {
+    margin: 4px 0 0 30px;
+}
+
+.folha .resposta-linhas div {
+    height: 8.5mm;
+    border-bottom: 1px solid #cfc9bd;
+}
+
+/* caixa para escrever/desenhar */
+.folha .resposta-caixa {
+    margin: 8px 0 0 30px;
+    border: 1px solid #cfc9bd;
+    border-radius: 6px;
+}
+
+.folha .resposta-caixa.pequena {
+    height: 35mm;
+}
+
+.folha .resposta-caixa.grande {
+    height: 75mm;
+}
+
+/* mensagem final */
+.folha .atividade-final {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-left: 3px solid var(--verde-claro);
+    background: var(--creme);
+    border-radius: 0 6px 6px 0;
+    font-size: 10.5pt;
+    line-height: 1.65;
+    color: var(--texto);
+    white-space: pre-line;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+/* identificação compacta (paciente / data) */
+.folha .identificacao-grid.atividade-ident {
+    padding: 9px 14px;
+    margin-bottom: 14px;
+}

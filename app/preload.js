@@ -28,6 +28,11 @@ contextBridge.exposeInMainWorld('documentosPDF', {
     gerar: () => ipcRenderer.invoke('documento-gerar-pdf')
 });
 
+// Atividades Terapêuticas: abre o ChatGPT no navegador do computador
+contextBridge.exposeInMainWorld('linksExternos', {
+    abrirChatGPT: () => ipcRenderer.invoke('abrir-chatgpt')
+});
+
 contextBridge.exposeInMainWorld('atualizacao', {
     verificar: () => ipcRenderer.invoke('verificar-atualizacao'),
     versao: () => ipcRenderer.invoke('versao-app'),

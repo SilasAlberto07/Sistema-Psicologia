@@ -933,6 +933,20 @@ ipcMain.handle('documento-gerar-pdf', async (event) => {
     }
 });
 
+// Atividades Terapêuticas: botão "Abrir ChatGPT".
+// Abre no navegador do computador (fora do programa), e SOMENTE este endereço —
+// a tela não consegue pedir para abrir outro site por aqui.
+const ENDERECO_CHATGPT = 'https://chatgpt.com';
+ipcMain.handle('abrir-chatgpt', async () => {
+    try {
+        await shell.openExternal(ENDERECO_CHATGPT);
+        return true;
+    } catch (err) {
+        log.error('[atividades] Não foi possível abrir o ChatGPT:', err);
+        return false;
+    }
+});
+
 app.whenReady().then(async () => {
     await criarJanela();
     verificarAtualizacao(false);

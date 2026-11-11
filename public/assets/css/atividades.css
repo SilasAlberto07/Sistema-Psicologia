@@ -1,0 +1,425 @@
+/* ═══════════════════════════════════════════════
+   ATIVIDADES.CSS — estilos de Pages/atividades.html
+   (Gerador de Atividades Terapêuticas)
+   Usa as mesmas bases da tela Documentos (documentos.css):
+   .form-section, .linha, .form-group, .w-*
+═══════════════════════════════════════════════ */
+.atividades-container {
+    width: 100%;
+    max-width: 100%;
+    color-scheme: light;
+}
+
+.atividades-container [hidden] {
+    display: none !important;
+}
+
+/* ---------- cabeçalho ---------- */
+.ativ-cabecalho {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.ativ-descricao {
+    margin-top: -6px;
+    font-size: 13.5px;
+    color: #7a7a68;
+}
+
+.ativ-cabecalho-botoes {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ---------- botões ---------- */
+.ativ-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 16px;
+    border: 1px solid #ddd8ce;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #5a5a48;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.ativ-btn:hover {
+    background: #f5f4f1;
+}
+
+.ativ-btn i {
+    font-size: 16px;
+}
+
+.ativ-btn-principal {
+    background: #8a9e78;
+    border-color: #8a9e78;
+    color: #ffffff;
+}
+
+.ativ-btn-principal:hover {
+    background: #7a8e68;
+}
+
+.ativ-btn-chatgpt {
+    background: #ffffff;
+    border-color: #8a9e78;
+    color: #5c7a48;
+}
+
+.ativ-btn-chatgpt:hover {
+    background: #eef4e8;
+}
+
+.ativ-botoes {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.ativ-botoes-final {
+    justify-content: flex-end;
+    margin-top: 18px;
+}
+
+/* ---------- títulos e textos ---------- */
+.ativ-secao-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #3d3a28;
+}
+
+.ativ-secao-titulo i {
+    color: #8a9e78;
+}
+
+.ativ-etapa {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #3d3a28;
+}
+
+.ativ-etapa span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #eef4e8;
+    color: #5c7a48;
+    font-size: 13px;
+}
+
+.ativ-subtitulo {
+    margin: 22px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #ede8e0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #5c7a48;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.ativ-ajuda {
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: #9a9a88;
+}
+
+.atividades-container .form-group label {
+    white-space: normal;
+}
+
+.atividades-container .form-group label small {
+    text-transform: none;
+    letter-spacing: normal;
+    color: #9a9a88;
+}
+
+/* ---------- campos de texto grandes ---------- */
+.atividades-container textarea {
+    width: 100%;
+    padding: 10px;
+    background-color: #faf8f4;
+    border: 1px solid #ddd8ce;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #3d3a28;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.atividades-container textarea:focus {
+    border-color: #8a9e78;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(138, 158, 120, 0.15);
+}
+
+.ativ-textarea-prompt {
+    font-size: 12.5px !important;
+    background-color: #f7f6f2 !important;
+}
+
+.campo-faltando {
+    border-color: #d88 !important;
+    box-shadow: 0 0 0 3px rgba(170, 58, 58, 0.12) !important;
+}
+
+/* ---------- aviso de privacidade ---------- */
+.ativ-aviso-privacidade {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 4px 0 16px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #eef4e8;
+    border: 1px solid #d8e6c8;
+    color: #3d5a28;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.ativ-aviso-privacidade i {
+    font-size: 18px;
+    margin-top: 1px;
+}
+
+/* ---------- listas (recentes / biblioteca) ---------- */
+.ativ-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ativ-cartao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 14px;
+    border: 1px solid #ede8e0;
+    border-radius: 10px;
+    background: #fdfcfa;
+}
+
+.ativ-cartao:hover {
+    border-color: #d8e6c8;
+    background: #ffffff;
+}
+
+.ativ-cartao-titulo {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3d3a28;
+    margin-bottom: 5px;
+}
+
+.ativ-cartao-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 12px;
+    color: #8a8a78;
+}
+
+.ativ-tag {
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: #f1efe9;
+    color: #6a6a58;
+}
+
+.ativ-status,
+.ativ-selo {
+    padding: 2px 9px;
+    border-radius: 20px;
+    background: #fff6e6;
+    color: #8a6420;
+    font-size: 11.5px;
+    font-weight: 500;
+}
+
+.ativ-status.ok,
+.ativ-selo.ok {
+    background: #eef4e8;
+    color: #3d5a28;
+}
+
+.ativ-cartao-acoes {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.ativ-cartao-acoes button,
+.ativ-pergunta-acoes button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid #ddd8ce;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #5a5a48;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.ativ-cartao-acoes button:hover,
+.ativ-pergunta-acoes button:hover {
+    background: #f5f4f1;
+}
+
+.ativ-cartao-acoes button.perigo:hover,
+.ativ-pergunta-acoes button.perigo:hover {
+    background: #fbeeee;
+    border-color: #e8c6c6;
+    color: #a03a3a;
+}
+
+.ativ-vazio {
+    padding: 30px 10px;
+    text-align: center;
+    color: #9a9a88;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.ativ-vazio i {
+    font-size: 34px;
+    color: #c8d6b8;
+}
+
+/* ---------- editor ---------- */
+.ativ-editor-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.ativ-editor-topo .ativ-etapa {
+    margin-bottom: 12px;
+}
+
+.ativ-perguntas {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.ativ-pergunta {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px;
+    border: 1px solid #ede8e0;
+    border-radius: 10px;
+    background: #fdfcfa;
+}
+
+.ativ-pergunta-numero {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: #8a9e78;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.ativ-pergunta-corpo {
+    flex: 1;
+    min-width: 0;
+}
+
+.ativ-pergunta-corpo textarea {
+    resize: none;
+    overflow: hidden;
+}
+
+.ativ-pergunta-opcoes {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #7a7a68;
+}
+
+.ativ-pergunta-opcoes select {
+    margin-left: 6px;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid #ddd8ce;
+    border-radius: 7px;
+    background: #faf8f4;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #3d3a28;
+}
+
+.ativ-pergunta-acoes {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.ativ-pergunta-acoes button {
+    width: 32px;
+    justify-content: center;
+    padding: 0;
+}
+
+.ativ-pergunta-acoes button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.ativ-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: #3d3a28;
+    cursor: pointer;
+}
+
+.ativ-check input {
+    width: 16px;
+    height: 16px;
+    accent-color: #8a9e78;
+}

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atividades Terapêuticas</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/button.css">
+    <link rel="stylesheet" href="../assets/css/documentos.css">
+    <link rel="stylesheet" href="../assets/css/atividades.css">
+    <link rel="stylesheet" href="/assets/vendor/tabler-icons/tabler-icons.min.css">
+</head>
+
+<body>
+
+    <div class="container-menu">
+
+        <div id="menu"></div>
+
+        <main class="page-container">
+            <div class="atividades-container">
+
+                <!-- CABEÇALHO DO MÓDULO -->
+                <div class="ativ-cabecalho">
+                    <div>
+                        <h1 class="page-title"><i class="ti ti-notebook" style="color:#8a9e78"></i> Gerador de Atividades Terapêuticas</h1>
+                        <p class="ativ-descricao">Elabore atividades personalizadas para seus pacientes.</p>
+                    </div>
+                    <div class="ativ-cabecalho-botoes">
+                        <button type="button" class="ativ-btn ativ-btn-principal" id="btnNovaAtividade">
+                            <i class="ti ti-plus"></i> Nova atividade
+                        </button>
+                        <button type="button" class="ativ-btn" id="btnBiblioteca">
+                            <i class="ti ti-books"></i> Biblioteca de atividades
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ══════════ TELA INICIAL: atividades recentes ══════════ -->
+                <section class="ativ-tela" id="telaInicio">
+                    <div class="form-section">
+                        <h2 class="ativ-secao-titulo"><i class="ti ti-clock"></i> Atividades criadas recentemente</h2>
+                        <div class="ativ-lista" id="listaRecentes"></div>
+                    </div>
+                </section>
+
+                <!-- ══════════ NOVA ATIVIDADE: formulário + prompt + colar ══════════ -->
+                <section class="ativ-tela" id="telaNova" hidden>
+
+                    <div class="form-section">
+                        <div class="ativ-etapa"><span>1</span> Dados da atividade</div>
+
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Paciente <small>(opcional — só aparece na folha impressa, nunca vai para a IA)</small></label>
+                                <input type="text" id="ativPaciente" list="listaPacientesAtiv" autocomplete="off"
+                                    placeholder="Digite o nome do paciente...">
+                                <datalist id="listaPacientesAtiv"></datalist>
+                            </div>
+                        </div>
+
+                        <div class="linha">
+                            <div class="form-group w-30">
+                                <label>Faixa etária</label>
+                                <select id="ativFaixa">
+                                    <option value="Adulto">Adulto</option>
+                                    <option value="Adolescente">Adolescente</option>
+                                    <option value="Criança">Criança</option>
+                                </select>
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Abordagem</label>
+                                <select id="ativAbordagem">
+                                    <option value="TCC">TCC — Terapia Cognitivo-Comportamental</option>
+                                </select>
+                            </div>
+                            <div class="form-group w-20">
+                                <label>Nº de perguntas</label>
+                                <input type="number" id="ativQuantidade" min="1" max="30" value="6">
+                            </div>
+                        </div>
+
+                        <div class="linha">
+                            <div class="form-group w-50">
+                                <label>Categoria da atividade</label>
+                                <select id="ativCategoria">
+                                    <option>Ansiedade</option>
+                                    <option>Autoestima</option>
+                                    <option>Autoconhecimento</option>
+                                    <option>Pensamentos automáticos</option>
+                                    <option>Regulação emocional</option>
+                                    <option>Relacionamentos</option>
+                                    <option>Habilidades sociais</option>
+                                    <option>Resolução de problemas</option>
+                                    <option>Ativação comportamental</option>
+                                    <option>Outros</option>
+                                </select>
+                            </div>
+                            <div class="form-group w-100">
+                                <label>Tipo de atividade</label>
+                                <select id="ativTipo">
+                                    <option>Perguntas reflexivas</option>
+                                    <option>Exercício escrito</option>
+                                    <option>Diário de acompanhamento</option>
+                                    <option>Registro de pensamentos</option>
+                                    <option>Questionário reflexivo</option>
+                                    <option>Exercício prático</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="linha" id="linhaCategoriaOutra" hidden>
+                            <div class="form-group w-100">
+                                <label>Qual categoria?</label>
+                                <input type="text" id="ativCategoriaOutra" placeholder="Ex: luto, procrastinação...">
+                            </div>
+                        </div>
+
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Objetivo terapêutico <small>(o que deseja trabalhar)</small></label>
+                                <textarea id="ativObjetivo" rows="2" placeholder="Ex: trabalhar autoestima e reconhecimento de qualidades pessoais"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Orientações adicionais da psicóloga <small>(opcional)</small></label>
+                                <textarea id="ativOrientacoesPsi" rows="2" placeholder="Ex: linguagem bem simples, incluir um exemplo antes das perguntas..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="ativ-aviso-privacidade">
+                            <i class="ti ti-shield-lock"></i>
+                            <span>O prompt <strong>não leva nome, CPF, telefone nem dados do prontuário</strong>.
+                                Nas orientações, descreva o contexto de forma anônima, sem nomes ou detalhes que identifiquem o paciente.</span>
+                        </div>
+
+                        <button type="button" class="ativ-btn ativ-btn-principal" id="btnGerarPrompt">
+                            <i class="ti ti-wand"></i> Gerar prompt
+                        </button>
+                    </div>
+
+                    <div class="form-section" id="secaoPrompt" hidden>
+                        <div class="ativ-etapa"><span>2</span> Prompt para o ChatGPT</div>
+                        <p class="ativ-ajuda">Copie o prompt, abra o ChatGPT, cole e envie. Depois copie a resposta e cole no passo 3.</p>
+                        <textarea id="textoPrompt" class="ativ-textarea-prompt" rows="14"></textarea>
+                        <div class="ativ-botoes">
+                            <button type="button" class="ativ-btn ativ-btn-principal" id="btnCopiarPrompt">
+                                <i class="ti ti-copy"></i> Copiar prompt
+                            </button>
+                            <button type="button" class="ativ-btn ativ-btn-chatgpt" id="btnAbrirChatGPT">
+                                <i class="ti ti-external-link"></i> Abrir ChatGPT
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-section" id="secaoColar" hidden>
+                        <div class="ativ-etapa"><span>3</span> Colar atividade gerada</div>
+                        <p class="ativ-ajuda">Cole aqui a resposta do ChatGPT. Você pode corrigir o texto antes de continuar.</p>
+                        <textarea id="textoColado" class="ativ-textarea-colar" rows="14"
+                            placeholder="Cole aqui a atividade gerada pelo ChatGPT..."></textarea>
+                        <div class="ativ-botoes">
+                            <button type="button" class="ativ-btn ativ-btn-principal" id="btnLevarEditor">
+                                <i class="ti ti-arrow-right"></i> Organizar no editor
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════ EDITOR DA ATIVIDADE ══════════ -->
+                <section class="ativ-tela" id="telaEditor" hidden>
+                    <div class="form-section">
+                        <div class="ativ-editor-topo">
+                            <div class="ativ-etapa"><span><i class="ti ti-pencil"></i></span> Editor da atividade</div>
+                            <span class="ativ-selo" id="seloStatus"></span>
+                        </div>
+
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Título</label>
+                                <input type="text" id="edTitulo" placeholder="Título da atividade">
+                            </div>
+                        </div>
+
+                        <div class="linha">
+                            <div class="form-group w-30">
+                                <label>Categoria</label>
+                                <input type="text" id="edCategoria" list="listaCategorias">
+                                <datalist id="listaCategorias"></datalist>
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Faixa etária</label>
+                                <select id="edFaixa">
+                                    <option value="Adulto">Adulto</option>
+                                    <option value="Adolescente">Adolescente</option>
+                                    <option value="Criança">Criança</option>
+                                </select>
+                            </div>
+                            <div class="form-group w-100">
+                                <label>Objetivo terapêutico <small>(uso interno, não sai na folha)</small></label>
+                                <input type="text" id="edObjetivoTerapeutico">
+                            </div>
+                        </div>
+
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Objetivo da atividade <small>(sai na folha, em linguagem acessível ao paciente)</small></label>
+                                <textarea id="edObjetivoPaciente" rows="2"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Introdução / orientações ao paciente</label>
+                                <textarea id="edIntroducao" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <h3 class="ativ-subtitulo">Perguntas</h3>
+                        <div id="listaPerguntas" class="ativ-perguntas"></div>
+                        <button type="button" class="ativ-btn" id="btnAdicionarPergunta">
+                            <i class="ti ti-plus"></i> Adicionar pergunta
+                        </button>
+
+                        <div class="linha" style="margin-top:18px">
+                            <div class="form-group w-100">
+                                <label>Orientações finais</label>
+                                <textarea id="edOrientacoesFinais" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <label class="ativ-check">
+                            <input type="checkbox" id="edRevisada">
+                            Revisei o conteúdo e aprovo esta atividade para uso
+                        </label>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="ativ-etapa"><span><i class="ti ti-printer"></i></span> Impressão</div>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Paciente <small>(opcional)</small></label>
+                                <input type="text" id="impPaciente" list="listaPacientesAtiv" autocomplete="off"
+                                    placeholder="Digite o nome do paciente...">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Data</label>
+                                <input type="date" id="impData">
+                            </div>
+                        </div>
+                        <label class="ativ-check">
+                            <input type="checkbox" id="impMostrarNome" checked>
+                            Mostrar o nome do paciente na folha (somente se autorizado)
+                        </label>
+
+                        <div class="ativ-botoes ativ-botoes-final">
+                            <button type="button" class="ativ-btn" id="btnCancelarEditor">
+                                <i class="ti ti-arrow-left"></i> Voltar
+                            </button>
+                            <button type="button" class="ativ-btn" id="btnVisualizar">
+                                <i class="ti ti-eye"></i> Visualizar impressão
+                            </button>
+                            <button type="button" class="ativ-btn" id="btnImprimir">
+                                <i class="ti ti-printer"></i> Imprimir
+                            </button>
+                            <button type="button" class="ativ-btn ativ-btn-principal" id="btnSalvar">
+                                <i class="ti ti-device-floppy"></i> Salvar na biblioteca
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════ BIBLIOTECA ══════════ -->
+                <section class="ativ-tela" id="telaBiblioteca" hidden>
+                    <div class="form-section">
+                        <h2 class="ativ-secao-titulo"><i class="ti ti-books"></i> Biblioteca de atividades</h2>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Pesquisar por título</label>
+                                <input type="text" id="bibBusca" placeholder="Digite parte do título...">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Categoria</label>
+                                <select id="bibCategoria"><option value="">Todas</option></select>
+                            </div>
+                            <div class="form-group w-20">
+                                <label>Faixa etária</label>
+                                <select id="bibFaixa">
+                                    <option value="">Todas</option>
+                                    <option value="Adulto">Adulto</option>
+                                    <option value="Adolescente">Adolescente</option>
+                                    <option value="Criança">Criança</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="ativ-lista" id="listaBiblioteca"></div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+    </div>
+
+    <script src="/assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="../assets/js/alert.js"></script>
+    <script src="../assets/js/menu.js"></script>
+    <script src="../assets/js/atividades.js"></script>
+</body>
+
+</html>
