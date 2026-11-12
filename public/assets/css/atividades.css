@@ -548,3 +548,65 @@
     border-color: #8a9e78;
     color: #ffffff;
 }
+
+/* ---------- revisão obrigatória (em destaque) ---------- */
+.ativ-revisao {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-top: 20px;
+    padding: 16px 18px;
+    border: 2px solid #f0dcb0;
+    border-radius: 12px;
+    background: #fff9ec;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.ativ-revisao:hover {
+    border-color: #e6c886;
+}
+
+.ativ-revisao input {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    margin-top: 1px;
+    accent-color: #5c7a48;
+    cursor: pointer;
+}
+
+.ativ-revisao-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ativ-revisao-texto strong {
+    font-size: 15.5px;
+    font-weight: 600;
+    color: #6b4f14;
+}
+
+.ativ-revisao-texto small {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #8a6a30;
+}
+
+.ativ-revisao.aprovada {
+    border-color: #b9cfa3;
+    background: #eef4e8;
+}
+
+.ativ-revisao.aprovada strong {
+    color: #3d5a28;
+}
+
+.ativ-revisao.aprovada small {
+    color: #5c7a48;
+}
+
+.ativ-revisao.alerta {
+    box-shadow: 0 0 0 4px rgba(224, 160, 40, 0.35);
+}

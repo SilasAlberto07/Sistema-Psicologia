@@ -306,7 +306,7 @@ function cartaoAtividade(a) {
             </div>
             <div class="ativ-cartao-acoes">
                 <button type="button" data-acao="abrir" title="Abrir / usar com um paciente"><i class="ti ti-pencil"></i> Abrir</button>
-                <button type="button" data-acao="imprimir" title="Visualizar impressão"><i class="ti ti-printer"></i></button>
+                ${revisada ? `<button type="button" data-acao="imprimir" title="Visualizar impressão"><i class="ti ti-printer"></i></button>` : ""}
                 <button type="button" data-acao="duplicar" title="Duplicar"><i class="ti ti-copy"></i></button>
                 <button type="button" data-acao="excluir" title="Excluir" class="perigo"><i class="ti ti-trash"></i></button>
             </div>
@@ -370,6 +370,10 @@ async function acaoNaLista(evento) {
     if (acao === "abrir") {
         abrirNoEditor(atividade);
     } else if (acao === "imprimir") {
+        if (atividade.statusRevisao !== "revisada") {
+            mostrarMensagem("Abra a atividade e marque a revisão antes de imprimir.", "warning");
+            return;
+        }
         abrirImpressao(atividade, true);
     } else if (acao === "duplicar") {
         const copia = JSON.parse(JSON.stringify(atividade));
@@ -674,6 +678,7 @@ function abrirNoEditor(atividade, rotuloPaciente = "") {
     $("impMostrarNome").checked = true;
 
     atualizarSelo();
+    atualizarRevisao();
     renderizarPerguntas();
     alterado = false;
     mostrarTela("telaEditor");
@@ -770,7 +775,24 @@ $("btnAdicionarPergunta").addEventListener("click", () => {
 
 ["edTitulo", "edCategoria", "edFaixa", "edObjetivoTerapeutico", "edObjetivoPaciente", "edIntroducao", "edOrientacoesFinais"]
     .forEach(id => $(id).addEventListener("input", () => { alterado = true; }));
-$("edRevisada").addEventListener("change", () => { alterado = true; atualizarSelo(); });
+$("edRevisada").addEventListener("change", () => { alterado = true; atualizarSelo(); atualizarRevisao(); });
+
+// o card "Salvar e imprimir" só aparece depois que a Dra marca a revisão
+function atualizarRevisao() {
+    const revisada = $("edRevisada").checked;
+    $("cardImpressao").hidden = !revisada;
+    $("botoesSemRevisao").hidden = revisada;
+    $("caixaRevisao").classList.toggle("aprovada", revisada);
+}
+
+function exigirRevisao() {
+    if ($("edRevisada").checked) return true;
+    $("caixaRevisao").classList.add("alerta");
+    $("caixaRevisao").scrollIntoView({ behavior: "smooth", block: "center" });
+    setTimeout(() => $("caixaRevisao").classList.remove("alerta"), 1500);
+    mostrarMensagem("Revise as perguntas e marque a aprovação antes de salvar, visualizar ou imprimir.", "warning");
+    return false;
+}
 
 // junta o que está no editor
 function atividadeDoEditor() {
@@ -791,6 +813,7 @@ function atividadeDoEditor() {
 }
 
 $("btnSalvar").addEventListener("click", async () => {
+    if (!exigirRevisao()) return;
     const atividade = atividadeDoEditor();
     if (!atividade.titulo) {
         $("edTitulo").classList.add("campo-faltando");
@@ -878,6 +901,8 @@ function textoCompleto(a) {
     ].filter(Boolean).join("\n\n");
 }
 
+$("btnVoltarEditor").addEventListener("click", () => $("btnCancelarEditor").click());
+
 $("btnCancelarEditor").addEventListener("click", async () => {
     if (!(await podeSairDoEditor())) return;
     alterado = false;
@@ -911,8 +936,8 @@ function opcoesDeImpressao() {
     };
 }
 
-$("btnVisualizar").addEventListener("click", () => abrirImpressao(atividadeDoEditor(), true, opcoesDeImpressao()));
-$("btnImprimir").addEventListener("click", () => abrirImpressao(atividadeDoEditor(), false, opcoesDeImpressao()));
+$("btnVisualizar").addEventListener("click", () => { if (exigirRevisao()) abrirImpressao(atividadeDoEditor(), true, opcoesDeImpressao()); });
+$("btnImprimir").addEventListener("click", () => { if (exigirRevisao()) abrirImpressao(atividadeDoEditor(), false, opcoesDeImpressao()); });
 
 // avisa antes de fechar a página com alterações não salvas
 window.addEventListener("beforeunload", (e) => {

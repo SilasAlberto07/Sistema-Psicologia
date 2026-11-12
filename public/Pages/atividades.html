@@ -223,14 +223,25 @@
                             </div>
                         </div>
 
-                        <label class="ativ-check">
+                        <!-- revisão obrigatória: sem ela não dá para salvar, visualizar nem imprimir -->
+                        <label class="ativ-revisao" id="caixaRevisao">
                             <input type="checkbox" id="edRevisada">
-                            Revisei o conteúdo e aprovo esta atividade para uso
+                            <span class="ativ-revisao-texto">
+                                <strong>Revisei todas as perguntas e aprovo esta atividade</strong>
+                                <small>Obrigatório. Leia com atenção o conteúdo gerado pela IA. Só depois de marcar aqui
+                                    será possível <b>salvar</b>, <b>visualizar</b> e <b>imprimir</b> a atividade.</small>
+                            </span>
                         </label>
+
+                        <div class="ativ-botoes ativ-botoes-final" id="botoesSemRevisao">
+                            <button type="button" class="ativ-btn" id="btnVoltarEditor">
+                                <i class="ti ti-arrow-left"></i> Voltar
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="form-section">
-                        <div class="ativ-etapa"><span><i class="ti ti-printer"></i></span> Impressão</div>
+                    <div class="form-section" id="cardImpressao" hidden>
+                        <div class="ativ-etapa"><span><i class="ti ti-printer"></i></span> Salvar e imprimir</div>
                         <div class="linha">
                             <div class="form-group w-100">
                                 <label>Paciente <small>(opcional)</small></label>
