@@ -16,11 +16,21 @@
 const CHAVE_ATIVIDADES = "atividadesTerapeuticas";
 const CHAVE_IMPRESSAO = "atividadeImpressao"; // passagem temporária para a folha de impressão
 
-const CATEGORIAS = [
-    "Ansiedade", "Autoestima", "Autoconhecimento", "Pensamentos automáticos",
-    "Regulação emocional", "Relacionamentos", "Habilidades sociais",
-    "Resolução de problemas", "Ativação comportamental", "Outros"
-];
+// listas dos selects "Categoria" e "Tipo de atividade" — a Dra pode editar (lápis).
+// Ficam salvas na chave "atividadesListas". Mudar a lista não altera as atividades já salvas.
+const CHAVE_LISTAS = "atividadesListas";
+const LISTAS_PADRAO = {
+    categorias: [
+        "Ansiedade", "Autoestima", "Autoconhecimento", "Pensamentos automáticos",
+        "Regulação emocional", "Relacionamentos", "Habilidades sociais",
+        "Resolução de problemas", "Ativação comportamental", "Outros"
+    ],
+    tipos: [
+        "Perguntas reflexivas", "Exercício escrito", "Diário de acompanhamento",
+        "Registro de pensamentos", "Questionário reflexivo", "Exercício prático"
+    ]
+};
+let listas = JSON.parse(JSON.stringify(LISTAS_PADRAO));
 
 // espaço de resposta de cada pergunta
 const ESPACOS = [
@@ -116,27 +126,136 @@ async function carregarPacientes() {
     lista.innerHTML = "";
     mapaPacientes = {};
 
-    const adicionar = (rotulo, nome, idade) => {
-        mapaPacientes[rotulo] = { nome, idade };
+    const adicionar = (rotulo, nome, idade, destino) => {
+        mapaPacientes[rotulo] = { nome, idade, destino };
         const opt = document.createElement("option");
         opt.value = rotulo;
         lista.appendChild(opt);
     };
 
     pacientes.filter(p => !p.excluido).forEach(p => {
-        adicionar(`${p.nomeCompleto} — Paciente (${p.id})`, p.nomeCompleto, p.idade);
+        adicionar(`${p.nomeCompleto} — Paciente (${p.id})`, p.nomeCompleto, p.idade, { origem: "individual", id: p.id });
     });
     casais.filter(c => !c.excluido).forEach(c => {
-        if (c.p1NomeCompleto) adicionar(`${c.p1NomeCompleto} — Casal (${c.id})`, c.p1NomeCompleto, c.p1Idade);
-        if (c.p2NomeCompleto) adicionar(`${c.p2NomeCompleto} — Casal (${c.id})`, c.p2NomeCompleto, c.p2Idade);
+        if (c.p1NomeCompleto) adicionar(`${c.p1NomeCompleto} — Casal (${c.id})`, c.p1NomeCompleto, c.p1Idade, { origem: "casal", id: c.id, pessoa: "p1" });
+        if (c.p2NomeCompleto) adicionar(`${c.p2NomeCompleto} — Casal (${c.id})`, c.p2NomeCompleto, c.p2Idade, { origem: "casal", id: c.id, pessoa: "p2" });
     });
 }
 
 function pacienteDoCampo(id) {
     const valor = $(id).value.trim();
     if (!valor) return null;
-    return mapaPacientes[valor] || { nome: valor.replace(/\s+—\s+.*$/, ""), idade: null };
+    return mapaPacientes[valor] || { nome: valor.replace(/\s+—\s+.*$/, ""), idade: null, destino: null };
 }
+
+// ------------------------------------------
+// LISTAS EDITÁVEIS (Categoria / Tipo de atividade)
+// ------------------------------------------
+async function carregarListas() {
+    try {
+        const salvo = JSON.parse(await window.storage.getItem(CHAVE_LISTAS)) || {};
+        ["categorias", "tipos"].forEach(nome => {
+            if (Array.isArray(salvo[nome]) && salvo[nome].length) listas[nome] = salvo[nome];
+        });
+    } catch (e) { /* mantém o padrão */ }
+}
+
+async function gravarListas() {
+    let salvo = {};
+    try { salvo = JSON.parse(await window.storage.getItem(CHAVE_LISTAS)) || {}; } catch (e) { }
+    await window.storage.setItem(CHAVE_LISTAS, JSON.stringify({ ...salvo, ...listas }));
+}
+
+function preencherSelect(select, itens) {
+    const atual = select.value;
+    select.innerHTML = itens.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join("");
+    if (itens.includes(atual)) select.value = atual;
+}
+
+function preencherSelectsDasListas() {
+    preencherSelect($("ativCategoria"), listas.categorias);
+    preencherSelect($("ativTipo"), listas.tipos);
+    $("linhaCategoriaOutra").hidden = $("ativCategoria").value !== "Outros";
+}
+
+const NOMES_LISTA = {
+    categorias: { titulo: "Categorias de atividade", novo: "Nova categoria..." },
+    tipos: { titulo: "Tipos de atividade", novo: "Novo tipo de atividade..." }
+};
+
+function linhaDaLista(valor) {
+    return `
+        <div class="lista-edicao-item">
+            <i class="ti ti-grip-vertical"></i>
+            <input type="text" value="${esc(valor)}" data-original="${esc(valor)}">
+            <button type="button" data-acao="subir" title="Mover para cima"><i class="ti ti-arrow-up"></i></button>
+            <button type="button" data-acao="apagar" class="perigo" title="Apagar"><i class="ti ti-trash"></i></button>
+        </div>`;
+}
+
+async function editarLista(nomeLista) {
+    const info = NOMES_LISTA[nomeLista];
+    const resultado = await Swal.fire({
+        title: info.titulo,
+        html: `
+            <p class="lista-edicao-ajuda">Edite os nomes, apague ou acrescente. As atividades já salvas não mudam.</p>
+            <div class="lista-edicao" id="listaEdicao">${listas[nomeLista].map(linhaDaLista).join("")}</div>
+            <div class="lista-edicao-nova">
+                <input type="text" id="listaEdicaoNovo" placeholder="${info.novo}">
+                <button type="button" id="listaEdicaoAdicionar"><i class="ti ti-plus"></i> Adicionar</button>
+            </div>`,
+        width: 520,
+        showCancelButton: true,
+        confirmButtonText: "Salvar lista",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#8a9e78",
+        customClass: { popup: "lista-edicao-popup" },
+        didOpen: () => {
+            const lista = document.getElementById("listaEdicao");
+            const novo = document.getElementById("listaEdicaoNovo");
+            const adicionar = () => {
+                const valor = novo.value.trim();
+                if (!valor) return;
+                lista.insertAdjacentHTML("beforeend", linhaDaLista(valor));
+                novo.value = "";
+                novo.focus();
+            };
+            document.getElementById("listaEdicaoAdicionar").addEventListener("click", adicionar);
+            novo.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); adicionar(); } });
+            lista.addEventListener("click", (e) => {
+                const botao = e.target.closest("button[data-acao]");
+                if (!botao) return;
+                const linha = botao.closest(".lista-edicao-item");
+                if (botao.dataset.acao === "apagar") linha.remove();
+                if (botao.dataset.acao === "subir" && linha.previousElementSibling) {
+                    linha.parentNode.insertBefore(linha, linha.previousElementSibling);
+                }
+            });
+        },
+        preConfirm: () => {
+            const novoPendente = document.getElementById("listaEdicaoNovo").value.trim();
+            const valores = [...document.querySelectorAll("#listaEdicao input")].map(i => i.value.trim());
+            if (novoPendente) valores.push(novoPendente);
+            const unicos = valores.filter((v, i) => v && valores.findIndex(x => x.toLowerCase() === v.toLowerCase()) === i);
+            if (!unicos.length) {
+                Swal.showValidationMessage("A lista precisa ter pelo menos um item.");
+                return false;
+            }
+            return unicos;
+        }
+    });
+
+    if (!resultado.isConfirmed) return;
+    listas[nomeLista] = resultado.value;
+    await gravarListas();
+    preencherSelectsDasListas();
+    preencherFiltroCategorias();
+    mostrarMensagem("Lista atualizada!", "success");
+}
+
+document.querySelectorAll(".ativ-editar-lista").forEach(botao => {
+    botao.addEventListener("click", () => editarLista(botao.dataset.lista));
+});
 
 // ------------------------------------------
 // NAVEGAÇÃO ENTRE AS TELAS
@@ -211,7 +330,7 @@ function renderizarRecentes() {
 function preencherFiltroCategorias() {
     const select = $("bibCategoria");
     const atual = select.value;
-    const usadas = [...new Set([...CATEGORIAS, ...atividades.map(a => a.categoria).filter(Boolean)])];
+    const usadas = [...new Set([...listas.categorias, ...atividades.map(a => a.categoria).filter(Boolean)])];
     select.innerHTML = `<option value="">Todas</option>` + usadas.map(c => `<option>${esc(c)}</option>`).join("");
     select.value = atual;
 
@@ -287,10 +406,11 @@ function limparFormulario() {
     ["ativPaciente", "ativObjetivo", "ativOrientacoesPsi", "ativCategoriaOutra", "textoPrompt", "textoColado"]
         .forEach(id => { $(id).value = ""; });
     $("ativFaixa").value = "Adulto";
-    $("ativCategoria").value = CATEGORIAS[0];
+    preencherSelectsDasListas();
+    $("ativCategoria").selectedIndex = 0;
     $("ativTipo").selectedIndex = 0;
     $("ativQuantidade").value = 6;
-    $("linhaCategoriaOutra").hidden = true;
+    $("linhaCategoriaOutra").hidden = $("ativCategoria").value !== "Outros";
     $("secaoPrompt").hidden = true;
     $("secaoColar").hidden = true;
 }
@@ -698,8 +818,55 @@ $("btnSalvar").addEventListener("click", async () => {
     alterado = false;
     atualizarSelo();
     renderizarRecentes();
-    mostrarMensagem("Atividade salva na biblioteca!", "success");
+
+    // com paciente escolhido: guarda o PDF nos Documentos do paciente (tela Sessões)
+    const paciente = pacienteDoCampo("impPaciente");
+    if (paciente && paciente.destino && atividade.perguntas.length) {
+        guardarNosDocumentos(atividade, paciente);
+    } else {
+        mostrarMensagem(
+            $("impPaciente").value.trim() && !(paciente && paciente.destino)
+                ? "Atividade salva na biblioteca! O paciente digitado não foi encontrado no cadastro, por isso ela não foi guardada nos documentos."
+                : "Atividade salva na biblioteca!",
+            $("impPaciente").value.trim() && !(paciente && paciente.destino) ? "info" : "success"
+        );
+    }
 });
+
+// abre a folha em uma janela que gera o PDF, guarda nos documentos do paciente e fecha
+function guardarNosDocumentos(atividade, paciente) {
+    const opcoes = opcoesDeImpressao();
+    const dados = {
+        atividade,
+        paciente: opcoes.mostrarNome ? paciente.nome : "",
+        data: opcoes.data || hojeISO(),
+        destino: paciente.destino
+    };
+    localStorage.removeItem(CHAVE_RESULTADO_DOCS);
+    localStorage.setItem(CHAVE_IMPRESSAO, JSON.stringify(dados));
+    window.open("imprimir-atividade.html?guardar=true", "_blank", "width=900,height=700");
+    aguardarResultadoDocs(paciente.nome);
+}
+
+const CHAVE_RESULTADO_DOCS = "atividadeGuardadaResultado";
+
+function aguardarResultadoDocs(nome) {
+    let tentativas = 0;
+    const timer = setInterval(() => {
+        tentativas++;
+        const bruto = localStorage.getItem(CHAVE_RESULTADO_DOCS);
+        if (!bruto && tentativas < 60) return;
+        clearInterval(timer);
+        localStorage.removeItem(CHAVE_RESULTADO_DOCS);
+        let r = null;
+        try { r = JSON.parse(bruto); } catch (e) { }
+        if (r && r.ok) {
+            mostrarMensagem(`Atividade salva na biblioteca e guardada nos Documentos de ${nome}${r.substituiu ? " (a versão anterior ficou como substituída)" : ""}!`, "success");
+        } else {
+            mostrarMensagem(`Atividade salva na biblioteca, mas não foi possível guardar nos Documentos de ${nome}${r && r.erro ? `: ${r.erro}` : "."}`, "warning");
+        }
+    }, 500);
+}
 
 function textoCompleto(a) {
     return [
@@ -759,7 +926,8 @@ window.addEventListener("beforeunload", (e) => {
 // INÍCIO
 // ------------------------------------------
 (async () => {
-    await Promise.all([carregarAtividades(), carregarPacientes()]);
+    await Promise.all([carregarAtividades(), carregarPacientes(), carregarListas()]);
+    preencherSelectsDasListas();
     preencherFiltroCategorias();
     renderizarRecentes();
 })();

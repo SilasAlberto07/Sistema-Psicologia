@@ -24,6 +24,7 @@ const DocsPaciente = (() => {
         atestado:   { nome: "Atestado",   plural: "Atestados",   icone: "ti-stethoscope",      geravel: true,  editavel: true },
         declaracao: { nome: "Declaração", plural: "Declarações", icone: "ti-file-text",        geravel: true,  editavel: true },
         devolutiva: { nome: "Devolutiva", plural: "Devolutivas", icone: "ti-report",           geravel: true,  editavel: true },
+        atividade:  { nome: "Atividade",  plural: "Atividades",  icone: "ti-notebook",         geravel: false, editavel: false }, // vem da tela Atividades Terapêuticas
         teste:      { nome: "Teste",      plural: "Testes",      icone: "ti-clipboard-check",  geravel: false, editavel: false },
         anexo:      { nome: "Anexo",      plural: "Anexos",      icone: "ti-paperclip",        geravel: false, editavel: false }
     };
@@ -103,7 +104,8 @@ const DocsPaciente = (() => {
                 nomePessoa: doc.nomePessoa || nomeDaPessoa(registro, origem, doc.pessoa),
                 data: doc.criadoEm,
                 status: doc.status || "ativo",
-                origemTexto: doc.substitui ? "Gerado em Documentos (versão editada)" : "Gerado em Documentos",
+                origemTexto: (doc.tipo === "atividade" ? "Atividades Terapêuticas" : "Gerado em Documentos")
+                    + (doc.substitui ? " (versão editada)" : ""),
                 arquivo: { tipo: "pdf", dados: doc.pdf, nome: `${doc.titulo}.pdf` },
                 doc
             });
@@ -150,7 +152,7 @@ const DocsPaciente = (() => {
         const doc = {
             id: novoId(),
             tipo: info.tipo,
-            titulo: TITULOS[info.tipo] || TIPOS[info.tipo]?.nome || "Documento",
+            titulo: info.titulo || TITULOS[info.tipo] || TIPOS[info.tipo]?.nome || "Documento",
             criadoEm: agora,
             status: "ativo",
             dados: info.dados,
@@ -218,6 +220,7 @@ const DocsPaciente = (() => {
 
         return salvarDocumentoGerado(destino, {
             tipo: dadosTemp.tipo,
+            titulo: dadosTemp.tituloDocumento,
             dados,
             substitui: dadosTemp.substitui
         }, `data:application/pdf;base64,${base64}`);

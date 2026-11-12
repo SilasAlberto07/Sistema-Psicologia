@@ -84,29 +84,21 @@
                         <div class="linha">
                             <div class="form-group w-50">
                                 <label>Categoria da atividade</label>
-                                <select id="ativCategoria">
-                                    <option>Ansiedade</option>
-                                    <option>Autoestima</option>
-                                    <option>Autoconhecimento</option>
-                                    <option>Pensamentos automáticos</option>
-                                    <option>Regulação emocional</option>
-                                    <option>Relacionamentos</option>
-                                    <option>Habilidades sociais</option>
-                                    <option>Resolução de problemas</option>
-                                    <option>Ativação comportamental</option>
-                                    <option>Outros</option>
-                                </select>
+                                <div class="ativ-select-editavel">
+                                    <select id="ativCategoria"></select>
+                                    <button type="button" class="ativ-editar-lista" data-lista="categorias" title="Editar lista de categorias">
+                                        <i class="ti ti-pencil"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="form-group w-100">
                                 <label>Tipo de atividade</label>
-                                <select id="ativTipo">
-                                    <option>Perguntas reflexivas</option>
-                                    <option>Exercício escrito</option>
-                                    <option>Diário de acompanhamento</option>
-                                    <option>Registro de pensamentos</option>
-                                    <option>Questionário reflexivo</option>
-                                    <option>Exercício prático</option>
-                                </select>
+                                <div class="ativ-select-editavel">
+                                    <select id="ativTipo"></select>
+                                    <button type="button" class="ativ-editar-lista" data-lista="tipos" title="Editar lista de tipos de atividade">
+                                        <i class="ti ti-pencil"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -254,6 +246,10 @@
                             <input type="checkbox" id="impMostrarNome" checked>
                             Mostrar o nome do paciente na folha (somente se autorizado)
                         </label>
+                        <p class="ativ-ajuda ativ-ajuda-docs">
+                            <i class="ti ti-folder"></i> Com um paciente escolhido, ao <strong>salvar</strong> a atividade também fica guardada
+                            nos <strong>Documentos</strong> do paciente (tela Sessões).
+                        </p>
 
                         <div class="ativ-botoes ativ-botoes-final">
                             <button type="button" class="ativ-btn" id="btnCancelarEditor">
