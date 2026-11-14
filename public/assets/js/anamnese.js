@@ -280,6 +280,9 @@ const estiloSwal = document.createElement('style');
 estiloSwal.innerHTML = `.swal2-container { z-index: 999999 !important; }`;
 document.head.appendChild(estiloSwal);
 
+// pede para a IA devolver tudo numa caixa de código (botão de copiar)
+const OBS_CAIXA_COPIAR = "\n\nOBSERVAÇÃO: Coloque a resposta inteira dentro de UM ÚNICO bloco de código (caixa de código do tipo texto), para que possa ser copiada clicando apenas no ícone de copiar. Dentro da caixa coloque somente os títulos acima com as respostas preenchidas, usando exatamente os mesmos títulos, cada um no começo de uma linha e seguido de dois-pontos. Não use negrito, asteriscos, # ou qualquer outra formatação dentro da caixa, e não escreva nenhum outro comentário dentro dela.";
+
 function gerarPromptAnamnese() {
     const idade = Number(paciente.idade);
     const menor = !isNaN(idade) && idade < 18;
@@ -288,7 +291,7 @@ function gerarPromptAnamnese() {
 
     const aviso = "Preencha as perguntas baseado com o relato do paciente citado abaixo, a responda deve ser de acordo com o código de ética CFPe a abordagem da TCC:\n\n";
 
-    return aviso + campos.map(label => `${label}:`).join("\n");
+    return aviso + campos.map(label => `${label}:`).join("\n") + OBS_CAIXA_COPIAR;
 }
 
 const modalPromptIA = document.getElementById("modalPromptIAAnamnese");
