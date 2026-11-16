@@ -511,3 +511,26 @@
 .link-altas:hover {
     background-color: #e0ead6;
 }
+
+/* botão "Abrir ChatGPT" das janelas de prompt (mesmo visual do botão das Atividades) */
+.btn-abrir-chatgpt {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 8px;
+    border: 1px solid #8a9e78;
+    background-color: #ffffff;
+    color: #5c7a48;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.btn-abrir-chatgpt:hover {
+    background-color: #eef4e8;
+}

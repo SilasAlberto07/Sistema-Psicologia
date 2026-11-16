@@ -121,10 +121,13 @@ const estiloSwalDev = document.createElement("style");
 estiloSwalDev.innerHTML = `.swal2-container { z-index: 999999 !important; }`;
 document.head.appendChild(estiloSwalDev);
 
+// pede para a IA devolver tudo numa caixa de código (botão de copiar)
+const OBS_CAIXA_COPIAR = "\n\nOBSERVAÇÃO: Coloque a resposta inteira dentro de UM ÚNICO bloco de código (caixa de código do tipo texto), para que possa ser copiada clicando apenas no ícone de copiar. Dentro da caixa coloque somente os títulos acima com as respostas preenchidas, usando exatamente os mesmos títulos, cada um no começo de uma linha e seguido de dois-pontos. Não use negrito, asteriscos, # ou qualquer outra formatação dentro da caixa, e não escreva nenhum outro comentário dentro dela.";
+
 function gerarPromptDevolutiva() {
     const aviso = "Preencha os tópicos do Relatório de Devolutiva do Acompanhamento Psicológico baseado no resumo do acompanhamento citado abaixo. As respostas devem ser de acordo com o código de ética do CFP e a abordagem da TCC, de forma ética, técnica e revisada com o CFP. Mantenha exatamente os títulos abaixo, seguidos de dois-pontos. Em \"Evolução observada\", escreva um indicador por linha.\n\n";
     const campos = mapaCamposDevolutiva.map(([label]) => `${label}:`).join("\n");
-    return aviso + campos;
+    return aviso + campos + OBS_CAIXA_COPIAR;
 }
 
 const modalPromptIADev = $dev("modalPromptIADevolutiva");

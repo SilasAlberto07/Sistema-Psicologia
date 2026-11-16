@@ -477,7 +477,9 @@ function montarPrompt() {
         "PERGUNTAS:",
         "1. (pergunta) [média]",
         "2. (pergunta) [longa]",
-        "ORIENTAÇÕES FINAIS: (mensagem final breve e acolhedora)"
+        "ORIENTAÇÕES FINAIS: (mensagem final breve e acolhedora)",
+        "",
+        "OBSERVAÇÃO: Coloque a atividade inteira dentro de UM ÚNICO bloco de código (caixa de código do tipo texto), para que possa ser copiada clicando apenas no ícone de copiar. Dentro da caixa coloque somente a atividade no formato acima, sem negrito, asteriscos, # ou qualquer outra formatação, e não escreva nenhum outro comentário dentro dela."
     ].filter((linha, i, todas) => !(linha === "" && todas[i - 1] === "")).join("\n").replace(/\n{3,}/g, "\n\n");
 }
 
