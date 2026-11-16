@@ -921,6 +921,8 @@ function abrirImpressao(atividade, visualizar, opcoes = {}) {
     const dados = {
         atividade,
         paciente: opcoes.mostrarNome && opcoes.paciente ? opcoes.paciente : "",
+        // usado só no nome do arquivo ao baixar o PDF ("Atividade - Nome do paciente.pdf")
+        nomeArquivo: opcoes.paciente || "",
         data: opcoes.data || hojeISO()
     };
     localStorage.setItem(CHAVE_IMPRESSAO, JSON.stringify(dados));
@@ -930,14 +932,13 @@ function abrirImpressao(atividade, visualizar, opcoes = {}) {
 function opcoesDeImpressao() {
     const p = pacienteDoCampo("impPaciente");
     return {
-        paciente: p ? p.nome : "",
+        paciente: p ? p.nome : $("impPaciente").value.trim(),
         mostrarNome: $("impMostrarNome").checked,
         data: $("impData").value
     };
 }
 
 $("btnVisualizar").addEventListener("click", () => { if (exigirRevisao()) abrirImpressao(atividadeDoEditor(), true, opcoesDeImpressao()); });
-$("btnImprimir").addEventListener("click", () => { if (exigirRevisao()) abrirImpressao(atividadeDoEditor(), false, opcoesDeImpressao()); });
 
 // avisa antes de fechar a página com alterações não salvas
 window.addEventListener("beforeunload", (e) => {

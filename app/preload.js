@@ -25,7 +25,9 @@ contextBridge.exposeInMainWorld('senhaBackup', {
 
 // Documentos do paciente: gera o PDF da página de impressão aberta
 contextBridge.exposeInMainWorld('documentosPDF', {
-    gerar: () => ipcRenderer.invoke('documento-gerar-pdf')
+    gerar: () => ipcRenderer.invoke('documento-gerar-pdf'),
+    // Atividades: gera o PDF da folha aberta e pergunta onde salvar
+    baixar: (nomeSugerido) => ipcRenderer.invoke('atividade-baixar-pdf', nomeSugerido)
 });
 
 // Atividades Terapêuticas: abre o ChatGPT no navegador do computador

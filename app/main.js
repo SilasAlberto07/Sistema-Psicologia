@@ -933,6 +933,36 @@ ipcMain.handle('documento-gerar-pdf', async (event) => {
     }
 });
 
+// Atividades Terapêuticas: botão "Baixar PDF" da visualização.
+// Gera o PDF da folha aberta e pergunta onde salvar (já com o nome "Atividade - Paciente.pdf").
+ipcMain.handle('atividade-baixar-pdf', async (event, nomeSugerido) => {
+    if (!auth || !auth.estaAutenticado()) return { ok: false };
+    try {
+        let nome = String(nomeSugerido || 'Atividade.pdf').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
+        if (!/\.pdf$/i.test(nome)) nome += '.pdf';
+
+        const pdf = await event.sender.printToPDF({
+            printBackground: true,
+            pageSize: 'A4',
+            preferCSSPageSize: true
+        });
+
+        const janela = BrowserWindow.fromWebContents(event.sender);
+        const escolha = await dialog.showSaveDialog(janela, {
+            title: 'Salvar atividade em PDF',
+            defaultPath: path.join(app.getPath('downloads'), nome),
+            filters: [{ name: 'PDF', extensions: ['pdf'] }]
+        });
+        if (escolha.canceled || !escolha.filePath) return { ok: false, cancelado: true };
+
+        fs.writeFileSync(escolha.filePath, pdf);
+        return { ok: true, caminho: escolha.filePath };
+    } catch (err) {
+        log.error('[atividades] Falha ao baixar PDF:', err);
+        return { ok: false };
+    }
+});
+
 // Atividades Terapêuticas: botão "Abrir ChatGPT".
 // Abre no navegador do computador (fora do programa), e SOMENTE este endereço —
 // a tela não consegue pedir para abrir outro site por aqui.

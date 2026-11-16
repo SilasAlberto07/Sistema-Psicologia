@@ -162,16 +162,47 @@ function compactarPaginas() {
     });
 }
 
-function montarBarra() {
+// nome do arquivo: "Atividade - Nome do paciente.pdf" (sem paciente: usa o título)
+function nomeDoPDF(dados) {
+    const nome = String(dados.nomeArquivo || dados.paciente || "").trim()
+        || (dados.atividade && dados.atividade.titulo) || "Terapêutica";
+    const limpo = nome.replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
+    return `Atividade - ${limpo || "Terapêutica"}.pdf`;
+}
+
+function montarBarra(dados) {
     const barra = document.createElement("div");
     barra.className = "barra-acoes-tela";
     barra.innerHTML = `
-        <button type="button" id="btnImprimirAtividade">🖨️ Imprimir / Salvar PDF</button>
+        <button type="button" id="btnImprimirAtividade">🖨️ Imprimir</button>
+        <button type="button" id="btnBaixarPdfAtividade">📄 Baixar PDF</button>
         <button type="button" id="btnFecharAtividade" class="secundario">Fechar</button>
     `;
     document.body.prepend(barra);
     document.getElementById("btnImprimirAtividade").addEventListener("click", () => window.print());
     document.getElementById("btnFecharAtividade").addEventListener("click", () => window.close());
+
+    const btnPdf = document.getElementById("btnBaixarPdfAtividade");
+    btnPdf.addEventListener("click", async () => {
+        if (!window.documentosPDF || !window.documentosPDF.baixar) {
+            alert("Não foi possível gerar o PDF.");
+            return;
+        }
+        const texto = btnPdf.textContent;
+        btnPdf.disabled = true;
+        btnPdf.textContent = "Gerando PDF...";
+        try {
+            const r = await window.documentosPDF.baixar(nomeDoPDF(dados));
+            if (r && r.ok) btnPdf.textContent = "✔ PDF salvo";
+            else if (r && r.cancelado) btnPdf.textContent = texto;
+            else { alert("Não foi possível salvar o PDF."); btnPdf.textContent = texto; }
+        } catch (e) {
+            alert("Não foi possível salvar o PDF.");
+            btnPdf.textContent = texto;
+        }
+        btnPdf.disabled = false;
+        if (btnPdf.textContent !== texto) setTimeout(() => { btnPdf.textContent = texto; }, 2500);
+    });
 }
 
 // ═══════════════════════════════════════════════
@@ -231,7 +262,7 @@ async function guardarNosDocumentos(dados) {
                     localStorage.setItem("atividadeGuardadaResultado", JSON.stringify(resultado));
                     window.close();
                 });
-        } else if (modoVisualizar) montarBarra();
+        } else if (modoVisualizar) montarBarra(dados);
         else window.print();
     });
 })();
