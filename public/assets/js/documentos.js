@@ -274,6 +274,11 @@ btnGerar.addEventListener("click", async () => {
         return;
     }
 
+    if (["laudo", "relatorio", "entrevista"].includes(tipoDocumento.value)) {
+        gerarLaudoRelatorio(tipoDocumento.value);
+        return;
+    }
+
     const selecao = mapaOpcoes[inputPaciente.value.trim()];
 
     if (!selecao) {

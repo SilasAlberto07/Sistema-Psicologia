@@ -471,3 +471,42 @@ body {
         position: fixed;
     }
 }
+
+/* ---------- DOCUMENTO COMPACTO (relatório de entrevista — empresa) ----------
+   Menos espaço entre as linhas e entre as seções, para caber em uma folha. */
+.folha-compacta .documento-texto,
+.folha-compacta .documento-lista,
+.folha-compacta .devolutiva-identificacao p {
+    line-height: 1.4;
+}
+
+.folha-compacta .documento-texto {
+    margin-bottom: 4px;
+}
+
+/* identificação (empresa, cargo, candidato, idade): um pouco mais espaçada que o resto */
+.folha-compacta .devolutiva-identificacao p {
+    margin: 0;
+    line-height: 1.75;
+}
+
+.folha-compacta .devolutiva-identificacao {
+    margin-bottom: 6px;
+}
+
+.folha-compacta .titulo-secao {
+    margin: 10px 0 4px;
+    padding-bottom: 2px;
+}
+
+.folha-compacta .documento-data {
+    margin-top: 12px;
+}
+
+.folha-compacta .assinatura {
+    padding-top: 7mm;
+}
+
+.folha-compacta .timestamp-impressao {
+    margin-top: 6px;
+}

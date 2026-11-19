@@ -93,6 +93,188 @@ if (!dados) {
                 <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
                 <p>CRP 18/9851</p>`;
 
+    } else if (dados.tipo === "entrevista") {
+
+        // RELATÓRIO DE ENTREVISTA – RECRUTAMENTO E SELEÇÃO (documento para empresa)
+        const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        // Texto copiado de PDF vem com quebra de linha no fim de cada linha.
+        // Junta as linhas quebradas no meio da frase de volta em um parágrafo só
+        // (assim o texto fica justificado e sem espaço extra entre as linhas).
+        // Novo parágrafo só depois de linha em branco ou de linha que termina com . ! ? ou :
+        // (texto copiado de PDF: só depois de linha em branco)
+        const ehTopico = (l) => /^\s*[-•*–]\s+/.test(l);
+        const paragrafos = (t) => {
+            const blocos = [];
+            let atual = null;
+            const todas = String(t || "").split(/\n/).map(l => l.trim()).filter(l => l && !ehTopico(l));
+            // a maioria das linhas termina sem ponto → texto copiado de PDF:
+            // só a linha em branco separa parágrafo (junta mesmo se a linha terminar com ponto)
+            const semPonto = todas.filter(l => !/[.!?:]["”)]?$/.test(l)).length;
+            const copiadoDePDF = todas.length >= 3 && semPonto / todas.length >= 0.5;
+            String(t || "").split(/\n/).forEach(bruta => {
+                const linha = bruta.trim();
+                if (!linha) { atual = null; return; }
+                if (ehTopico(linha)) {
+                    atual = { topico: true, texto: linha.replace(/^\s*[-•*–]\s+/, "") };
+                    blocos.push(atual);
+                    return;
+                }
+                if (atual && !atual.topico && (copiadoDePDF || !/[.!?:]["”)]?$/.test(atual.texto))) {
+                    // palavra quebrada com hífen no fim da linha ("compe-" + "tências")
+                    atual.texto = /[A-Za-zÀ-ÿ]-$/.test(atual.texto)
+                        ? atual.texto.slice(0, -1) + linha
+                        : `${atual.texto} ${linha}`;
+                    return;
+                }
+                atual = { topico: false, texto: linha };
+                blocos.push(atual);
+            });
+            return blocos.map(b => b.topico
+                ? `<ul class="documento-lista"><li>${esc(b.texto)}</li></ul>`
+                : `<p class="documento-texto">${esc(b.texto)}</p>`).join("");
+        };
+        const porExtenso = (d) => {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(d || "")) return "";
+            const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho",
+                "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+            const [ano, mes, dia] = d.split("-");
+            return `${Number(dia)} de ${meses[Number(mes) - 1]} de ${ano}`;
+        };
+        const localData = [dados.cidadeEstado, porExtenso(dados.data)].map(t => String(t || "").trim()).filter(Boolean).join(", ");
+        const linhaId = (rotulo, valor) => valor ? `<p><strong>${rotulo}:</strong> ${esc(valor)}</p>` : "";
+
+        corpoHTML = `
+            <div class="cabecalho-print">
+                <h1>Relatório de Entrevista – Recrutamento e Seleção</h1>
+            </div>
+
+            <div class="devolutiva-identificacao">
+                ${linhaId("Empresa", dados.empresa)}
+                ${linhaId("Cargo", dados.cargo)}
+                ${linhaId("Candidato(a)", dados.candidato || dados.nomeCompleto)}
+                ${linhaId("Idade", dados.idade)}
+            </div>
+
+            <div class="titulo-secao">1. Objetivo do acompanhamento da entrevista</div>
+            ${paragrafos(dados.objetivo)}
+
+            <div class="titulo-secao">2. Desenvolvimento do processo seletivo</div>
+            ${paragrafos(dados.desenvolvimento)}
+
+            <div class="titulo-secao">3. Indicadores comportamentais identificados</div>
+            ${paragrafos(dados.indicadores)}
+
+            <div class="titulo-secao">4. Evolução observada e considerações finais</div>
+            ${paragrafos(dados.consideracoes)}
+
+            ${localData ? `<p class="documento-data">${esc(localData)}.</p>` : ""}
+        `;
+
+        assinaturaHTML = `
+                <p>Responsável pela entrevista:</p>
+                <h3>${esc(dados.responsavel || "Psicóloga Organizacional – Dra. Cláudia Bethânia")}</h3>
+                <p>CRP 18/9851${dados.empresa ? ` · ${esc(dados.empresa)}` : ""}</p>`;
+
+    } else if (dados.tipo === "laudo" || dados.tipo === "relatorio") {
+
+        // LAUDO PSICOLÓGICO / RELATÓRIO PSICOLÓGICO
+        // Só sai o que foi escrito nos campos. Linha começando com "-", "•" ou "*" vira tópico.
+        const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        const ehTopico = (l) => /^\s*[-•*–]\s+/.test(l);
+        const blocos = (t) => {
+            const linhas = String(t || "").split(/\n/).map(l => l.trim()).filter(Boolean);
+            let html = "", lista = [];
+            const fecharLista = () => {
+                if (lista.length) html += `<ul class="documento-lista">${lista.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`;
+                lista = [];
+            };
+            linhas.forEach(l => {
+                if (ehTopico(l)) lista.push(l.replace(/^\s*[-•*–]\s+/, ""));
+                else { fecharLista(); html += `<p class="documento-texto">${esc(l)}</p>`; }
+            });
+            fecharLista();
+            return html;
+        };
+        const dataBR = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d || "") ? d.split("-").reverse().join("/") : esc(d || "");
+        const porExtenso = (d) => {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(d || "")) return "";
+            const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho",
+                "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+            const [ano, mes, dia] = d.split("-");
+            return `${Number(dia)} de ${meses[Number(mes) - 1]} de ${ano}`;
+        };
+        const localData = [dados.cidadeEstado, porExtenso(dados.data)].map(t => String(t || "").trim()).filter(Boolean).join(", ");
+        const linhaId = (rotulo, valor) => valor ? `<p><strong>${rotulo}:</strong> ${valor}</p>` : "";
+
+        if (dados.tipo === "laudo") {
+            corpoHTML = `
+                <div class="cabecalho-print">
+                    <h1>Laudo Psicológico</h1>
+                </div>
+
+                <div class="titulo-secao">1) Identificação</div>
+                <div class="devolutiva-identificacao">
+                    ${linhaId("Nome", esc(dados.paciente || dados.nomeCompleto))}
+                    ${linhaId("Idade", esc(dados.idade))}
+                    ${linhaId("CPF", esc(dados.cpf))}
+                    ${linhaId("Solicitante", esc(dados.solicitante))}
+                    ${linhaId("Finalidade", esc(dados.finalidade))}
+                    <p><strong>Autora:</strong> Cláudia Bethânia Prechedes dos Santos Rocha da Silva, CRP 18/9851</p>
+                </div>
+
+                <div class="titulo-secao">2) Descrição</div>
+                ${blocos(dados.descricao)}
+
+                <div class="titulo-secao">3) Procedimentos</div>
+                ${blocos(dados.procedimentos)}
+
+                <div class="titulo-secao">4) Análise</div>
+                ${blocos(dados.analise)}
+
+                <div class="titulo-secao">5) Conclusão</div>
+                ${blocos(dados.conclusao)}
+
+                ${localData ? `<p class="documento-data">${esc(localData)}.</p>` : ""}
+            `;
+        } else {
+            corpoHTML = `
+                <div class="cabecalho-print">
+                    <h1>Relatório Psicológico</h1>
+                </div>
+
+                <div class="titulo-secao">1) Identificação</div>
+                <div class="devolutiva-identificacao">
+                    ${linhaId("Paciente", esc(dados.paciente || dados.nomeCompleto))}
+                    ${linhaId("Data de Nascimento", dataBR(dados.nascimento))}
+                    <p><strong>Psicóloga:</strong> Cláudia Bethânia Prechedes dos Santos Rocha da Silva</p>
+                    <p><strong>CRP:</strong> 18/9851</p>
+                    ${linhaId("Data do atendimento", dataBR(dados.dataAtendimento))}
+                    ${linhaId("Data de emissão", dataBR(dados.data))}
+                </div>
+
+                <div class="titulo-secao">2) Finalidade do documento</div>
+                ${blocos(dados.finalidade)}
+
+                <div class="titulo-secao">3) Descrição da Demanda</div>
+                ${blocos(dados.demanda)}
+
+                <div class="titulo-secao">4) Procedimento</div>
+                ${blocos(dados.procedimento)}
+
+                <div class="titulo-secao">5) Análise</div>
+                ${blocos(dados.analise)}
+
+                <div class="titulo-secao">6) Conclusão</div>
+                ${blocos(dados.conclusao)}
+
+                ${localData ? `<p class="documento-data">${esc(localData)}.</p>` : ""}
+            `;
+        }
+
+        assinaturaHTML = `
+                <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
+                <p>CRP 18/9851</p>`;
+
     } else if (dados.tipo === "declaracao" && dados.texto) {
 
         // texto escrito/editado pela Dra na tela Documentos
@@ -209,6 +391,13 @@ if (!dados) {
     // (espera a marca d'água carregar para ela sair no PDF)
     // (monta no modelo do contrato e espera fontes e logo carregarem)
     // atestado e declaração são curtos: o conteúdo fica centralizado na folha A4
-    const centralizar = dados.tipo !== "devolutiva";
-    FolhaPadrao.aplicar(container, { centralizar }).then(() => DocsPaciente.guardarEImprimir(dados));
+    const centralizar = !["devolutiva", "laudo", "relatorio", "entrevista"].includes(dados.tipo);
+    FolhaPadrao.aplicar(container, { centralizar }).then(() => {
+        // relatório de entrevista (empresa): texto mais compacto, com menos espaço entre as linhas
+        if (dados.tipo === "entrevista") {
+            const folha = container.querySelector(".folha");
+            if (folha) folha.classList.add("folha-compacta");
+        }
+        return DocsPaciente.guardarEImprimir(dados);
+    });
 }

@@ -24,6 +24,8 @@ const DocsPaciente = (() => {
         atestado:   { nome: "Atestado",   plural: "Atestados",   icone: "ti-stethoscope",      geravel: true,  editavel: true },
         declaracao: { nome: "Declaração", plural: "Declarações", icone: "ti-file-text",        geravel: true,  editavel: true },
         devolutiva: { nome: "Devolutiva", plural: "Devolutivas", icone: "ti-report",           geravel: true,  editavel: true },
+        laudo:      { nome: "Laudo",      plural: "Laudos",      icone: "ti-file-analytics",   geravel: true,  editavel: true },
+        relatorio:  { nome: "Relatório",  plural: "Relatórios",  icone: "ti-file-description", geravel: true,  editavel: true },
         atividade:  { nome: "Atividade",  plural: "Atividades",  icone: "ti-notebook",         geravel: false, editavel: false }, // vem da tela Atividades Terapêuticas
         teste:      { nome: "Teste",      plural: "Testes",      icone: "ti-clipboard-check",  geravel: false, editavel: false },
         anexo:      { nome: "Anexo",      plural: "Anexos",      icone: "ti-paperclip",        geravel: false, editavel: false }
@@ -33,7 +35,9 @@ const DocsPaciente = (() => {
         contrato: "Contrato de Prestação de Serviços de Psicoterapia",
         atestado: "Atestado Psicológico",
         declaracao: "Declaração de Comparecimento",
-        devolutiva: "Relatório de Devolutiva"
+        devolutiva: "Relatório de Devolutiva",
+        laudo: "Laudo Psicológico",
+        relatorio: "Relatório Psicológico"
     };
 
     const CHAVE_CONFIG = "configDocumentos";

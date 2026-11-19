@@ -30,7 +30,7 @@
                     <div id="avisoEdicao" class="aviso-edicao" style="display:none"></div>
 
                     <div class="linha">
-                        <div class="form-group w-100">
+                        <div class="form-group w-100" id="grupoInputPaciente">
                             <label>Paciente</label>
                             <input type="text" id="inputPaciente" list="listaPacientes" autocomplete="off"
                                 placeholder="Digite o nome do paciente ou casal...">
@@ -39,10 +39,17 @@
                         <div class="form-group w-50">
                             <label>Tipo de documento</label>
                             <select id="tipoDocumento">
-                                <option value="declaracao">Declaração de Comparecimento</option>
-                                <option value="atestado">Atestado Psicológico</option>
-                                <option value="contrato">Contrato de Prestação de Serviços de Psicoterapia</option>
-                                <option value="devolutiva">Relatório de Devolutiva</option>
+                                <optgroup label="Pacientes particulares (ficam guardados em Sessões)">
+                                    <option value="declaracao">Declaração de Comparecimento</option>
+                                    <option value="atestado">Atestado Psicológico</option>
+                                    <option value="contrato">Contrato de Prestação de Serviços de Psicoterapia</option>
+                                    <option value="devolutiva">Relatório de Devolutiva</option>
+                                    <option value="laudo">Laudo Psicológico</option>
+                                    <option value="relatorio">Relatório Psicológico</option>
+                                </optgroup>
+                                <optgroup label="Empresas — Psicologia Organizacional (não vão para Sessões)">
+                                    <option value="entrevista">Relatório de Entrevista – Recrutamento e Seleção</option>
+                                </optgroup>
                             </select>
                         </div>
                     </div>
@@ -346,6 +353,236 @@
                         </div>
                     </div>
 
+                    <!-- CAMPOS LAUDO PSICOLÓGICO -->
+                    <div id="camposLaudo" class="grupo-campos campos-ia" style="display:none">
+
+                        <div class="botoes-ia-devolutiva">
+                            <button type="button" class="btn-modal" data-ia-prompt>
+                                <i class="ti ti-robot"></i> Gerar Prompt para IA
+                            </button>
+                            <button type="button" class="btn-modal" data-ia-colar>
+                                <i class="ti ti-clipboard-text"></i> Preencher com Texto Colado
+                            </button>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">1) Identificação</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Nome</label>
+                                <input type="text" id="ldNome" placeholder="Vem do paciente escolhido acima — pode ajustar">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-20">
+                                <label>Idade</label>
+                                <input type="text" id="ldIdade" placeholder="Ex: 40 anos">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>CPF</label>
+                                <input type="text" id="ldCpf" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Solicitante</label>
+                                <input type="text" id="ldSolicitante"
+                                    placeholder="Ex: A própria avaliada, para fins de participação em concurso público">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Finalidade</label>
+                                <input type="text" id="ldFinalidade"
+                                    placeholder="Ex: Avaliação psicológica para fins de aptidão ao cargo de ...">
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">2) Descrição</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="ldDescricao" rows="4"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">3) Procedimentos <small>(linha começando com "-" vira tópico)</small></h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="ldProcedimentos" rows="5"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">4) Análise <small>(linha começando com "-" vira tópico — ex: um por teste)</small></h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="ldAnalise" rows="8"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">5) Conclusão</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="ldConclusao" rows="5"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="linha">
+                            <div class="form-group w-30">
+                                <label>Data do laudo</label>
+                                <input type="date" id="ldData">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CAMPOS RELATÓRIO PSICOLÓGICO -->
+                    <div id="camposRelatorio" class="grupo-campos campos-ia" style="display:none">
+
+                        <div class="botoes-ia-devolutiva">
+                            <button type="button" class="btn-modal" data-ia-prompt>
+                                <i class="ti ti-robot"></i> Gerar Prompt para IA
+                            </button>
+                            <button type="button" class="btn-modal" data-ia-colar>
+                                <i class="ti ti-clipboard-text"></i> Preencher com Texto Colado
+                            </button>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">1) Identificação</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Paciente</label>
+                                <input type="text" id="rlPaciente" placeholder="Vem do paciente escolhido acima — pode ajustar">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-30">
+                                <label>Data de nascimento</label>
+                                <input type="text" id="rlNascimento" placeholder="dd/mm/aaaa">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Data do atendimento</label>
+                                <input type="date" id="rlDataAtendimento">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Data de emissão</label>
+                                <input type="date" id="rlData">
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">2) Finalidade do documento</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="rlFinalidade" rows="2" placeholder="Ex: Relatório psicológico elaborado a pedido do paciente."></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">3) Descrição da Demanda</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="rlDemanda" rows="6"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">4) Procedimento</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="rlProcedimento" rows="4"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">5) Análise</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="rlAnalise" rows="8"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">6) Conclusão</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="rlConclusao" rows="5"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CAMPOS RELATÓRIO DE ENTREVISTA (EMPRESA) — não é guardado em Sessões -->
+                    <div id="camposEntrevista" class="grupo-campos campos-ia" style="display:none">
+
+                        <p class="aviso-empresa"><i class="ti ti-building"></i> Documento para <strong>empresa</strong>
+                            (Psicologia Organizacional). É só gerado e impresso — não fica guardado nos documentos de nenhum paciente.</p>
+
+                        <div class="botoes-ia-devolutiva">
+                            <button type="button" class="btn-modal" data-ia-prompt>
+                                <i class="ti ti-robot"></i> Gerar Prompt para IA
+                            </button>
+                            <button type="button" class="btn-modal" data-ia-colar>
+                                <i class="ti ti-clipboard-text"></i> Preencher com Texto Colado
+                            </button>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">Identificação</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Empresa</label>
+                                <input type="text" id="etEmpresa" placeholder="Ex: Via Tributária – Escritório de Contabilidade">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-50">
+                                <label>Cargo</label>
+                                <input type="text" id="etCargo" placeholder="Ex: Recepcionista">
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-50">
+                                <label>Candidato(a)</label>
+                                <input type="text" id="etCandidato" placeholder="Nome do(a) candidato(a)">
+                            </div>
+                            <div class="form-group w-20">
+                                <label>Idade</label>
+                                <input type="text" id="etIdade" placeholder="Ex: 28 anos">
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">1. Objetivo do acompanhamento da entrevista</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="etObjetivo" rows="4"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">2. Desenvolvimento do processo seletivo</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="etDesenvolvimento" rows="6"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">3. Indicadores comportamentais identificados</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="etIndicadores" rows="6"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">4. Evolução observada e considerações finais</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <textarea id="etConsideracoes" rows="6"></textarea>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">Responsável pela entrevista</h4>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Responsável</label>
+                                <input type="text" id="etResponsavel" value="Psicóloga Organizacional – Dra. Cláudia Bethânia">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Data do relatório</label>
+                                <input type="date" id="etData">
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Janela: prompt pronto para IA (Relatório de Devolutiva) -->
                     <div class="modal-colar oculto" id="modalPromptIADevolutiva">
                         <div class="modal-colar-box">
@@ -423,6 +660,7 @@
     <script src="../assets/js/documentos-paciente.js"></script>
     <script src="../assets/js/documentos.js"></script>
     <script src="../assets/js/documentos-devolutiva.js"></script>
+    <script src="../assets/js/documentos-laudo-relatorio.js"></script>
 </body>
 
 </html>
