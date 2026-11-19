@@ -445,6 +445,9 @@ const CAMPOS_EDICAO = {
 function abrirEdicaoDaURL() {
     const params = new URLSearchParams(window.location.search);
 
+    // empresa (Psicologia Organizacional): quem cuida é o documentos-laudo-relatorio.js
+    if (params.has("empresa") || params.get("origem") === "empresa") return;
+
     // "Novo documento" pela tela Sessões: já deixa o paciente escolhido
     const paciente = params.get("paciente");
     if (paciente) {

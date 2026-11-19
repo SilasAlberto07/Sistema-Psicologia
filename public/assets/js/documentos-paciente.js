@@ -26,6 +26,7 @@ const DocsPaciente = (() => {
         devolutiva: { nome: "Devolutiva", plural: "Devolutivas", icone: "ti-report",           geravel: true,  editavel: true },
         laudo:      { nome: "Laudo",      plural: "Laudos",      icone: "ti-file-analytics",   geravel: true,  editavel: true },
         relatorio:  { nome: "Relatório",  plural: "Relatórios",  icone: "ti-file-description", geravel: true,  editavel: true },
+        entrevista: { nome: "Entrevista", plural: "Entrevistas", icone: "ti-briefcase",        geravel: true,  editavel: true }, // empresa (Psicologia Organizacional)
         atividade:  { nome: "Atividade",  plural: "Atividades",  icone: "ti-notebook",         geravel: false, editavel: false }, // vem da tela Atividades Terapêuticas
         teste:      { nome: "Teste",      plural: "Testes",      icone: "ti-clipboard-check",  geravel: false, editavel: false },
         anexo:      { nome: "Anexo",      plural: "Anexos",      icone: "ti-paperclip",        geravel: false, editavel: false }
@@ -37,7 +38,8 @@ const DocsPaciente = (() => {
         declaracao: "Declaração de Comparecimento",
         devolutiva: "Relatório de Devolutiva",
         laudo: "Laudo Psicológico",
-        relatorio: "Relatório Psicológico"
+        relatorio: "Relatório Psicológico",
+        entrevista: "Relatório de Entrevista – Recrutamento e Seleção"
     };
 
     const CHAVE_CONFIG = "configDocumentos";
@@ -48,7 +50,9 @@ const DocsPaciente = (() => {
         return `doc_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     }
 
+    // "empresa" = Psicologia Organizacional (lista separada dos pacientes)
     function chaveLista(origem) {
+        if (origem === "empresa") return "empresas";
         return origem === "casal" ? "casais" : "pacientes";
     }
 
@@ -58,6 +62,7 @@ const DocsPaciente = (() => {
     }
 
     function nomeDaPessoa(registro, origem, pessoa) {
+        if (origem === "empresa") return registro.nomeFantasia || registro.razaoSocial || "";
         if (origem !== "casal") return registro.nomeCompleto || "";
         if (pessoa === "p1") return registro.p1NomeCompleto || "";
         if (pessoa === "p2") return registro.p2NomeCompleto || "";
@@ -148,7 +153,7 @@ const DocsPaciente = (() => {
     async function salvarDocumentoGerado(destino, info, pdfDataURL) {
         const lista = await lerLista(destino.origem);
         const registro = lista.find(r => String(r.id) === String(destino.id));
-        if (!registro) return { ok: false, erro: "Paciente não encontrado." };
+        if (!registro) return { ok: false, erro: destino.origem === "empresa" ? "Empresa não encontrada." : "Paciente não encontrado." };
 
         if (!Array.isArray(registro.documentos)) registro.documentos = [];
 

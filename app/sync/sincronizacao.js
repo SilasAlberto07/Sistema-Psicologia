@@ -11,7 +11,7 @@
  *    dos outros e JUNTA com os seus dados item por item (ver merge.js).
  *  - Antes de juntar, guarda uma cópia de segurança dos dados daqui.
  *
- * Só pacientes, casais e financeiro são sincronizados. A senha de login
+ * Só pacientes, casais, financeiro e empresas são sincronizados. A senha de login
  * continua separada em cada computador.
  * -----------------------------------------------------------------------
  */
@@ -23,7 +23,7 @@ const zlib = require('zlib');
 const crypto = require('crypto');
 const M = require('./merge');
 
-const CHAVES_SINCRONIZADAS = ['pacientes', 'casais', 'financeiro'];
+const CHAVES_SINCRONIZADAS = ['pacientes', 'casais', 'financeiro', 'empresas']; // empresas = Psicologia Organizacional
 const FORMATO = 1;
 const EXTENSAO = '.psisync';
 const INTERVALO_LEITURA_MS = 45 * 1000;   // lê os outros computadores a cada 45s

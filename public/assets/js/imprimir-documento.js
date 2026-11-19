@@ -93,6 +93,75 @@ if (!dados) {
                 <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
                 <p>CRP 18/9851</p>`;
 
+    } else if (dados.tipo === "fichaEmpresa") {
+
+        // FICHA DE CADASTRO INSTITUCIONAL – PSICOLOGIA ORGANIZACIONAL (só imprime, não fica guardada)
+        const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        const dataBR = (d) => /^\d{4}-\d{2}-\d{2}/.test(d || "") ? d.slice(0, 10).split("-").reverse().join("/") : esc(d || "");
+        const linha = (rotulo, valor) => `<tr><th>${rotulo}</th><td>${valor ? esc(valor) : "&nbsp;"}</td></tr>`;
+        const n = Number(dados.periodoQtd);
+        const periodo = Number.isFinite(n) && n > 0
+            ? `${n} ${n === 1 ? ({ meses: "mês", semanas: "semana", dias: "dia" }[dados.periodoUnidade || "meses"]) : (dados.periodoUnidade || "meses")}`
+              + (dados.dataTermino ? ` (até ${dataBR(dados.dataTermino)})` : "")
+            : (dados.dataTermino ? `até ${dataBR(dados.dataTermino)}` : "");
+
+        corpoHTML = `
+            <div class="cabecalho-print">
+                <h1>Cadastro Institucional – Psicologia Organizacional</h1>
+            </div>
+
+            <div class="titulo-secao">1. Identificação da Empresa</div>
+            <table class="ficha-tabela">
+                ${linha("Razão social", dados.razaoSocial)}
+                ${linha("Nome fantasia", dados.nomeFantasia)}
+                ${linha("CNPJ", dados.cnpj)}
+                ${linha("Ramo de atividade", dados.ramo)}
+                ${linha("Endereço", dados.endereco)}
+                ${linha("Cidade/Estado", dados.cidadeEstado)}
+                ${linha("CEP", dados.cep)}
+            </table>
+
+            <div class="titulo-secao">2. Responsável pela Empresa</div>
+            <table class="ficha-tabela">
+                ${linha("Nome completo", dados.respNome)}
+                ${linha("Cargo", dados.respCargo)}
+                ${linha("Telefone/WhatsApp", dados.respTelefone)}
+                ${linha("E-mail", dados.respEmail)}
+            </table>
+
+            <div class="titulo-secao">3. Informações Organizacionais</div>
+            <table class="ficha-tabela">
+                ${linha("Total de colaboradores", dados.totalColaboradores)}
+                ${linha("Quantidade de setores", dados.qtdSetores)}
+                ${linha("Responsável pelo RH/Administrativo", dados.respRH)}
+            </table>
+
+            <div class="titulo-secao">4. Informações da Contratação</div>
+            <table class="ficha-tabela">
+                ${linha("Objeto e escopo do serviço contratado", dados.escopo)}
+                <tr><th>Data de início</th><td>${dados.dataInicio ? dataBR(dados.dataInicio) : "&nbsp;"}</td></tr>
+                ${linha("Período previsto", periodo)}
+                ${linha("Responsável pelo acompanhamento do projeto", dados.respProjeto)}
+            </table>
+
+            <div class="titulo-secao">5. Psicóloga Responsável pelo Projeto</div>
+            <table class="ficha-tabela">
+                ${linha("Psicóloga", "Cláudia Bethânia")}
+                ${linha("CRP", "18/9851")}
+                ${linha("Área de atuação", "Psicologia Organizacional")}
+                <tr><th>Data do cadastro</th><td>${dados.dataCadastro ? dataBR(dados.dataCadastro) : "&nbsp;"}</td></tr>
+            </table>
+
+            <div class="titulo-secao">6. Finalidade e Proteção das Informações</div>
+            <p class="documento-texto">As informações coletadas destinam-se exclusivamente à identificação cadastral da empresa e à
+            organização da prestação dos serviços de Psicologia Organizacional. Os dados serão tratados com confidencialidade
+            e segurança, observando a legislação aplicável, especialmente a Lei Geral de Proteção de Dados Pessoais
+            (Lei nº 13.709/2018).</p>
+        `;
+
+        // o modelo da ficha não tem assinatura (termina na seção 6)
+        assinaturaHTML = "";
+
     } else if (dados.tipo === "entrevista") {
 
         // RELATÓRIO DE ENTREVISTA – RECRUTAMENTO E SELEÇÃO (documento para empresa)
@@ -372,10 +441,10 @@ if (!dados) {
 
             ${corpoHTML}
 
-            <div class="assinatura">
+            ${assinaturaHTML ? `<div class="assinatura">
                 <div class="linha-assinatura"></div>
                 ${assinaturaHTML}
-            </div>
+            </div>` : ""}
 
             <div class="rodape-contato">
                 maclaudiabethaniapsicologa@gmail.com · (66) 99689-4144 · @psiclaudiabethania_
@@ -391,10 +460,10 @@ if (!dados) {
     // (espera a marca d'água carregar para ela sair no PDF)
     // (monta no modelo do contrato e espera fontes e logo carregarem)
     // atestado e declaração são curtos: o conteúdo fica centralizado na folha A4
-    const centralizar = !["devolutiva", "laudo", "relatorio", "entrevista"].includes(dados.tipo);
+    const centralizar = !["devolutiva", "laudo", "relatorio", "entrevista", "fichaEmpresa"].includes(dados.tipo);
     FolhaPadrao.aplicar(container, { centralizar }).then(() => {
         // relatório de entrevista (empresa): texto mais compacto, com menos espaço entre as linhas
-        if (dados.tipo === "entrevista") {
+        if (dados.tipo === "entrevista" || dados.tipo === "fichaEmpresa") {
             const folha = container.querySelector(".folha");
             if (folha) folha.classList.add("folha-compacta");
         }

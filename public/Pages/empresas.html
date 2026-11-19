@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empresas</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/button.css">
+    <link rel="stylesheet" href="../assets/css/sessoes.css">
+    <link rel="stylesheet" href="../assets/css/empresas.css">
+    <link rel="stylesheet" href="/assets/vendor/tabler-icons/tabler-icons.min.css">
+</head>
+
+<body>
+
+    <div class="container-menu">
+
+        <div id="menu"></div>
+
+        <main class="page-container-sessoes">
+
+            <h1 class="page-title"><i class="ti ti-building" style="color:#8a9e78"></i> Empresas
+                <small class="subtitulo-org">Psicologia Organizacional</small></h1>
+
+            <div class="topo-empresas">
+                <div class="tabs-tipo">
+                    <button class="tab-tipo ativa" data-aba="ativas">
+                        <i class="ti ti-building"></i> Ativas <span class="qtd-aba" id="qtdAtivas">0</span>
+                    </button>
+                    <button class="tab-tipo" data-aba="arquivadas">
+                        <i class="ti ti-archive"></i> Arquivadas <span class="qtd-aba" id="qtdArquivadas">0</span>
+                    </button>
+                </div>
+                <a href="novaempresa.html" class="btn-nova-empresa"><i class="ti ti-building-plus"></i> Cadastrar Empresa</a>
+            </div>
+
+            <div class="busca-sessoes">
+                <i class="ti ti-search"></i>
+                <input type="text" id="pesquisaEmpresa" class="input-busca-paciente"
+                    placeholder="Pesquisar por nome ou CNPJ...">
+            </div>
+
+            <div id="containerEmpresas" class="table-container"></div>
+
+        </main>
+
+    </div>
+
+    <!-- visualizar PDF -->
+    <div class="modal-docs-visor oculto" id="visorEmpresa">
+        <div class="modal-docs-visor-box">
+            <div class="modal-docs-header">
+                <h2 id="visorEmpresaTitulo"></h2>
+                <button type="button" class="modal-docs-fechar" id="visorEmpresaFechar" title="Fechar"><i class="ti ti-x"></i></button>
+            </div>
+            <div class="modal-docs-visor-corpo" id="visorEmpresaCorpo"></div>
+        </div>
+    </div>
+
+    <script src="/assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="../assets/js/alert.js"></script>
+    <script src="../assets/js/menu.js"></script>
+    <script src="../assets/js/documentos-paciente.js"></script>
+    <script src="../assets/js/empresas-dados.js"></script>
+    <script src="../assets/js/empresas.js"></script>
+</body>
+
+</html>

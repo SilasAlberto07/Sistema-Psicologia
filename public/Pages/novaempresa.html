@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastrar Empresa</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/button.css">
+    <link rel="stylesheet" href="../assets/css/novopaciente.css">
+    <link rel="stylesheet" href="../assets/css/empresas.css">
+    <link rel="stylesheet" href="/assets/vendor/tabler-icons/tabler-icons.min.css">
+</head>
+
+<body>
+
+    <div class="container-menu">
+
+        <div id="menu"></div>
+
+        <main class="form-container">
+            <form id="formEmpresa" autocomplete="off">
+                <h1 class="page-title"><i class="ti ti-building-plus" style="color:#8a9e78"></i>
+                    <span id="tituloPagina">Cadastro Institucional – Psicologia Organizacional</span></h1>
+
+                <p class="aviso-org"><i class="ti ti-building"></i> Cadastro de <strong>empresa</strong>.
+                    Fica separado dos pacientes: não aparece em Pacientes, Sessões nem Agenda.</p>
+
+                <fieldset class="form-section">
+                    <legend>1. Identificação da Empresa</legend>
+                    <div class="linha">
+                        <div class="form-group w-12">
+                            <label>Código</label>
+                            <input type="text" id="codigo" readonly disabled>
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Razão social</label>
+                            <input type="text" id="razaoSocial" required>
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-100">
+                            <label>Nome fantasia</label>
+                            <input type="text" id="nomeFantasia" placeholder="Nome que aparece nos relatórios">
+                        </div>
+                        <div class="form-group w-220px">
+                            <label>CNPJ</label>
+                            <input type="text" id="cnpj" placeholder="00.000.000/0000-00" maxlength="18">
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-100">
+                            <label>Ramo de atividade</label>
+                            <input type="text" id="ramo" placeholder="Ex: Escritório de Contabilidade">
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-100">
+                            <label>Endereço</label>
+                            <input type="text" id="endereco" placeholder="Rua, número, bairro">
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-50">
+                            <label>Cidade/Estado</label>
+                            <input type="text" id="cidadeEstado" placeholder="Ex: Sinop – MT">
+                        </div>
+                        <div class="form-group w-150px">
+                            <label>CEP</label>
+                            <input type="text" id="cep" placeholder="00000-000" maxlength="9">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>2. Responsável pela Empresa</legend>
+                    <div class="linha">
+                        <div class="form-group w-100">
+                            <label>Nome completo</label>
+                            <input type="text" id="respNome">
+                        </div>
+                        <div class="form-group w-40">
+                            <label>Cargo</label>
+                            <input type="text" id="respCargo">
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-40">
+                            <label>Telefone/WhatsApp</label>
+                            <input type="text" id="respTelefone" placeholder="(66) 99999-9999">
+                        </div>
+                        <div class="form-group w-100">
+                            <label>E-mail</label>
+                            <input type="email" id="respEmail">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>3. Informações Organizacionais</legend>
+                    <div class="linha">
+                        <div class="form-group w-30">
+                            <label>Total de colaboradores</label>
+                            <input type="number" id="totalColaboradores" min="0">
+                        </div>
+                        <div class="form-group w-30">
+                            <label>Quantidade de setores</label>
+                            <input type="number" id="qtdSetores" min="0">
+                        </div>
+                        <div class="form-group w-100">
+                            <label>Responsável pelo RH/Administrativo</label>
+                            <input type="text" id="respRH">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>4. Informações da Contratação</legend>
+                    <div class="form-group w-100">
+                        <label>Objeto e escopo do serviço contratado</label>
+                        <textarea id="escopo" rows="3"
+                            placeholder="Ex: Recrutamento e seleção para os cargos de recepcionista e auxiliar administrativo..."></textarea>
+                    </div>
+                    <div class="linha" style="margin-top:12px">
+                        <div class="form-group w-180px">
+                            <label>Data de início</label>
+                            <input type="date" id="dataInicio">
+                        </div>
+                        <div class="form-group w-120px">
+                            <label>Período previsto</label>
+                            <input type="number" id="periodoQtd" min="1" placeholder="Ex: 6">
+                        </div>
+                        <div class="form-group w-120px">
+                            <label>&nbsp;</label>
+                            <select id="periodoUnidade">
+                                <option value="meses">meses</option>
+                                <option value="semanas">semanas</option>
+                                <option value="dias">dias</option>
+                            </select>
+                        </div>
+                        <div class="form-group w-180px">
+                            <label>Término previsto</label>
+                            <input type="date" id="dataTermino" title="Calculado pelo início + período. Pode ajustar.">
+                        </div>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-100">
+                            <label>Responsável pelo acompanhamento do projeto</label>
+                            <input type="text" id="respProjeto">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>5. Psicóloga Responsável pelo Projeto</legend>
+                    <div class="psi-fixa">
+                        <p><strong>Psicóloga:</strong> Cláudia Bethânia</p>
+                        <p><strong>CRP:</strong> 18/9851</p>
+                        <p><strong>Área de atuação:</strong> Psicologia Organizacional</p>
+                    </div>
+                    <div class="linha" style="margin-top:10px">
+                        <div class="form-group w-180px">
+                            <label>Data do cadastro</label>
+                            <input type="date" id="dataCadastro">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>6. Finalidade e Proteção das Informações</legend>
+                    <p class="texto-lgpd">As informações coletadas destinam-se exclusivamente à identificação cadastral da empresa
+                        e à organização da prestação dos serviços de Psicologia Organizacional. Os dados serão tratados com
+                        confidencialidade e segurança, observando a legislação aplicável, especialmente a Lei Geral de Proteção
+                        de Dados Pessoais (Lei nº 13.709/2018).</p>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>Observações (uso interno — não sai na ficha)</legend>
+                    <div class="form-group w-100">
+                        <textarea id="observacoes" rows="3" placeholder="Anotações da Dra. sobre a empresa..."></textarea>
+                    </div>
+                </fieldset>
+
+                <div class="botoes">
+                    <button type="submit" id="salvar"><i class="ti ti-device-floppy"></i> <span id="textoSalvar">Salvar Empresa</span></button>
+                    <button type="button" id="limpar"><i class="ti ti-eraser"></i> Limpar Formulário</button>
+                </div>
+            </form>
+        </main>
+
+    </div>
+    <script src="/assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="../assets/js/alert.js"></script>
+    <script src="../assets/js/menu.js"></script>
+    <script src="../assets/js/empresas-dados.js"></script>
+    <script src="../assets/js/novaempresa.js"></script>
+</body>
+
+</html>

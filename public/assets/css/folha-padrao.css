@@ -510,3 +510,47 @@ body {
 .folha-compacta .timestamp-impressao {
     margin-top: 6px;
 }
+
+/* ---------- FICHA DE CADASTRO DA EMPRESA (Psicologia Organizacional) ---------- */
+.folha .ficha-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin-bottom: 0;
+}
+
+.folha .ficha-tabela th,
+.folha .ficha-tabela td {
+    border-bottom: 1px solid #e2ddd2;
+    padding: 2px 6px;
+    vertical-align: top;
+    text-align: left;
+    line-height: 1.3;
+}
+
+.folha .ficha-tabela th {
+    width: 38%;
+    font-weight: 600;
+    color: #4f5e43;
+    background-color: #f7f5f0;
+}
+
+.folha .ficha-tabela td {
+    color: #3d3a28;
+    white-space: pre-line;
+}
+
+.folha-compacta .ficha-tabela + .titulo-secao {
+    margin-top: 8px;
+}
+
+/* ficha da empresa: texto da LGPD um pouco menor, para caber tudo em uma folha */
+.folha-compacta .ficha-tabela ~ .documento-texto {
+    font-size: 9.5pt;
+    line-height: 1.35;
+}
+
+.folha-compacta .ficha-tabela + .titulo-secao,
+.folha-compacta .ficha-tabela ~ .titulo-secao {
+    margin: 7px 0 3px;
+}

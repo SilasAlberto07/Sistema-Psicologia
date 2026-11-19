@@ -1,0 +1,337 @@
+/* ═══════════════════════════════════════════════
+   PSICOLOGIA ORGANIZACIONAL — Cadastrar Empresa e Empresas
+   (usa o visual do formulário de paciente e dos cards da tela Sessões)
+═══════════════════════════════════════════════ */
+
+/* ---------- aviso e textos ---------- */
+.aviso-org {
+    background-color: #eef2ea;
+    border: 1px solid #d3dcc8;
+    color: #4f5e43;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: -12px 0 18px;
+}
+
+.aviso-org i {
+    color: #7a8e69;
+    margin-right: 4px;
+}
+
+.psi-fixa {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 28px;
+    font-size: 13.5px;
+    color: #3d3a28;
+}
+
+.psi-fixa strong {
+    color: #5c7a48;
+    font-weight: 600;
+}
+
+.texto-lgpd {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #6a6a58;
+    text-align: justify;
+}
+
+.subtitulo-org {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #8a9e78;
+    margin-left: 6px;
+    letter-spacing: 0.02em;
+}
+
+/* ---------- topo da tela Empresas ---------- */
+.topo-empresas {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.topo-empresas .tabs-tipo {
+    margin-bottom: 0;
+}
+
+.qtd-aba {
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
+    padding: 0 7px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 2px;
+}
+
+.btn-nova-empresa {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #7a8e69;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: 8px;
+    transition: background-color 0.15s;
+}
+
+.btn-nova-empresa:hover {
+    background-color: #66795a;
+}
+
+.page-container-sessoes .busca-sessoes {
+    margin-top: 14px;
+}
+
+/* ---------- card da empresa ---------- */
+.empresa-header {
+    cursor: pointer;
+}
+
+.codigo-empresa {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: #9a9a88;
+    background-color: #f5f2ec;
+    border-radius: 6px;
+    padding: 2px 7px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.tag-arquivada {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: #8a7a5a;
+    background-color: #f3ede0;
+    border-radius: 6px;
+    padding: 2px 7px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.empresa-card.arquivada {
+    opacity: 0.85;
+}
+
+.contador-badge i {
+    font-size: 13px;
+    margin-right: 4px;
+}
+
+.contador-badge.contrato.andamento { background-color: #eef4f8; color: #4a6f8f; }
+.contador-badge.contrato.acabando  { background-color: #fff1e6; color: #b0652a; }
+.contador-badge.contrato.encerrado { background-color: #f6eceb; color: #a0524a; }
+.contador-badge.contrato.a-iniciar { background-color: #f3f0fa; color: #6a5a9a; }
+.contador-badge.contrato.sem-data  { background-color: #f5f2ec; color: #9a9a88; }
+
+.corpo-empresa {
+    padding: 4px 18px 18px;
+}
+
+/* ---------- blocos do corpo ---------- */
+.emp-corpo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+@media (max-width: 1000px) {
+    .emp-corpo-grid { grid-template-columns: 1fr; }
+}
+
+.emp-bloco {
+    background-color: #faf8f4;
+    border: 1px solid #ede8e0;
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.emp-bloco h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #3d4a30;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.emp-bloco h3 i {
+    color: #8a9e78;
+    font-size: 17px;
+}
+
+.emp-contrato-status {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #4a6f8f;
+}
+
+.emp-contrato-status.acabando  { color: #b0652a; }
+.emp-contrato-status.encerrado { color: #a0524a; }
+.emp-contrato-status.a-iniciar { color: #6a5a9a; }
+.emp-contrato-status.sem-data  { color: #9a9a88; }
+
+.emp-barra {
+    height: 8px;
+    background-color: #ede8e0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.emp-barra-cheia {
+    height: 100%;
+    background-color: #8a9e78;
+    border-radius: 6px;
+    transition: width 0.4s;
+}
+
+.emp-barra-cheia.acabando  { background-color: #d08a4a; }
+.emp-barra-cheia.encerrado { background-color: #b56a60; }
+
+.emp-barra-legenda {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #9a9a88;
+    margin: 4px 0 10px;
+}
+
+.emp-info-lista {
+    display: grid;
+    gap: 7px;
+}
+
+.emp-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    color: #3d3a28;
+}
+
+.emp-info-item i {
+    color: #8a9e78;
+    font-size: 15px;
+    margin-top: 2px;
+}
+
+.emp-info-item small {
+    display: block;
+    font-size: 10.5px;
+    color: #9a9a88;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.emp-escopo {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #e2ddd2;
+}
+
+.emp-escopo small {
+    font-size: 10.5px;
+    color: #9a9a88;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.emp-escopo p {
+    font-size: 13px;
+    color: #3d3a28;
+    line-height: 1.5;
+    white-space: pre-line;
+    margin-top: 2px;
+}
+
+/* ---------- documentos da empresa ---------- */
+.emp-docs {
+    margin-top: 14px;
+    background-color: #ffffff;
+}
+
+.emp-docs-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.emp-docs-topo h3 {
+    margin-bottom: 0;
+}
+
+.emp-docs-lista {
+    display: grid;
+    gap: 8px;
+}
+
+.docs-item.tipo-entrevista { border-left-color: #5c7a48; }
+
+/* ---------- botões de baixo ---------- */
+.emp-acoes {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
+.btn-emp {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #ffffff;
+    border: 1px solid #d3dcc8;
+    color: #4f5e43;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-emp:hover {
+    background-color: #eef2ea;
+    border-color: #a8c094;
+}
+
+.btn-emp.discreto {
+    color: #8a7a5a;
+    border-color: #ede8e0;
+    margin-left: auto;
+}
+
+.btn-emp.discreto:hover {
+    background-color: #f7f3ea;
+}
+
+/* ---------- Documentos: escolher a empresa no Relatório de Entrevista ---------- */
+.grupo-empresa-cadastrada select {
+    width: 100%;
+}
+
+.link-cadastrar-empresa {
+    font-size: 12px;
+    color: #7a8e69;
+    margin-top: 4px;
+    display: inline-block;
+}

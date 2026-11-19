@@ -218,10 +218,18 @@ function gerarLaudoRelatorio(tipo) {
     dados.nomeCompleto = nome;
     dados.cidadeEstado = document.getElementById("cidadeEstado").value.trim();
 
-    // documento para empresa: só gera e imprime (sem paciente, não vai para Sessões)
+    // documento para empresa: não vai para Sessões nem para nenhum paciente.
+    // Com empresa cadastrada escolhida, o PDF fica guardado na empresa (tela Empresas).
     if (modelo.empresa) {
+        const idEmpresa = $lr("etEmpresaCadastrada") ? $lr("etEmpresaCadastrada").value : "";
+        if (idEmpresa) {
+            dados.empresaId = idEmpresa;
+            dados.destino = { origem: "empresa", id: idEmpresa };
+            if (edicaoEmpresa && String(edicaoEmpresa.id) === String(idEmpresa)) dados.substitui = edicaoEmpresa.doc.id;
+        }
         localStorage.setItem("documentoTemp", JSON.stringify(dados));
         window.open("imprimir-documento.html", "_blank");
+        if (edicaoEmpresa) encerrarEdicaoEmpresa();
         return;
     }
 
@@ -400,3 +408,114 @@ function montarJanelasIA(modelo) {
 }
 
 Object.values(MODELOS_LAUDO_RELATORIO).forEach(montarJanelasIA);
+
+
+// ==========================================
+// EMPRESAS (Psicologia Organizacional) no Relatório de Entrevista
+//  - "Empresa cadastrada": escolhendo, o relatório fica guardado na empresa
+//  - documentos.html?empresa=<id>                       → já abre com a empresa escolhida
+//  - documentos.html?editarDoc=<id>&origem=empresa&id=<id da empresa> → editar
+// ==========================================
+let empresasDocs = [];
+let edicaoEmpresa = null; // { doc, id }
+
+function nomeEmpresaParaRelatorio(empresa) {
+    // nome que vai no campo "Empresa" do relatório (ex: "Via Tributária – Escritório de Contabilidade")
+    const nome = Empresas.nome(empresa);
+    return empresa.ramo && !nome.toLowerCase().includes(empresa.ramo.toLowerCase()) ? `${nome} – ${empresa.ramo}` : nome;
+}
+
+function encerrarEdicaoEmpresa() {
+    edicaoEmpresa = null;
+    const aviso = document.getElementById("avisoEdicao");
+    if (aviso) aviso.style.display = "none";
+    history.replaceState(null, "", window.location.pathname);
+}
+
+async function iniciarEmpresasNosDocumentos() {
+    const select = $lr("etEmpresaCadastrada");
+    if (!select || typeof Empresas === "undefined") return;
+
+    empresasDocs = await Empresas.lerTodas();
+    const ativas = empresasDocs.filter(e => !e.arquivada)
+        .sort((a, b) => Empresas.nome(a).localeCompare(Empresas.nome(b), "pt-BR"));
+    ativas.forEach(e => {
+        const op = document.createElement("option");
+        op.value = e.id;
+        op.textContent = `${Empresas.nome(e)}${e.cnpj ? ` · CNPJ ${e.cnpj}` : ""}`;
+        select.appendChild(op);
+    });
+
+    // escolheu a empresa: completa o campo "Empresa" (se estiver vazio ou foi o sistema que colocou)
+    let ultimoNomeAuto = "";
+    select.addEventListener("change", () => {
+        const empresa = empresasDocs.find(e => String(e.id) === String(select.value));
+        const campo = $lr("etEmpresa");
+        if (empresa && (!campo.value.trim() || campo.value === ultimoNomeAuto)) {
+            campo.value = nomeEmpresaParaRelatorio(empresa);
+            ultimoNomeAuto = campo.value;
+        }
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const abrirEntrevista = () => {
+        tipoDocumento.value = "entrevista";
+        tipoDocumento.dispatchEvent(new Event("change"));
+    };
+    // empresa arquivada também pode ser escolhida quando vem da tela Empresas
+    const garantirOpcao = (empresa) => {
+        if (![...select.options].some(o => o.value === String(empresa.id))) {
+            const op = document.createElement("option");
+            op.value = empresa.id;
+            op.textContent = `${Empresas.nome(empresa)} (arquivada)`;
+            select.appendChild(op);
+        }
+    };
+
+    // "Novo relatório" pela tela Empresas
+    const idEmpresa = params.get("empresa");
+    if (idEmpresa) {
+        const empresa = empresasDocs.find(e => String(e.id) === String(idEmpresa));
+        abrirEntrevista();
+        if (empresa) {
+            garantirOpcao(empresa);
+            select.value = empresa.id;
+            select.dispatchEvent(new Event("change"));
+        }
+        history.replaceState(null, "", window.location.pathname);
+        return;
+    }
+
+    // "Editar" pela tela Empresas
+    if (params.get("origem") === "empresa" && params.get("editarDoc")) {
+        const empresa = empresasDocs.find(e => String(e.id) === String(params.get("id")));
+        const doc = empresa && (empresa.documentos || []).find(d => d.id === params.get("editarDoc"));
+        if (!doc || !CAMPOS_EDICAO[doc.tipo]) {
+            mostrarMensagem("Documento não encontrado para editar.", "warning");
+            history.replaceState(null, "", window.location.pathname);
+            return;
+        }
+        abrirEntrevista();
+        garantirOpcao(empresa);
+        select.value = empresa.id;
+        const dados = doc.dados || {};
+        CAMPOS_EDICAO[doc.tipo].forEach(([chave, id]) => {
+            const campo = document.getElementById(id);
+            if (campo && dados[chave] !== undefined) campo.value = dados[chave];
+        });
+        ultimoNomeAuto = "";
+        edicaoEmpresa = { doc, id: empresa.id };
+
+        const aviso = document.getElementById("avisoEdicao");
+        if (aviso) {
+            const quando = new Date(doc.criadoEm).toLocaleDateString("pt-BR");
+            aviso.innerHTML = `<i class="ti ti-pencil"></i> Editando <strong>${escaparTexto(doc.titulo)}</strong>
+                de ${escaparTexto(dados.candidato || "")} (${quando}). Ao gerar, a versão anterior fica guardada como <strong>substituída</strong>.
+                <button type="button" id="btnSairEdicao">Sair da edição</button>`;
+            aviso.style.display = "";
+            document.getElementById("btnSairEdicao").onclick = () => window.location.href = "documentos.html";
+        }
+    }
+}
+
+iniciarEmpresasNosDocumentos();

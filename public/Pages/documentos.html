@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../assets/css/global.css">
     <link rel="stylesheet" href="../assets/css/button.css">
     <link rel="stylesheet" href="../assets/css/documentos.css">
+    <link rel="stylesheet" href="../assets/css/empresas.css">
     <link rel="stylesheet" href="../assets/css/contrato.css">
     <link rel="stylesheet" href="../assets/css/modal.css">
     <link rel="stylesheet" href="/assets/vendor/tabler-icons/tabler-icons.min.css">
@@ -507,7 +508,18 @@
                     <div id="camposEntrevista" class="grupo-campos campos-ia" style="display:none">
 
                         <p class="aviso-empresa"><i class="ti ti-building"></i> Documento para <strong>empresa</strong>
-                            (Psicologia Organizacional). É só gerado e impresso — não fica guardado nos documentos de nenhum paciente.</p>
+                            (Psicologia Organizacional). Não vai para Sessões nem para nenhum paciente.
+                            Escolhendo a empresa cadastrada, o relatório fica guardado em <strong>Empresas</strong>.</p>
+
+                        <div class="linha grupo-empresa-cadastrada">
+                            <div class="form-group w-100">
+                                <label>Empresa cadastrada</label>
+                                <select id="etEmpresaCadastrada">
+                                    <option value="">— Não guardar (só gerar e imprimir) —</option>
+                                </select>
+                                <a href="novaempresa.html" class="link-cadastrar-empresa"><i class="ti ti-building-plus"></i> Cadastrar nova empresa</a>
+                            </div>
+                        </div>
 
                         <div class="botoes-ia-devolutiva">
                             <button type="button" class="btn-modal" data-ia-prompt>
@@ -660,6 +672,7 @@
     <script src="../assets/js/documentos-paciente.js"></script>
     <script src="../assets/js/documentos.js"></script>
     <script src="../assets/js/documentos-devolutiva.js"></script>
+    <script src="../assets/js/empresas-dados.js"></script>
     <script src="../assets/js/documentos-laudo-relatorio.js"></script>
 </body>
 
