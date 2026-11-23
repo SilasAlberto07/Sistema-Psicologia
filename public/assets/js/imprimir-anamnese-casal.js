@@ -171,7 +171,7 @@ function renderizar(incluirSigiloso) {
 
         <div class="assinatura">
             <div class="linha-assinatura"></div>
-            <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
+            <h3>Cláudia Bethânia – Psicóloga Clínica</h3>
             <p>CRP 18/9851</p>
         </div>
 

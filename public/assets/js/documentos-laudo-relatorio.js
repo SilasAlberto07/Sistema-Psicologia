@@ -254,13 +254,31 @@ function gerarPromptLaudoRelatorio(modelo) {
     return `${modelo.aviso}\n\n${campos}${OBS_CAIXA_COPIAR_LR}`;
 }
 
+// tira acento e deixa minúsculo (para comparar "Análise" com "ANALISE", "analise"...)
+const semAcentoLR = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+// monta o pedaço da expressão que aceita a palavra com ou sem acento
+function padraoSemAcentoLR(label) {
+    const classes = { a: "[aáàâã]", e: "[eéêè]", i: "[iíî]", o: "[oóôõ]", u: "[uúü]", c: "[cç]" };
+    return semAcentoLR(label).split("").map(ch => {
+        if (classes[ch]) return classes[ch];
+        if (ch === " ") return "\\s+";
+        return ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }).join("");
+}
+
 function preencherLaudoRelatorioAutomaticamente(modelo, textoColado) {
+    textoColado = String(textoColado || "").replace(/\r\n?/g, "\n");
     // título mais comprido primeiro (ex: "Procedimentos" antes de "Procedimento")
     const camposOrdenados = [...modelo.titulosIA].sort((a, b) => b[0].length - a[0].length);
-    const escapados = camposOrdenados.map(([label]) => label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-    // título no começo da linha, com ou sem número / negrito na frente (ex: "4) **Análise:**"),
-    // e com os dois-pontos obrigatórios (para não confundir com uma frase que começa com a mesma palavra)
-    const regexLabels = new RegExp(`(?:^|\\n)[\\s#*\\d.)-]*(${escapados.join("|")})\\s*\\**\\s*:\\s*\\**`, "gi");
+    const padroes = camposOrdenados.map(([label]) => padraoSemAcentoLR(label));
+    // Título no começo da linha, com ou sem número / negrito / # na frente (ex: "4) **Análise:**", "### 3. Procedimentos"),
+    // com ou sem acento, maiúsculo ou minúsculo. Vale se vier com dois-pontos OU se estiver sozinho na linha
+    // (assim não confunde com uma frase do texto que começa com a mesma palavra).
+    const regexLabels = new RegExp(
+        `(?:^|\\n)[ \\t#*\\d.)º°\\-–]*(${padroes.join("|")})[ \\t]*\\**[ \\t]*(?::[ \\t]*\\**|(?=\\n|$))`,
+        "gi"
+    );
 
     const matches = [];
     let m;
@@ -282,7 +300,7 @@ function preencherLaudoRelatorioAutomaticamente(modelo, textoColado) {
         const fimConteudo = proxima ? proxima.inicio : textoColado.length;
         const valor = textoColado.slice(match.fim, fimConteudo).replace(/```/g, "").trim();
 
-        const encontrado = modelo.titulosIA.find(([label]) => label.toLowerCase() === match.label.toLowerCase());
+        const encontrado = modelo.titulosIA.find(([label]) => semAcentoLR(label) === semAcentoLR(match.label).replace(/\s+/g, " "));
         if (!encontrado || !valor) return;
 
         $lr(encontrado[1]).value = valor;

@@ -30,7 +30,7 @@ if (!dados) {
 
     let corpoHTML = "";
     let assinaturaHTML = `
-                <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
+                <h3>Cláudia Bethânia – Psicóloga Clínica</h3>
                 <p>CRP 18/9851</p>`;
 
     if (dados.tipo === "devolutiva") {
@@ -90,7 +90,7 @@ if (!dados) {
         `;
 
         assinaturaHTML = `
-                <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
+                <h3>Cláudia Bethânia – Psicóloga Clínica</h3>
                 <p>CRP 18/9851</p>`;
 
     } else if (dados.tipo === "fichaEmpresa") {
@@ -241,7 +241,7 @@ if (!dados) {
 
         assinaturaHTML = `
                 <p>Responsável pela entrevista:</p>
-                <h3>${esc(dados.responsavel || "Psicóloga Organizacional – Dra. Cláudia Bethânia")}</h3>
+                <h3>${esc(dados.responsavel || "Psicóloga Organizacional – Cláudia Bethânia")}</h3>
                 <p>CRP 18/9851${dados.empresa ? ` · ${esc(dados.empresa)}` : ""}</p>`;
 
     } else if (dados.tipo === "laudo" || dados.tipo === "relatorio") {
@@ -341,7 +341,7 @@ if (!dados) {
         }
 
         assinaturaHTML = `
-                <h3>Dra. Cláudia Bethânia – Psicóloga Clínica</h3>
+                <h3>Cláudia Bethânia – Psicóloga Clínica</h3>
                 <p>CRP 18/9851</p>`;
 
     } else if (dados.tipo === "declaracao" && dados.texto) {
