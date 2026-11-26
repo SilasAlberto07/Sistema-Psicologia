@@ -85,6 +85,7 @@ const PADROES_CONTRATO = {
     valorSessaoPacote: "",
     qtdPacote: "4",
     valorPacote: "",
+    valorTeste: "550,00",
     prazoRestituicao: ""
 };
 
@@ -109,6 +110,8 @@ const CAMPOS_CONTRATO = [
     ["valorSessaoPacote", "ctValorSessaoPacote", false],
     ["qtdPacote", "ctQtdPacote", false],
     ["valorPacote", "ctValorPacote", false],
+    ["tipoTeste", "ctTipoTeste", false],
+    ["valorTeste", "ctValorTeste", false],
     ["prazoRestituicao", "ctPrazoRestituicao", false],
     ["data", "ctData", false]
 ];
@@ -133,8 +136,12 @@ async function carregarPadroesContrato() {
         if (valores[chave] !== undefined) document.getElementById(id).value = valores[chave];
     });
     document.getElementById("ctData").value = hojeISO();
+    // o teste de personalidade é decidido a cada contrato: começa desmarcado
+    document.getElementById("ctTestePersonalidade").checked = false;
+    document.getElementById("ctTipoTeste").value = "";
     calcularValorPacote();
     mostrarCamposOpcao();
+    mostrarCamposTeste();
 }
 
 // ------------------------------------------
@@ -170,7 +177,70 @@ function mostrarCamposOpcao() {
     document.getElementById("avisoPacote").style.display = opcao === "pacote" ? "" : "none";
 }
 
-document.getElementById("ctOpcaoContratada").addEventListener("change", mostrarCamposOpcao);
+document.getElementById("ctOpcaoContratada").addEventListener("change", () => {
+    mostrarCamposOpcao();
+    atualizarResumoValores();
+});
+
+// ------------------------------------------
+// TESTE DE PERSONALIDADE
+// Marcado → aparecem o teste e o valor (já vem 550,00, dá para mudar)
+// e um resumo com a soma: sessões + teste = total.
+// ------------------------------------------
+const VALOR_PADRAO_TESTE = "550,00";
+
+function mostrarCamposTeste() {
+    const marcado = document.getElementById("ctTestePersonalidade").checked;
+    const campoValor = document.getElementById("ctValorTeste");
+    document.getElementById("grupoTeste").style.display = marcado ? "" : "none";
+    if (marcado && !campoValor.value.trim()) campoValor.value = VALOR_PADRAO_TESTE;
+    atualizarResumoValores();
+}
+
+// mesma conta que vai para o contrato
+function calcularTotaisContrato() {
+    const opcao = document.getElementById("ctOpcaoContratada").value;
+    let itemSessoes = null;
+    if (opcao === "avulsa") {
+        itemSessoes = { nome: "Sessão avulsa", valor: lerValorBR(document.getElementById("ctValorAvulsa").value) };
+    } else if (opcao === "pacote") {
+        const qtd = document.getElementById("ctQtdPacote").value.trim();
+        itemSessoes = { nome: `Pacote mensal de ${qtd || "__"} sessões`, valor: lerValorBR(document.getElementById("ctValorPacote").value) };
+    }
+    const valorTeste = lerValorBR(document.getElementById("ctValorTeste").value);
+    const total = (itemSessoes && itemSessoes.valor !== null && valorTeste !== null)
+        ? itemSessoes.valor + valorTeste : null;
+    return { itemSessoes, valorTeste, total };
+}
+
+function atualizarResumoValores() {
+    const caixa = document.getElementById("resumoValoresContrato");
+    if (!document.getElementById("ctTestePersonalidade").checked) {
+        caixa.style.display = "none";
+        return;
+    }
+    const { itemSessoes, valorTeste, total } = calcularTotaisContrato();
+    const reais = (v) => v === null ? "—" : `R$ ${formatarValorBR(v)}`;
+    const tipo = document.getElementById("ctTipoTeste").value.trim();
+
+    let html = `<div class="resumo-titulo">Resumo dos valores (sai assim no contrato)</div>`;
+    if (itemSessoes) {
+        html += `<div class="resumo-linha"><span>${escaparTexto(itemSessoes.nome)}</span><span>${reais(itemSessoes.valor)}</span></div>`;
+    }
+    html += `<div class="resumo-linha"><span>Teste de Personalidade${tipo ? ` <small>(${escaparTexto(tipo)})</small>` : ""}</span><span>${reais(valorTeste)}</span></div>`;
+    if (itemSessoes) {
+        html += `<div class="resumo-linha resumo-total"><span>Valor total</span><span>${reais(total)}</span></div>`;
+    } else {
+        html += `<div class="resumo-aviso">Escolha a opção contratada (avulsa ou pacote) para o sistema somar o total.</div>`;
+    }
+    caixa.innerHTML = html;
+    caixa.style.display = "";
+}
+
+document.getElementById("ctTestePersonalidade").addEventListener("change", mostrarCamposTeste);
+["ctTipoTeste", "ctValorTeste", "ctValorAvulsa", "ctValorSessaoPacote", "ctQtdPacote"].forEach(id => {
+    document.getElementById(id).addEventListener("input", atualizarResumoValores);
+});
 
 // "2026-11-10" → "10/11/2026"
 function dataParaBR(valor) {
@@ -252,6 +322,13 @@ async function gerarContrato() {
 
     dados.cidadeEstado = document.getElementById("cidadeEstado").value.trim();
 
+    // Teste de Personalidade: só vai para o contrato quando estiver marcado
+    dados.testePersonalidade = document.getElementById("ctTestePersonalidade").checked ? "sim" : "";
+    if (!dados.testePersonalidade) {
+        dados.tipoTeste = "";
+        dados.valorTeste = "";
+    }
+
     // paciente escolhido na lista → o PDF fica guardado nos documentos dele
     const selecao = mapaOpcoes[inputPaciente.value.trim()];
     if (selecao) dados.destino = destinoDaSelecao(selecao);
@@ -271,6 +348,11 @@ btnGerar.addEventListener("click", async () => {
 
     if (tipoDocumento.value === "devolutiva") {
         gerarDevolutiva();
+        return;
+    }
+
+    if (tipoDocumento.value === "recibo") {
+        gerarRecibo(false);
         return;
     }
 
@@ -432,6 +514,12 @@ function encerrarEdicao() {
 const CAMPOS_EDICAO = {
     declaracao: [["data", "declData"], ["hora", "declHora"], ["endereco", "declEndereco"], ["previsao", "declPrevisao"], ["texto", "declTexto"], ["cidadeEstado", "cidadeEstado"]],
     atestado: [["data", "atestData"], ["duracao", "atestDuracao"], ["motivo", "atestMotivo"], ["cidadeEstado", "cidadeEstado"]],
+    recibo: [
+        ["nomeCompleto", "rcNome"], ["cpf", "rcCpf"], ["valor", "rcValor"],
+        ["qtdTeste", "rcQtdTeste"], ["tipoTeste", "rcTipoTeste"],
+        ["descricao", "rcDescricao"], ["formaPagamento", "rcFormaPagamento"],
+        ["dataPagamento", "rcDataPagamento"], ["dataEmissao", "rcDataEmissao"], ["cidadeEstado", "cidadeEstado"]
+    ],
     contrato: [...CAMPOS_CONTRATO.map(([chave, id]) => [chave, id]), ["cidadeEstado", "cidadeEstado"]],
     devolutiva: [
         ["paciente", "devPaciente"], ["inicio", "devInicio"], ["fim", "devFim"], ["modalidade", "devModalidade"],
@@ -461,6 +549,13 @@ function abrirEdicaoDaURL() {
             inputPaciente.dispatchEvent(new Event("change"));
         }
         history.replaceState(null, "", window.location.pathname);
+        return;
+    }
+
+    // recibo sem paciente cadastrado (lista "Recibos emitidos")
+    const idRecibo = params.get("editarRecibo");
+    if (idRecibo && typeof abrirReciboAvulsoParaEditar === "function") {
+        abrirReciboAvulsoParaEditar(idRecibo);
         return;
     }
 
@@ -501,8 +596,12 @@ function abrirEdicaoDaURL() {
     }
     // declaração antiga (de antes do texto editável): monta o texto com os campos dela
     if (doc.tipo === "declaracao" && !dados.texto) montarTextoDeclaracao(true);
+    if (doc.tipo === "recibo" && typeof aposAbrirReciboParaEditar === "function") aposAbrirReciboParaEditar();
     if (doc.tipo === "contrato") {
+        // contrato antigo (sem esse campo) abre desmarcado
+        document.getElementById("ctTestePersonalidade").checked = dados.testePersonalidade === "sim";
         mostrarCamposOpcao();
+        mostrarCamposTeste();
         calcularValorPacote();
     }
 

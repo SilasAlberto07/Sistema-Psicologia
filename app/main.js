@@ -485,7 +485,7 @@ ipcMain.handle('backup-restaurar', async (event, pedido, senhaDoArquivo, senhaCo
             if (linha && !textoPuro) {
                 let valorAtual;
                 try { valorAtual = JSON.parse(linha.valor); } catch (_) { valorAtual = linha.valor; }
-                if (['pacientes', 'casais', 'financeiro', 'empresas'].includes(chave)) {
+                if (['pacientes', 'casais', 'financeiro', 'empresas', 'recibos'].includes(chave)) {
                     // sincronização desligada por erro: junta as listas item por item mesmo assim
                     const preparado = M.prepararChave(chave, valorAtual ?? [], null);
                     const { novo } = M.uniaoParaRestaurar(chave, preparado.valor, preparado.meta,

@@ -388,6 +388,36 @@ body {
     color: #a8a898;
 }
 
+/* recibo de prestação de serviços psicológicos */
+.folha .documento-texto.recibo-dado {
+    margin-bottom: 2px;
+    text-align: left;
+}
+
+/* respiro entre o CPF e o texto da importância */
+.folha .documento-texto.recibo-importancia {
+    margin-top: 16px;
+}
+
+.folha .documento-texto.recibo-titulo {
+    margin: 14px 0 4px;
+    font-weight: 600;
+    color: var(--verde-titulo);
+}
+
+.folha .recibo-lista li {
+    margin-bottom: 4px;
+    text-align: justify;
+}
+
+.folha .recibo-lista + .documento-texto.recibo-dado {
+    margin-top: 24px; /* respiro entre a descrição e a forma de pagamento */
+}
+
+.folha .documento-texto.recibo-final {
+    margin-top: 14px;
+}
+
 /* barra de botões na tela, alinhada à folha */
 .barra-acoes-tela {
     max-width: 210mm;

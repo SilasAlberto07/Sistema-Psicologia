@@ -39,6 +39,80 @@ function dataBR(valor) {
     return iso ? `${iso[3]}/${iso[2]}/${iso[1]}` : texto;
 }
 
+// "1.080,00" → 1080; vazio → null
+function lerValor(texto) {
+    let limpo = String(texto || "").replace(/R\$|\s/gi, "");
+    if (limpo.includes(",")) limpo = limpo.replace(/\./g, "").replace(",", ".");
+    const numero = parseFloat(limpo);
+    return isNaN(numero) ? null : numero;
+}
+
+function reais(numero) {
+    return numero.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// número por extenso: 1630 → "mil seiscentos e trinta reais"
+function porExtenso(valor) {
+    const UN = ["", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove", "dez", "onze", "doze",
+        "treze", "quatorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove"];
+    const DEZ = ["", "", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta", "noventa"];
+    const CEM = ["", "cento", "duzentos", "trezentos", "quatrocentos", "quinhentos", "seiscentos", "setecentos",
+        "oitocentos", "novecentos"];
+
+    function ate999(n) {
+        if (n === 100) return "cem";
+        const partes = [];
+        if (n >= 100) { partes.push(CEM[Math.floor(n / 100)]); n %= 100; }
+        if (n >= 20) { partes.push(DEZ[Math.floor(n / 10)]); n %= 10; }
+        if (n > 0) partes.push(UN[n]);
+        return partes.join(" e ");
+    }
+
+    function inteiro(n) {
+        if (n === 0) return "zero";
+        const milhoes = Math.floor(n / 1000000);
+        const milhares = Math.floor((n % 1000000) / 1000);
+        const resto = n % 1000;
+        const grupos = [];
+        if (milhoes) grupos.push(milhoes === 1 ? "um milhão" : `${ate999(milhoes)} milhões`);
+        if (milhares) grupos.push(milhares === 1 ? "mil" : `${ate999(milhares)} mil`);
+        if (resto) grupos.push(ate999(resto));
+        if (grupos.length === 1) return grupos[0];
+        // "mil e quinhentos" / "mil seiscentos e trinta"
+        const ultimo = grupos.pop();
+        const usaE = resto && (resto < 100 || resto % 100 === 0);
+        return grupos.join(" ") + (usaE ? " e " : " ") + ultimo;
+    }
+
+    const reaisInt = Math.floor(Math.round(valor * 100) / 100);
+    const centavos = Math.round(valor * 100) % 100;
+    let texto = "";
+    if (reaisInt) {
+        const ehMilhaoRedondo = reaisInt >= 1000000 && reaisInt % 1000000 === 0;
+        texto = `${inteiro(reaisInt)}${ehMilhaoRedondo ? " de" : ""} ${reaisInt === 1 ? "real" : "reais"}`;
+    }
+    if (centavos) texto += `${texto ? " e " : ""}${ate999(centavos)} ${centavos === 1 ? "centavo" : "centavos"}`;
+    return texto || "zero reais";
+}
+
+// parágrafo com o valor total e de onde ele vem (só quando há Teste de Personalidade)
+function paragrafoValorTotal(d, ehAvulsa, ehPacote, avulsa, pacote, qtdPacote) {
+    const valorTeste = lerValor(d.valorTeste);
+    let nomeSessoes = "das sessões contratadas", valorSessoes = null;
+    if (ehAvulsa) { nomeSessoes = "da Sessão Avulsa"; valorSessoes = lerValor(avulsa); }
+    if (ehPacote) { nomeSessoes = `do Pacote Mensal de ${esc(qtdPacote)} Sessões`; valorSessoes = lerValor(pacote); }
+
+    const total = (valorSessoes !== null && valorTeste !== null) ? valorSessoes + valorTeste : null;
+    const valorTotal = total === null
+        ? `R$ ${campo("", 7)} (${campo("", 16)})`
+        : `<span class="preenchido">R$ ${reais(total)} (${porExtenso(total)})</span>`;
+    const sessoes = valorSessoes === null ? `R$ ${campo("", 6)}` : `R$ ${reais(valorSessoes)}`;
+    const teste = valorTeste === null ? `R$ ${campo("", 6)}` : `R$ ${reais(valorTeste)}`;
+
+    return `<p class="opcao valor-total"><strong>Valor total do contrato:</strong> ${valorTotal},
+        correspondente à soma ${nomeSessoes} (${sessoes}) e da Aplicação de Teste de Personalidade (${teste}).</p>`;
+}
+
 const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
     "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
@@ -64,6 +138,8 @@ function montarContrato(d) {
     const qtdPacote = ehPacote ? d.qtdPacote : "";
     const presencial = d.modalidade === "presencial";
     const online = d.modalidade === "online";
+    // só aparece no contrato quando a Dra marcou o campo
+    const testePersonalidade = d.testePersonalidade === "sim";
 
     const rodapeDados = [
         `<strong>${esc(d.psiNome)}${d.psiCrp ? ` · CRP ${esc(d.psiCrp)}` : ""}</strong>`,
@@ -116,6 +192,8 @@ function montarContrato(d) {
         <p class="item">I. Valores contratados:</p>
         <p class="opcao">${marcador(ehAvulsa)} Sessão Avulsa: R$ ${campo(avulsa, 8)}.</p>
         <p class="opcao">${marcador(ehPacote)} Pacote Mensal de ${campo(qtdPacote, 2)} Sessões: R$ ${campo(pacote, 8)}.</p>
+        ${testePersonalidade ? `<p class="opcao" style="text-align:left">${marcador(true)} Aplicação de Teste de Personalidade (${campo(d.tipoTeste, 14)}): R$ ${campo(formatarValor(d.valorTeste), 8)}.</p>
+        ${paragrafoValorTotal(d, ehAvulsa, ehPacote, avulsa, pacote, qtdPacote)}` : ""}
         <p class="item">II. Para garantir o agendamento, será necessário o pagamento antecipado de, no mínimo, 50%
         (cinquenta por cento) do valor contratado, com quitação do saldo conforme as condições previamente acordadas
         entre as partes.</p>

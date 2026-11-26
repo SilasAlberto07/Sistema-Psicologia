@@ -1,4 +1,6 @@
 const dados = JSON.parse(localStorage.getItem("documentoTemp") || "null");
+// ?visualizar=true → mostra a folha com botões (Imprimir / Fechar), sem imprimir direto
+const modoVisualizar = new URLSearchParams(window.location.search).get("visualizar") === "true";
 
 const container = document.getElementById("conteudo-impressao");
 
@@ -344,6 +346,12 @@ if (!dados) {
                 <h3>Cláudia Bethânia – Psicóloga Clínica</h3>
                 <p>CRP 18/9851</p>`;
 
+    } else if (dados.tipo === "recibo") {
+
+        // Recibo de Prestação de Serviços Psicológicos (modelo em recibo-modelo.js)
+        corpoHTML = ReciboModelo.corpoHTML(dados);
+        assinaturaHTML = ReciboModelo.ASSINATURA;
+
     } else if (dados.tipo === "declaracao" && dados.texto) {
 
         // texto escrito/editado pela Dra na tela Documentos
@@ -466,6 +474,21 @@ if (!dados) {
         if (dados.tipo === "entrevista" || dados.tipo === "fichaEmpresa") {
             const folha = container.querySelector(".folha");
             if (folha) folha.classList.add("folha-compacta");
+        }
+        if (modoVisualizar) {
+            // só guarda nos documentos do paciente quando clicar em Imprimir
+            const barra = document.createElement("div");
+            barra.className = "barra-acoes-tela";
+            barra.innerHTML = `
+                <button type="button" id="btnImprimirVisualizar">🖨️ Imprimir</button>
+                <button type="button" id="btnFecharVisualizar" class="secundario">Fechar</button>`;
+            document.body.prepend(barra);
+            document.getElementById("btnImprimirVisualizar").addEventListener("click", async () => {
+                await DocsPaciente.guardarEImprimir(dados);
+                dados.salvo = true; // imprimiu de novo: não guarda uma segunda cópia
+            });
+            document.getElementById("btnFecharVisualizar").addEventListener("click", () => window.close());
+            return;
         }
         return DocsPaciente.guardarEImprimir(dados);
     });

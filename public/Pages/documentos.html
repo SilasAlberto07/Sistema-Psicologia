@@ -40,13 +40,16 @@
                         <div class="form-group w-50">
                             <label>Tipo de documento</label>
                             <select id="tipoDocumento">
-                                <optgroup label="Pacientes particulares (ficam guardados em Sessões)">
+                                <optgroup label="Documentos clínicos — pacientes (ficam guardados em Sessões)">
                                     <option value="declaracao">Declaração de Comparecimento</option>
                                     <option value="atestado">Atestado Psicológico</option>
-                                    <option value="contrato">Contrato de Prestação de Serviços de Psicoterapia</option>
                                     <option value="devolutiva">Relatório de Devolutiva</option>
                                     <option value="laudo">Laudo Psicológico</option>
                                     <option value="relatorio">Relatório Psicológico</option>
+                                </optgroup>
+                                <optgroup label="Contratos e recibos — pacientes (ficam guardados em Sessões)">
+                                    <option value="contrato">Contrato de Prestação de Serviços de Psicoterapia</option>
+                                    <option value="recibo">Recibo de Prestação de Serviços Psicológicos</option>
                                 </optgroup>
                                 <optgroup label="Empresas — Psicologia Organizacional (não vão para Sessões)">
                                     <option value="entrevista">Relatório de Entrevista – Recrutamento e Seleção</option>
@@ -240,12 +243,124 @@
                             </div>
                         </div>
                         <p class="contrato-aviso" id="avisoPacote" style="display:none">Valor do pacote = valor por sessão × quantidade de sessões. Em caso de reajuste, é só mudar o valor por sessão.</p>
+                        <!-- Teste de Personalidade: só sai no contrato quando estiver marcado -->
+                        <div class="linha">
+                            <label class="campo-flegar" for="ctTestePersonalidade">
+                                <input type="checkbox" id="ctTestePersonalidade">
+                                <span>
+                                    <strong>Teste de Personalidade</strong>
+                                    <small>Marque quando o paciente for fazer o teste antes das sessões. Se não marcar, não aparece no contrato.</small>
+                                </span>
+                            </label>
+                        </div>
+
+                        <!-- aparece só quando o Teste de Personalidade está marcado -->
+                        <div class="linha" id="grupoTeste" style="display:none">
+                            <div class="form-group w-50">
+                                <label>Teste que será aplicado <small>(escolha da lista ou escreva)</small></label>
+                                <input type="text" id="ctTipoTeste" list="listaTestes" placeholder="Escolha da lista ou escreva">
+                                <datalist id="listaTestes">
+                                    <option value="BFP – Bateria Fatorial de Personalidade">
+                                    <option value="QUATI – Questionário de Avaliação Tipológica">
+                                    <option value="HTP – House-Tree-Person (Casa-Árvore-Pessoa)">
+                                    <option value="Palográfico – Teste Palográfico">
+                                </datalist>
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Valor do teste (R$)</label>
+                                <input type="text" id="ctValorTeste" placeholder="550,00">
+                            </div>
+                        </div>
+
+                        <!-- resumo da soma (só com o teste marcado) -->
+                        <div class="resumo-valores" id="resumoValoresContrato" style="display:none"></div>
                         <div class="linha">
                             <div class="form-group w-30">
                                 <label>Data do contrato</label>
                                 <input type="date" id="ctData">
                             </div>
                         </div>
+                    </div>
+
+                    <!-- CAMPOS RECIBO DE PRESTAÇÃO DE SERVIÇOS PSICOLÓGICOS -->
+                    <div id="camposRecibo" class="grupo-campos" style="display:none">
+
+                        <h4 class="contrato-subtitulo">Recebido de <small>(vem do cadastro ao escolher o paciente acima — confira)</small></h4>
+                        <div class="linha">
+                            <div class="form-group w-50">
+                                <label>Paciente / Contratante</label>
+                                <input type="text" id="rcNome">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>CPF</label>
+                                <input type="text" id="rcCpf" placeholder="000.000.000-00" data-mascara="cpf">
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">Valor recebido</h4>
+                        <div class="linha">
+                            <div class="form-group w-30">
+                                <label>Valor (R$)</label>
+                                <input type="text" id="rcValor" placeholder="1.630,00">
+                            </div>
+                            <div class="form-group w-100">
+                                <label>Por extenso <small>(escrito pelo sistema)</small></label>
+                                <input type="text" id="rcValorExtenso" readonly tabindex="-1" style="background:#efede7;cursor:default">
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">Descrição dos serviços contratados</h4>
+                        <div class="linha">
+                            <div class="form-group w-20">
+                                <label>Qtd. de testes</label>
+                                <input type="number" id="rcQtdTeste" min="0" step="1" placeholder="1">
+                            </div>
+                            <div class="form-group w-50">
+                                <label>Teste aplicado</label>
+                                <select id="rcTipoTeste">
+                                    <option value="BFP – Bateria Fatorial de Personalidade">BFP – Bateria Fatorial de Personalidade</option>
+                                    <option value="QUATI – Questionário de Avaliação Tipológica">QUATI – Questionário de Avaliação Tipológica</option>
+                                    <option value="HTP – House-Tree-Person (Casa-Árvore-Pessoa)">HTP – House-Tree-Person (Casa-Árvore-Pessoa)</option>
+                                    <option value="Palográfico – Teste Palográfico">Palográfico – Teste Palográfico</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="linha">
+                            <div class="form-group w-100">
+                                <label>Texto da descrição <small>(editável — um item por linha; as sessões, quando precisar, é só escrever)</small></label>
+                                <textarea id="rcDescricao" rows="5"></textarea>
+                                <button type="button" class="btn-texto-declaracao" id="btnRefazerTextoRecibo">
+                                    <i class="ti ti-refresh"></i> Montar o texto de novo com os campos
+                                </button>
+                            </div>
+                        </div>
+
+                        <h4 class="contrato-subtitulo">Pagamento</h4>
+                        <div class="linha">
+                            <div class="form-group w-30">
+                                <label>Forma de pagamento</label>
+                                <select id="rcFormaPagamento">
+                                    <option value="">Deixar para preencher à mão</option>
+                                    <option value="Pix">Pix</option>
+                                    <option value="Cartão de crédito">Cartão de crédito</option>
+                                    <option value="Cartão de débito">Cartão de débito</option>
+                                    <option value="Dinheiro">Dinheiro</option>
+                                    <option value="Transferência bancária">Transferência bancária</option>
+                                </select>
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Data do pagamento</label>
+                                <input type="date" id="rcDataPagamento">
+                            </div>
+                            <div class="form-group w-30">
+                                <label>Data de emissão</label>
+                                <input type="date" id="rcDataEmissao">
+                            </div>
+                        </div>
+
+                        <!-- prévia do recibo, atualiza enquanto a Dra digita -->
+                        <h4 class="contrato-subtitulo">Prévia do recibo</h4>
+                        <div class="previa-recibo" id="previaRecibo"></div>
                     </div>
 
                     <!-- CAMPOS RELATÓRIO DE DEVOLUTIVA -->
@@ -655,10 +770,45 @@
                     </div>
 
                     <div class="botoes">
+                        <button id="btnVisualizarRecibo" class="btn-voltar" type="button" style="display:none"><i class="ti ti-eye"></i> Visualizar</button>
                         <button id="btnGerar" class="btn-salvar"><i class="ti ti-file-check"></i> Gerar e
                             Imprimir</button>
                     </div>
 
+                </div>
+
+                <!-- RECIBOS EMITIDOS (aparece com o Recibo escolhido) -->
+                <div class="form-section recibos-emitidos" id="secaoRecibosEmitidos" style="display:none">
+                    <div class="recibos-topo">
+                        <h4 class="contrato-subtitulo"><i class="ti ti-receipt"></i> Recibos emitidos
+                            <small>(todos, com ou sem cadastro — ficam guardados e sincronizados nos dois computadores)</small></h4>
+                    </div>
+                    <div class="linha">
+                        <div class="form-group w-50">
+                            <label>Pesquisar</label>
+                            <input type="text" id="rcBusca" placeholder="Nome, CPF ou valor...">
+                        </div>
+                        <div class="form-group w-30">
+                            <label>Mostrar</label>
+                            <select id="rcFiltro">
+                                <option value="ativos">Válidos</option>
+                                <option value="cancelados">Cancelados</option>
+                                <option value="todos">Todos (inclusive versões antigas)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="listaRecibosEmitidos" class="recibos-lista"></div>
+                </div>
+
+                <!-- Janela: ver o PDF do recibo -->
+                <div class="modal-colar oculto" id="visorRecibo">
+                    <div class="modal-colar-box visor-recibo-box">
+                        <div class="modal-colar-header">
+                            <h2><i class="ti ti-receipt"></i> <span id="visorReciboTitulo">Recibo</span></h2>
+                            <button type="button" id="fecharVisorRecibo"><i class="ti ti-x"></i></button>
+                        </div>
+                        <div class="visor-recibo-corpo" id="visorReciboCorpo"></div>
+                    </div>
                 </div>
 
             </div>
@@ -670,8 +820,11 @@
     <script src="../assets/js/abrir-chatgpt.js"></script>
     <script src="../assets/js/menu.js"></script>
     <script src="../assets/js/documentos-paciente.js"></script>
+    <script src="../assets/js/mascaras.js"></script>
     <script src="../assets/js/documentos.js"></script>
     <script src="../assets/js/documentos-devolutiva.js"></script>
+    <script src="../assets/js/recibo-modelo.js"></script>
+    <script src="../assets/js/documentos-recibo.js"></script>
     <script src="../assets/js/empresas-dados.js"></script>
     <script src="../assets/js/documentos-laudo-relatorio.js"></script>
 </body>
